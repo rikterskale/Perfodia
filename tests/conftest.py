@@ -1,4 +1,4 @@
-"""Shared fixtures for the PentestFW test suite."""
+"""Shared fixtures for the Perfodia test suite."""
 
 import sys
 import pytest

@@ -1,5 +1,7 @@
 """
-Base module — abstract class all pentest phase modules inherit from.
+Perfodia Module Base
+====================
+Abstract base classes and shared utilities for the Perfodia penetration testing framework.
 """
 
 import logging

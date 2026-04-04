@@ -1,9 +1,9 @@
 ###############################################################################
-# PentestFW Docker Image
+# Perfodia Docker Image
 ###############################################################################
 # Multi-target build:
-#   docker build -t pentestfw .                          # full (default)
-#   docker build -t pentestfw:minimal --target minimal . # scanning only
+#   docker build -t perfodia .                          # full (default)
+#   docker build -t perfodia:minimal --target minimal . # scanning only
 #
 # See DOCKER.md for complete usage instructions.
 ###############################################################################
@@ -12,8 +12,8 @@
 
 FROM debian:bookworm-slim AS base
 
-LABEL maintainer="pentestfw"
-LABEL description="PentestFW — Network Penetration Testing Framework"
+LABEL maintainer="perfodia"
+LABEL description="Perfodia — Network Penetration Testing Framework"
 
 ENV DEBIAN_FRONTEND=noninteractive \
     PYTHONDONTWRITEBYTECODE=1 \
@@ -46,18 +46,18 @@ RUN groupadd -r pentester && \
     echo "pentester ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers && \
     rm -rf /var/lib/apt/lists/*
 
-WORKDIR /opt/pentestfw
+WORKDIR /opt/perfodia
 
 # Copy framework code
-COPY --chown=pentester:pentester . /opt/pentestfw/
+COPY --chown=pentester:pentester . /opt/perfodia/
 
 # Install Python dependencies
 RUN pip3 install --no-cache-dir PyYAML && \
-    chmod +x /opt/pentestfw/pentestfw.py
+    chmod +x /opt/perfodia/perfodia.py
 
 # Create persistent volumes for reports and configs
-RUN mkdir -p /opt/pentestfw/reports /opt/pentestfw/logs && \
-    chown -R pentester:pentester /opt/pentestfw
+RUN mkdir -p /opt/perfodia/reports /opt/perfodia/logs && \
+    chown -R pentester:pentester /opt/perfodia
 
 # ─── Stage 2: Minimal — base + just enough for recon/scanning ──────────────
 
@@ -105,6 +105,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         netcat-openbsd \
         traceroute \
         dnsrecon \
+        ffuf \
+        seclists \
     && rm -rf /var/lib/apt/lists/*
 
 # ── Exploitation tools ──
@@ -115,12 +117,16 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         exploitdb \
         sqlmap \
         dirb \
+        netexec \
+        gowitness \
+        chromium \
     && rm -rf /var/lib/apt/lists/*
 
 # ── Python security packages ──
 RUN pip3 install --no-cache-dir \
         impacket \
         enum4linux-ng \
+        bloodhound \
     && rm -rf /root/.cache
 
 # ── Gobuster (static binary from GitHub releases) ──
@@ -149,6 +155,12 @@ RUN git clone --depth 1 https://github.com/lgandx/Responder.git /opt/Responder 2
     ln -sf /opt/Responder/Responder.py /usr/local/bin/responder && \
     chmod +x /opt/Responder/Responder.py || true
 
+# ── Metasploit Framework (matches install_deps.sh --full) ──
+RUN curl -fsSL https://raw.githubusercontent.com/rapid7/metasploit-omnibus/master/config/templates/metasploit-framework-wrappers/msfupdate.erb > /tmp/msfinstall 2>/dev/null && \
+    chmod +x /tmp/msfinstall && \
+    /tmp/msfinstall >> /dev/null 2>&1 || true && \
+    rm -f /tmp/msfinstall
+
 # ── Enable SNMP MIBs ──
 RUN if [ -f /etc/snmp/snmp.conf ]; then \
         sed -i 's/^mibs/#mibs/' /etc/snmp/snmp.conf; \
@@ -171,7 +183,7 @@ COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
 # Fix ownership
-RUN chown -R pentester:pentester /opt/pentestfw
+RUN chown -R pentester:pentester /opt/perfodia
 
 USER pentester
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
