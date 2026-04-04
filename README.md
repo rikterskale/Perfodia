@@ -1,4 +1,4 @@
-# PentestFW — Network Penetration Testing Framework
+# Perfodia — Network Penetration Testing Framework
 
 A modular Python 3 framework that orchestrates 30+ security tools into an 8-phase automated workflow with parallel execution, scope enforcement, centralized credential management, vulnerability scoring, password cracking, evidence capture, and multi-format reporting.
 
@@ -45,7 +45,7 @@ A modular Python 3 framework that orchestrates 30+ security tools into an 8-phas
 
 ## Overview
 
-PentestFW chains tools together so the output of one phase feeds the next automatically. Credentials from Phase 5 are reused in Phase 6. Service versions from Phase 2 are scored against vulnerability databases. Hashes from Phase 6 are cracked in Phase 7 and the passwords are stored back for Phase 8.
+Perfodia chains tools together so the output of one phase feeds the next automatically. Credentials from Phase 5 are reused in Phase 6. Service versions from Phase 2 are scored against vulnerability databases. Hashes from Phase 6 are cracked in Phase 7 and the passwords are stored back for Phase 8.
 
 **8 phases:** Reconnaissance → Scanning → Enumeration → Web App Testing → Exploitation → Active Directory → Password Cracking → Post-Exploitation
 
@@ -70,7 +70,7 @@ PentestFW chains tools together so the output of one phase feeds the next automa
 ### Step 1: Clone
 
 ```bash
-git clone <your-repo-url> pentestfw && cd pentestfw
+git clone <your-repo-url> pentestfw && cd perfodia
 ```
 
 ### Step 2: Install system tools
@@ -101,7 +101,7 @@ Core dependency is PyYAML. Recommended: `rich` (for TUI dashboard). Optional: `w
 ### Step 4: Verify
 
 ```bash
-sudo python3 pentestfw.py --check-tools
+sudo python3 perfodia.py --check-tools
 ```
 
 Shows status of all 32 registered tools with version info.
@@ -110,7 +110,7 @@ Shows status of all 32 registered tools with version info.
 
 ```bash
 pip3 install -r requirements.txt
-sudo python3 pentestfw.py -t 192.168.1.100 -m full -v
+sudo python3 perfodia.py -t 192.168.1.100 -m full -v
 ```
 
 ---
@@ -118,8 +118,8 @@ sudo python3 pentestfw.py -t 192.168.1.100 -m full -v
 ## Project Structure
 
 ```
-pentestfw/                              # ~10,500 lines
-├── pentestfw.py                        # Main CLI entry point
+perfodia/                              # ~10,500 lines
+├── perfodia.py                        # Main CLI entry point
 ├── requirements.txt                    # Python dependencies
 ├── install_deps.sh                     # System package installer
 ├── configs/
@@ -170,19 +170,19 @@ pentestfw/                              # ~10,500 lines
 
 ```bash
 # Config wizard — creates a tailored config file by asking questions
-sudo python3 pentestfw.py --init
+sudo python3 perfodia.py --init
 
 # Full 8-phase pentest
-sudo python3 pentestfw.py -t 192.168.1.100 -m full -v
+sudo python3 perfodia.py -t 192.168.1.100 -m full -v
 
 # Interactive TUI dashboard (requires: pip install rich)
-sudo python3 pentestfw.py -t 192.168.1.100 -m full --interactive -v
+sudo python3 perfodia.py -t 192.168.1.100 -m full --interactive -v
 
 # Dry run — shows commands without executing
-sudo python3 pentestfw.py -t 192.168.1.100 -m full --dry-run -vv
+sudo python3 perfodia.py -t 192.168.1.100 -m full --dry-run -vv
 
 # Resume an interrupted session
-sudo python3 pentestfw.py -t 192.168.1.100 -m full --resume --session 20250322_143000
+sudo python3 perfodia.py -t 192.168.1.100 -m full --resume --session 20250322_143000
 ```
 
 ---
@@ -191,11 +191,11 @@ sudo python3 pentestfw.py -t 192.168.1.100 -m full --resume --session 20250322_1
 
 ```bash
 # Generate config interactively
-sudo python3 pentestfw.py --init
+sudo python3 perfodia.py --init
 
 # Or copy and edit manually
 cp configs/default.yaml configs/mylab.yaml
-sudo python3 pentestfw.py -t <target> -c configs/mylab.yaml
+sudo python3 perfodia.py -t <target> -c configs/mylab.yaml
 ```
 
 Key sections in `default.yaml`:
@@ -256,7 +256,7 @@ reporting:
 
 ```bash
 # Run specific phases in any combination
-sudo python3 pentestfw.py -t 192.168.1.100 --modules recon,scan,webapp,ad,crack
+sudo python3 perfodia.py -t 192.168.1.100 --modules recon,scan,webapp,ad,crack
 ```
 
 ### Verbosity
@@ -408,10 +408,10 @@ cracking:
 **Usage:**
 ```bash
 # Crack after exploitation phase
-sudo python3 pentestfw.py -t 192.168.1.100 -m full -v
+sudo python3 perfodia.py -t 192.168.1.100 -m full -v
 
 # Crack previously collected hashes only
-sudo python3 pentestfw.py -t 192.168.1.100 -m crack --session previous_session
+sudo python3 perfodia.py -t 192.168.1.100 -m crack --session previous_session
 ```
 
 ---
@@ -469,11 +469,11 @@ enumeration:
 
 ```bash
 # Start a scan — gets interrupted
-sudo python3 pentestfw.py -t 192.168.1.0/24 -m full --session mylab -v
+sudo python3 perfodia.py -t 192.168.1.0/24 -m full --session mylab -v
 # Ctrl+C during enumeration
 
 # Resume from where it left off
-sudo python3 pentestfw.py -t 192.168.1.0/24 -m full --resume --session mylab -v
+sudo python3 perfodia.py -t 192.168.1.0/24 -m full --resume --session mylab -v
 # [RESUME] Skipping 'recon' (already completed)
 # [RESUME] Skipping 'scan' (already completed)
 # Starting enumeration...
@@ -498,7 +498,7 @@ Auto-captures screenshots of every web service. Backends (auto-detected): gowitn
 Three-backend fallback chain: WeasyPrint (Python) → wkhtmltopdf (CLI) → Chrome headless.
 
 ```bash
-sudo python3 pentestfw.py -t 192.168.1.100 -m full --report-format pdf
+sudo python3 perfodia.py -t 192.168.1.100 -m full --report-format pdf
 ```
 
 Install a backend: `pip install weasyprint` or `apt install wkhtmltopdf` or `apt install chromium-browser`.
@@ -513,7 +513,7 @@ Real-time terminal dashboard showing scan progress, live findings feed, credenti
 
 ```bash
 pip install rich
-sudo python3 pentestfw.py -t 192.168.1.100 -m full --interactive -v
+sudo python3 perfodia.py -t 192.168.1.100 -m full --interactive -v
 ```
 
 **Dashboard panels:**
@@ -534,7 +534,7 @@ Falls back to normal console output if `rich` is not installed.
 Interactive walkthrough that creates a tailored YAML config:
 
 ```bash
-sudo python3 pentestfw.py --init
+sudo python3 perfodia.py --init
 ```
 
 **Questions asked:**
@@ -693,9 +693,9 @@ reports/20250322_143000/
 ## Docker Support
 
 ```bash
-docker build -t pentestfw .
-docker run --rm --net=host -v ./reports:/opt/pentestfw/reports \
-    pentestfw -t 192.168.1.100 -m full -v
+docker build -t perfodia .
+docker run --rm --net=host -v ./reports:/opt/perfodia/reports \
+    perfodia -t 192.168.1.100 -m full -v
 ```
 
 See `DOCKER.md` for full details. Two variants: `full` (~1.5 GB) and `minimal` (~400 MB).
@@ -732,7 +732,7 @@ class MyModule(BaseModule):
         return results
 ```
 
-Register in `pentestfw.py` module_map. Add tools to `TOOL_REGISTRY` in `validators.py`.
+Register in `perfodia.py` module_map. Add tools to `TOOL_REGISTRY` in `validators.py`.
 
 ---
 
