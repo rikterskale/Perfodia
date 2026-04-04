@@ -1,0 +1,48 @@
+###############################################################################
+# PentestFW — Docker Compose
+###############################################################################
+# Usage:
+#   docker compose run --rm pentestfw -t 192.168.1.100 -m full -v
+#   docker compose run --rm pentestfw-minimal -t 192.168.1.100 -m scan -v
+#   docker compose run --rm pentestfw shell
+#
+# Reports are saved to ./reports/ on your host machine.
+###############################################################################
+
+services:
+
+  # ── Full image — all tools included ──
+  pentestfw:
+    build:
+      context: .
+      target: full
+    image: pentestfw:full
+    container_name: pentestfw
+    network_mode: host          # Required for raw socket scans (SYN, etc.)
+    cap_add:
+      - NET_ADMIN               # Nmap SYN scan, OS detection
+      - NET_RAW                 # Raw packet crafting
+    volumes:
+      - ./reports:/opt/pentestfw/reports       # Persist reports to host
+      - ./configs:/opt/pentestfw/configs:ro    # Mount custom configs
+    working_dir: /opt/pentestfw
+    stdin_open: true
+    tty: true
+
+  # ── Minimal image — scanning only, smaller footprint ──
+  pentestfw-minimal:
+    build:
+      context: .
+      target: minimal
+    image: pentestfw:minimal
+    container_name: pentestfw-minimal
+    network_mode: host
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    volumes:
+      - ./reports:/opt/pentestfw/reports
+      - ./configs:/opt/pentestfw/configs:ro
+    working_dir: /opt/pentestfw
+    stdin_open: true
+    tty: true

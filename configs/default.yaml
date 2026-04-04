@@ -1,0 +1,126 @@
+# =============================================================================
+# PentestFW - Default Configuration
+# =============================================================================
+# Copy this file and customize for your lab environment.
+# WARNING: Only use against systems you own or have authorization to test.
+# =============================================================================
+
+general:
+  threads: 10
+  timeout: 300           # seconds per tool execution
+  max_retries: 2
+  retry_delay: 5         # seconds between retries
+
+# ── Tool Paths ──
+# Override if tools are installed in non-standard locations.
+# tool_paths:
+#   nmap: /usr/local/bin/nmap
+#   masscan: /usr/bin/masscan
+#   enum4linux: /opt/enum4linux-ng/enum4linux-ng.py
+
+# ── Nmap Configuration ──
+nmap:
+  default_ports: "1-65535"
+  timing_template: 4     # T0=paranoid, T1=sneaky, T2=polite, T3=normal, T4=aggressive, T5=insane
+  max_retries: 2
+  host_timeout: "5m"
+  scripts:
+    - default
+    - vuln
+    - safe
+  extra_args: []
+
+# ── Masscan Configuration ──
+masscan:
+  rate: 1000             # packets per second
+  ports: "1-65535"
+
+# ── Service Enumeration ──
+enumeration:
+  smb:
+    enabled: true
+    depth: full           # basic or full
+  snmp:
+    enabled: true
+    community_strings:
+      - public
+      - private
+      - community
+  dns:
+    enabled: true
+    wordlist: "/usr/share/wordlists/dns.txt"
+  http:
+    enabled: true
+    wordlist: "/usr/share/wordlists/dirb/common.txt"
+    extensions: "php,html,txt,asp,aspx,jsp"
+
+# ── Exploitation Settings ──
+exploitation:
+  auto_exploit: false    # set true only in controlled lab environments
+  safe_mode: true        # skip potentially destructive exploits
+  max_exploit_threads: 3
+
+# ── Credential Handling ──
+credentials:
+  usernames:
+    - admin
+    - root
+    - administrator
+    - user
+    - test
+  passwords_file: "/usr/share/wordlists/rockyou.txt"
+  spray_lockout_threshold: 3   # max attempts per account
+  spray_delay: 30              # seconds between spray rounds
+
+# ── Reporting ──
+reporting:
+  include_raw_output: true
+  severity_threshold: "low"    # low, medium, high, critical
+  include_remediation: true
+  include_risk_rating: true    # executive summary with overall risk
+  include_screenshots: true    # embed screenshot links in HTML report
+
+# ── Web Application Testing ──
+webapp:
+  enabled: true
+  wordlist: "/usr/share/wordlists/dirb/common.txt"
+  extensions: "php,html,txt,bak,old,conf,asp,aspx,jsp,json,xml"
+  sqlmap_enabled: true         # SQL injection testing with sqlmap
+  sqlmap_level: 1              # sqlmap aggressiveness (1-5, keep low for safety)
+  sqlmap_risk: 1               # sqlmap risk (1-3, keep low for safety)
+  check_backup_files: true     # probe for .bak, .old, .sql, .zip files
+  check_git_exposure: true     # check for .git directory exposure
+  check_env_exposure: true     # check for .env file exposure
+
+# ── Active Directory ──
+ad:
+  enabled: true
+  bloodhound_collect: true     # BloodHound data collection (needs valid creds)
+  spray_passwords:             # passwords to try during AD password spraying
+    - "Password1"
+    - "Welcome1"
+    - "Company123"
+    - "Spring2025"
+    - "Summer2025"
+    - "Changeme1"
+  max_spray_users: 200         # cap users per spray round
+  check_smb_signing: true      # check for SMB signing (relay attack potential)
+
+# ── Evidence Screenshots ──
+screenshots:
+  enabled: true
+  max_workers: 5               # parallel screenshot threads
+  timeout: 30                  # per-screenshot timeout in seconds
+  # Preferred backend: gowitness > cutycapt > chromium > curl (auto-detected)
+
+# ── Parallel Execution ──
+parallel:
+  enabled: true                # set false to force sequential execution
+  # Thread count is controlled by general.threads above
+
+# ── Password Cracking ──
+cracking:
+  enabled: true
+  wordlist: "/usr/share/wordlists/rockyou.txt"
+  max_runtime: 600             # max seconds per hash type
+  use_rules: true              # use hashcat rules (best64.rule)

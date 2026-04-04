@@ -1,0 +1,27 @@
+# =============================================================================
+# PentestFW - Python Dependencies
+# =============================================================================
+# Install with: pip install -r requirements.txt
+# For system tools (nmap, hydra, etc.), run: sudo bash install_deps.sh --full
+# =============================================================================
+
+# ── Core (required) ──
+PyYAML>=6.0.1
+
+# ── Enhanced enumeration (recommended — installed by install_deps.sh) ──
+impacket>=0.11.0
+enum4linux-ng>=1.1.0
+
+# ── Interactive TUI dashboard (recommended) ──
+rich>=13.0.0
+
+# ── PDF report generation (optional — any ONE of these) ──
+# weasyprint>=60.0             # pip install weasyprint
+# Or install wkhtmltopdf:       apt install wkhtmltopdf
+# Or use chromium headless:     apt install chromium-browser
+
+# ── Active Directory (optional) ──
+# bloodhound>=1.7.0            # pip install bloodhound
+
+# ── Testing ──
+# pytest>=7.0                  # pip install pytest (for running unit tests)
