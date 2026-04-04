@@ -70,7 +70,7 @@ Perfodia chains tools together so the output of one phase feeds the next automat
 ### Step 1: Clone
 
 ```bash
-git clone <your-repo-url> pentestfw && cd perfodia
+git clone <your-repo-url> perfodia && cd perfodia
 ```
 
 ### Step 2: Install system tools
