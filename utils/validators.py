@@ -9,14 +9,34 @@ import socket
 import ipaddress
 import subprocess
 import logging
-from typing import Tuple, Optional
+from pathlib import Path
+from typing import Tuple, Optional, Dict, Iterable
 
 logger = logging.getLogger(__name__)
 
 # ── All tools the framework can leverage ──
 
-TOOL_REGISTRY = {
-    # (binary_name, package_hint, required)
+TOOL_ALIASES = {
+    "crackmapexec": ("crackmapexec", "netexec", "nxc"),
+}
+
+
+def _candidate_binaries(tool_name: str) -> Iterable[str]:
+    """Return the PATH candidates for a logical tool name."""
+    return TOOL_ALIASES.get(tool_name, (tool_name,))
+
+
+def resolve_tool_binary(tool_name: str) -> Optional[str]:
+    """Resolve a logical tool name to the first matching executable in PATH."""
+    for candidate in _candidate_binaries(tool_name):
+        path = shutil.which(candidate)
+        if path:
+            return path
+    return None
+
+
+TOOL_REGISTRY: Dict[str, tuple[str, str, bool]] = {
+    # (logical_name, package_hint, required)
     "nmap":              ("nmap",              "nmap",                True),
     "masscan":           ("masscan",           "masscan",             False),
     "nikto":             ("nikto",             "nikto",               False),
@@ -32,7 +52,7 @@ TOOL_REGISTRY = {
     "whois":             ("whois",             "whois",               False),
     "searchsploit":      ("searchsploit",      "exploitdb",           False),
     "msfconsole":        ("msfconsole",        "metasploit-framework",False),
-    "crackmapexec":      ("crackmapexec",      "pip: crackmapexec",   False),
+    "crackmapexec":      ("crackmapexec",      "pip: netexec (or crackmapexec)", False),
     "john":              ("john",              "john",                False),
     "hashcat":           ("hashcat",           "hashcat",             False),
     "impacket-secretsdump": ("impacket-secretsdump", "pip: impacket", False),
@@ -134,13 +154,13 @@ def validate_tool_dependencies(verbose: bool = False) -> bool:
     available_count = 0
     missing_optional = []
 
-    for name, (binary, package_hint, required) in sorted(TOOL_REGISTRY.items()):
-        path = shutil.which(binary)
+    for name, (_logical_name, package_hint, required) in sorted(TOOL_REGISTRY.items()):
+        path = resolve_tool_binary(name)
         found = path is not None
 
         if found:
             available_count += 1
-            version = _get_tool_version(binary)
+            version = _get_tool_version(Path(path).name)
             if verbose:
                 status = f"  [✓] {name:<28} {path}"
                 if version:
@@ -225,8 +245,8 @@ def validate_config(config) -> bool:
 
 
 def is_tool_available(tool_name: str) -> bool:
-    """Quick check if a specific tool is available in PATH."""
-    return shutil.which(tool_name) is not None
+    """Quick check if a specific tool (or supported alias) is available in PATH."""
+    return resolve_tool_binary(tool_name) is not None
 
 
 # ── Nmap option validation ──

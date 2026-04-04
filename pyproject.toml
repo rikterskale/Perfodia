@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "perfodia"
+version = "1.0.0"
+description = "Perfodia network penetration testing framework"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "PyYAML>=6.0.1",
+]
+
+[tool.setuptools]
+py-modules = ["perfodia"]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["configs", "configs.*", "modules", "modules.*", "utils", "utils.*"]

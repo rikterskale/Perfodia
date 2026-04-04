@@ -1,0 +1,42 @@
+# Python cache/build artifacts
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.pytest_cache/
+*.egg-info/
+build/
+dist/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Perfodia session output and sensitive artifacts
+reports/
+logs/
+*.log
+results.json
+session_checkpoint.json
+report.html
+report.json
+report.md
+report.pdf
+
+# Generated evidence, loot, and credential material
+**/evidence/
+**/screenshots/
+**/loot/
+**/exploits/
+**/nmap/
+**/recon/
+**/enum/
+**/credential_vault.json
+**/*_hashes_*.txt
+**/*.cracked
+**/bloodhound/
+
+# Local editor / OS noise
+.DS_Store
+Thumbs.db

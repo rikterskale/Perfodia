@@ -1,5 +1,5 @@
 # =============================================================================
-# PentestFW - Python Dependencies
+# Perfodia - Python Dependencies
 # =============================================================================
 # Install with: pip install -r requirements.txt
 # For system tools (nmap, hydra, etc.), run: sudo bash install_deps.sh --full

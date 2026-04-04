@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-PentestFW - Network Penetration Testing Framework
+Perfodia - Network Penetration Testing Framework
 ===================================================
 A modular Python-based penetration testing framework for lab environments.
 Integrates common security tools with structured workflows, verbose error
@@ -76,7 +76,7 @@ signal.signal(signal.SIGTERM, signal_handler)
 def parse_arguments():
     """Parse and validate command-line arguments."""
     parser = argparse.ArgumentParser(
-        description="PentestFW - Network Penetration Testing Framework",
+        description="Perfodia - Network Penetration Testing Framework",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
@@ -294,8 +294,8 @@ Examples:
     args = parser.parse_args()
 
     # Validation
-    if not args.check_tools and not args.report_only and not args.target and not args.target_list:
-        parser.error("--target or --target-list is required unless using --check-tools or --report-only")
+    if not args.check_tools and not args.report_only and not args.init and not args.target and not args.target_list:
+        parser.error("--target or --target-list is required unless using --check-tools, --report-only, or --init")
 
     return args
 
@@ -535,7 +535,7 @@ def main():
         args.verbose, logging.DEBUG
     )
     setup_logging(level=log_level, no_color=args.no_color)
-    logger.info(f"PentestFW starting at {datetime.now().isoformat()}")
+    logger.info(f"Perfodia starting at {datetime.now().isoformat()}")
 
     # Load configuration
     config = FrameworkConfig(args.config)
@@ -577,14 +577,36 @@ def main():
     if args.ports != "1-65535":
         config._data.setdefault("nmap", {})["default_ports"] = args.ports
 
+    # Handle report-only mode before creating a fresh session tree.
+    if args.report_only:
+        if not args.session:
+            logger.error("--session is required with --report-only")
+            sys.exit(1)
+
+        session_dir = Path(args.output_dir) / args.session
+        reporter = ReportGenerator(session_dir, config)
+        try:
+            reporter.require_session_data()
+        except FileNotFoundError as exc:
+            logger.error(str(exc))
+            sys.exit(1)
+
+        reporter.generate(format=args.report_format)
+        logger.info(f"Reports regenerated from: {session_dir}")
+        sys.exit(0)
+
     # Privilege check
     if not check_root_privileges():
         logger.warning("[!] Not running as root. Some tools require root.")
         if getattr(args, "nmap_scan_type", None) in (None, "sS", "-sS"):
             logger.warning("[!] Use --nmap-scan-type sT for rootless scanning.")
-        response = input("[?] Continue anyway? (y/N): ").strip().lower()
-        if response != "y":
-            sys.exit(0)
+
+        if sys.stdin.isatty():
+            response = input("[?] Continue anyway? (y/N): ").strip().lower()
+            if response != "y":
+                sys.exit(0)
+        else:
+            logger.warning("[!] Non-interactive session detected; continuing without prompt.")
 
     # Create session directory
     session_name = args.session or datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -601,15 +623,6 @@ def main():
     # Enable file logging
     from utils.logger import add_session_file_logging
     add_session_file_logging(session_dir / "logs")
-
-    # Handle report-only mode
-    if args.report_only:
-        if not args.session:
-            logger.error("--session is required with --report-only")
-            sys.exit(1)
-        reporter = ReportGenerator(session_dir, config)
-        reporter.generate(format=args.report_format)
-        sys.exit(0)
 
     # Load targets
     targets, exclusions = load_targets(args)
