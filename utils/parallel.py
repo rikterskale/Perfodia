@@ -15,9 +15,6 @@ from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
-# Thread-local storage for per-thread context
-_thread_local = threading.local()
-
 
 @dataclass
 class ParallelResult:

@@ -13,13 +13,6 @@ from utils.parsers import parse_nmap_xml
 
 logger = logging.getLogger(__name__)
 
-SPEED_MAP = {
-    "slow": "2",
-    "normal": "4",
-    "fast": "4",
-    "insane": "5",
-}
-
 
 class ScanningModule(BaseModule):
     MODULE_NAME = "scan"
@@ -123,10 +116,14 @@ class ScanningModule(BaseModule):
                     # Extract IP — handle "hostname (ip)" and bare IP
                     parts = line.split()
                     ip = parts[-1].strip("()")
-                    if ip not in self.exclusions:
-                        live_hosts.append(ip)
-                    else:
+                    # Use scope_guard for exclusion check (supports CIDR ranges)
+                    if self.scope_guard and not self.scope_guard.check(ip, tool_name="nmap", action="host_discovery"):
+                        logger.debug(f"  Excluding {ip} (out of scope or excluded)")
+                    elif ip in self.exclusions:
+                        # Fallback string check when no scope_guard
                         logger.debug(f"  Excluding {ip}")
+                    else:
+                        live_hosts.append(ip)
 
         return live_hosts
 
@@ -221,11 +218,21 @@ class ScanningModule(BaseModule):
             # ── Normal mode: framework defaults ──
             effective_scan_type = scan_type or "-sS"
 
+            # Determine if OS detection is safe to include.
+            # -O requires root and is incompatible with rootless scan types.
+            rootless_scan_types = {"-sT"}
+            include_os_detection = effective_scan_type not in rootless_scan_types
+
             nmap_args = [
                 effective_scan_type,            # SYN scan (or user override)
                 "-sV",                          # Service version detection
                 "-sC",                          # Default scripts
-                "-O",                           # OS detection
+            ]
+
+            if include_os_detection:
+                nmap_args.append("-O")          # OS detection (requires root)
+
+            nmap_args.extend([
                 f"-T{timing}",
                 "--reason",
                 "--open",                       # Only show open ports
@@ -234,7 +241,7 @@ class ScanningModule(BaseModule):
                 "--host-timeout", self.config.get("nmap", "host_timeout", default="5m"),
                 "-oX", xml_path,
                 "-oN", nmap_path,
-            ] + port_arg + [host_ip]
+            ] + port_arg + [host_ip])
 
             # Add any extra args from config file
             config_extra = self.config.get("nmap", "extra_args", default=[])

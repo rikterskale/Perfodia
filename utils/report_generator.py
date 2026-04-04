@@ -7,6 +7,7 @@ vault summary, and evidence screenshot gallery.
 import json
 import logging
 from datetime import datetime
+from html import escape as html_escape
 from pathlib import Path
 from typing import Dict, Any, Optional, List
 
@@ -99,6 +100,8 @@ class ReportGenerator:
             lines.extend(self._md_section_ad(phases["ad"]))
         if "exploit" in phases:
             lines.extend(self._md_section_exploit(phases["exploit"]))
+        if "crack" in phases:
+            lines.extend(self._md_section_crack(phases["crack"]))
 
         # ── Screenshots ──
         lines.extend(self._md_screenshots(results))
@@ -363,6 +366,43 @@ class ReportGenerator:
             lines.append("")
         return lines
 
+    def _md_section_crack(self, data: Dict) -> list:
+        """Render cracking phase results in markdown."""
+        lines = ["## Password Cracking Results", ""]
+        status = data.get("status", "unknown")
+        total_hashes = data.get("total_hashes", 0)
+        cracked_count = data.get("cracked", 0)
+
+        lines.append(f"**Status:** {status}  ")
+        lines.append(f"**Total hashes collected:** {total_hashes}  ")
+        lines.append(f"**Passwords cracked:** {cracked_count}  ")
+        lines.append("")
+
+        cracked_passwords = data.get("cracked_passwords", [])
+        if cracked_passwords:
+            lines.append("### Cracked Passwords")
+            lines.append("")
+            lines.append("| Hash (truncated) | Password |")
+            lines.append("|-----------------|----------|")
+            for entry in cracked_passwords[:30]:
+                hash_trunc = entry.get("hash", "")[:20] + "..."
+                pwd = entry.get("password", "")
+                # Mask password in report: show first 2 and last char
+                if len(pwd) > 3:
+                    masked = pwd[:2] + "*" * (len(pwd) - 3) + pwd[-1]
+                else:
+                    masked = "***"
+                lines.append(f"| `{hash_trunc}` | `{masked}` |")
+            lines.append("")
+        elif status == "no_hashes":
+            lines.append("*No hashes were found to crack.*")
+            lines.append("")
+        elif status == "no_tools":
+            lines.append("*Neither hashcat nor john was available.*")
+            lines.append("")
+
+        return lines
+
     def _md_screenshots(self, results: Dict) -> list:
         screenshots = results.get("screenshots", {})
         if not screenshots:
@@ -395,7 +435,7 @@ class ReportGenerator:
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Perfodia Report — {results.get('session_id', '')}</title>
+<title>Perfodia Report — {html_escape(str(results.get('session_id', '')))}</title>
 <style>
 body {{ font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; background: #0a0a1a; color: #e0e0e0; }}
 .container {{ max-width: 1200px; margin: 0 auto; padding: 40px; }}
@@ -426,20 +466,20 @@ blockquote {{ border-left: 3px solid #00d4ff; padding: 10px 15px; margin: 15px 0
 <div class="container">
 <h1>Penetration Test Report</h1>
 <div class="meta">
-    <p><strong>Session:</strong> {results.get('session_id', 'N/A')} &nbsp;|&nbsp;
-    <strong>Date:</strong> {results.get('start_time', 'N/A')} &nbsp;|&nbsp;
-    <strong>Targets:</strong> {', '.join(results.get('targets', []))}</p>
+    <p><strong>Session:</strong> {html_escape(str(results.get('session_id', 'N/A')))} &nbsp;|&nbsp;
+    <strong>Date:</strong> {html_escape(str(results.get('start_time', 'N/A')))} &nbsp;|&nbsp;
+    <strong>Targets:</strong> {html_escape(', '.join(results.get('targets', [])))}</p>
 </div>
 """
 
         # ── Executive Summary ──
         html += "<h2>Executive Summary</h2>\n"
         if risk:
-            html += f'<p>Overall Risk: <span class="risk-badge">{risk.get("overall_risk", "N/A")}</span>'
+            html += f'<p>Overall Risk: <span class="risk-badge">{html_escape(str(risk.get("overall_risk", "N/A")))}</span>'
             html += f' &nbsp; Risk Score: <strong>{risk.get("risk_score", 0)}</strong></p>\n'
             narrative = risk.get("attack_narrative", "")
             if narrative:
-                html += f"<blockquote>{narrative}</blockquote>\n"
+                html += f"<blockquote>{html_escape(narrative)}</blockquote>\n"
             breakdown = risk.get("breakdown", {})
             html += '<div style="margin: 20px 0;">\n'
             for sev, label, color in [
@@ -472,11 +512,11 @@ blockquote {{ border-left: 3px solid #00d4ff; padding: 10px 15px; margin: 15px 0
             html += "<table><tr><th>#</th><th>Severity</th><th>CVSS</th><th>Host</th><th>Title</th><th>Remediation</th></tr>\n"
             for i, f in enumerate(findings[:50], 1):
                 sev = f.get("severity", "info")
-                html += f'<tr class="finding-{sev}"><td>{i}</td><td><strong>{sev.upper()}</strong></td>'
+                html += f'<tr class="finding-{html_escape(sev)}"><td>{i}</td><td><strong>{html_escape(sev.upper())}</strong></td>'
                 html += f'<td>{f.get("cvss_score", 0):.1f}</td>'
-                html += f'<td>{f.get("host", "")}:{f.get("port", "")}</td>'
-                html += f'<td>{f.get("title", "")}</td>'
-                html += f'<td>{f.get("remediation", "")}</td></tr>\n'
+                html += f'<td>{html_escape(str(f.get("host", "")))}:{html_escape(str(f.get("port", "")))}</td>'
+                html += f'<td>{html_escape(str(f.get("title", "")))}</td>'
+                html += f'<td>{html_escape(str(f.get("remediation", "")))}</td></tr>\n'
             html += "</table>\n"
 
         # ── Credential Vault ──
@@ -485,10 +525,10 @@ blockquote {{ border-left: 3px solid #00d4ff; padding: 10px 15px; margin: 15px 0
             html += "<h2>Credential Vault</h2>\n"
             html += "<table><tr><th>Username</th><th>Type</th><th>Host</th><th>Service</th><th>Verified</th><th>Admin</th></tr>\n"
             for c in creds[:30]:
-                html += f'<tr><td>{c.get("username", "")}</td>'
-                html += f'<td>{c.get("cred_type", "")}</td>'
-                html += f'<td>{c.get("host", "")}</td>'
-                html += f'<td>{c.get("service", "")}</td>'
+                html += f'<tr><td>{html_escape(str(c.get("username", "")))}</td>'
+                html += f'<td>{html_escape(str(c.get("cred_type", "")))}</td>'
+                html += f'<td>{html_escape(str(c.get("host", "")))}</td>'
+                html += f'<td>{html_escape(str(c.get("service", "")))}</td>'
                 html += f'<td>{"✓" if c.get("verified") else ""}</td>'
                 html += f'<td>{"✓" if c.get("admin_access") else ""}</td></tr>\n'
             html += "</table>\n"
@@ -499,16 +539,16 @@ blockquote {{ border-left: 3px solid #00d4ff; padding: 10px 15px; margin: 15px 0
             for host in phases["scan"].get("hosts", []):
                 ip = host.get("ip", "")
                 hn = host.get("hostname", "")
-                html += f"<h3>{ip} {f'({hn})' if hn else ''}</h3>\n"
+                html += f"<h3>{html_escape(ip)} {f'({html_escape(hn)})' if hn else ''}</h3>\n"
                 ports = host.get("ports", [])
                 if ports:
                     html += "<table><tr><th>Port</th><th>State</th><th>Service</th><th>Version</th></tr>\n"
                     for p in ports:
                         svc = p.get("service", {})
-                        html += f'<tr><td>{p.get("port", "")}/{p.get("protocol", "")}</td>'
-                        html += f'<td>{p.get("state", "")}</td>'
-                        html += f'<td>{svc.get("name", "")}</td>'
-                        html += f'<td>{svc.get("product", "")} {svc.get("version", "")}</td></tr>\n'
+                        html += f'<tr><td>{html_escape(str(p.get("port", "")))}/{html_escape(str(p.get("protocol", "")))}</td>'
+                        html += f'<td>{html_escape(str(p.get("state", "")))}</td>'
+                        html += f'<td>{html_escape(str(svc.get("name", "")))}</td>'
+                        html += f'<td>{html_escape(str(svc.get("product", "")))} {html_escape(str(svc.get("version", "")))}</td></tr>\n'
                     html += "</table>\n"
 
         # ── Screenshots ──
@@ -520,11 +560,11 @@ blockquote {{ border-left: 3px solid #00d4ff; padding: 10px 15px; margin: 15px 0
                 if url.startswith("_"):
                     continue
                 if path.endswith((".png", ".jpg", ".jpeg")):
-                    html += f'<div style="max-width:400px"><p><strong>{url}</strong></p>'
-                    html += f'<img src="file://{path}" style="max-width:100%;border:1px solid #333;border-radius:4px;" />'
+                    html += f'<div style="max-width:400px"><p><strong>{html_escape(url)}</strong></p>'
+                    html += f'<img src="file://{html_escape(path)}" style="max-width:100%;border:1px solid #333;border-radius:4px;" />'
                     html += '</div>\n'
                 else:
-                    html += f'<p><strong>{url}</strong>: <code>{path}</code></p>\n'
+                    html += f'<p><strong>{html_escape(url)}</strong>: <code>{html_escape(path)}</code></p>\n'
             html += '</div>\n'
 
         html += """

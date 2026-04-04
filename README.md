@@ -155,12 +155,12 @@ perfodia/                              # ~10,500 lines
 │   └── report_generator.py             # HTML/JSON/Markdown/PDF reports
 ├── tests/
 │   ├── conftest.py                     # Shared fixtures
-│   ├── test_validators.py              # 11 tests
-│   ├── test_sanitizer.py               # 15 tests
+│   ├── test_validators.py              # 19 tests
+│   ├── test_sanitizer.py               # 20 tests
 │   ├── test_scope_guard.py             # 11 tests
-│   ├── test_credential_vault.py        # 12 tests
-│   ├── test_vuln_scorer.py             # 12 tests
-│   └── test_core.py                    # 22 tests (session, parallel, parsers)
+│   ├── test_credential_vault.py        # 11 tests
+│   ├── test_vuln_scorer.py             # 16 tests
+│   └── test_core.py                    # 21 tests (session, parallel, parsers)
 ├── Dockerfile                          # Multi-stage Docker build
 ├── docker-compose.yml                  # Docker services
 ├── docker-entrypoint.sh                # Docker entrypoint

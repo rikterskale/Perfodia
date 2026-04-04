@@ -103,6 +103,7 @@ RUN pip3 install --no-cache-dir \
         impacket \
         enum4linux-ng \
         bloodhound \
+        rich \
     && rm -rf /root/.cache
 
 ARG RESPONDER_REF=""

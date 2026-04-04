@@ -176,6 +176,12 @@ class FrameworkConfig:
                 for key, val in values.items():
                     if key not in self._data[section]:
                         self._data[section][key] = val
+                    elif isinstance(val, dict) and isinstance(self._data[section][key], dict):
+                        # Recurse one more level for nested dicts like
+                        # enumeration.smb, enumeration.snmp, etc.
+                        for subkey, subval in val.items():
+                            if subkey not in self._data[section][key]:
+                                self._data[section][key][subkey] = subval
 
     def get(self, section: str, key: str = None, default=None):
         """
@@ -192,6 +198,20 @@ class FrameworkConfig:
         if key is None:
             return self._data.get(section, default)
         return self._data.get(section, {}).get(key, default)
+
+    def set(self, section: str, key: str = None, value=None):
+        """
+        Set a configuration value.
+
+        Args:
+            section: Top-level config section (e.g., 'nmap')
+            key: Optional key within section (if None, sets the section itself)
+            value: The value to set
+        """
+        if key is None:
+            self._data[section] = value
+        else:
+            self._data.setdefault(section, {})[key] = value
 
     def get_tool_path(self, tool_name: str) -> str:
         """Get the configured path/command for a tool."""

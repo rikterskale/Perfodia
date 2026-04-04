@@ -259,9 +259,11 @@ class TUILogHandler(logging.Handler):
             self.state.add_event(msg)
 
             if record.levelno >= logging.ERROR:
-                self.state.errors += 1
+                with self.state._lock:
+                    self.state.errors += 1
             elif record.levelno >= logging.WARNING:
-                self.state.warnings += 1
+                with self.state._lock:
+                    self.state.warnings += 1
 
             # Detect findings from log messages
             msg_lower = msg.lower()

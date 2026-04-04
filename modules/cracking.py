@@ -33,6 +33,16 @@ HASHCAT_MODES: Dict[str, int] = {
     "lm":         3000,
 }
 
+# Map credential vault CredType enum values to HASHCAT_MODES keys.
+# CredType.value strings (e.g. "ntlm_hash") don't always match the
+# short names used in HASHCAT_MODES (e.g. "ntlm").
+_CREDTYPE_TO_HASHCAT: Dict[str, str] = {
+    "ntlm_hash":   "ntlm",
+    "net_ntlmv2":  "ntlmv2",
+    "asrep_hash":  "asrep",
+    "krb_tgs":     "kerberoast",
+}
+
 
 class CrackingModule(BaseModule):
     MODULE_NAME = "crack"
@@ -110,7 +120,9 @@ class CrackingModule(BaseModule):
             vault_hashes = self.credential_vault.get_hashes()
             by_type: Dict[str, List[str]] = {}
             for cred in vault_hashes:
-                t = cred.cred_type.value
+                # Map CredType value to hashcat-compatible type name
+                raw_type = cred.cred_type.value
+                t = _CREDTYPE_TO_HASHCAT.get(raw_type, raw_type)
                 by_type.setdefault(t, []).append(cred.secret)
             for hash_type, hashes in by_type.items():
                 if hashes:
