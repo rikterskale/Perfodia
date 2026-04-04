@@ -5,7 +5,7 @@ live findings feed, credential count, and severity breakdown.
 Uses the `rich` library for rendering.  Falls back gracefully if
 rich is not installed.
 
-Launch with: pentestfw.py --interactive -t <target> -m full
+Launch with: perfodia.py --interactive -t <target> -m full
 """
 
 from __future__ import annotations
@@ -188,7 +188,7 @@ class TUIDashboard:
             if snap["total_phases"] > 0 else "—"
         )
         header_text = Text.assemble(
-            ("  PentestFW ", "bold cyan"),
+            ("  Perfodia ", "bold cyan"),
             (f"  Phase: {phase} [{progress_pct}]  ", "bold white"),
             (f"  Tool: {snap['current_tool'] or '—'}  ", "dim"),
             (f"  Elapsed: {elapsed}  ", "green"),

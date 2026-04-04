@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 ###############################################################################
-# PentestFW Docker Entrypoint
+# Perfodia Docker Entrypoint
 ###############################################################################
 # Handles:
 #   - Running the framework with proper arguments
@@ -10,7 +10,7 @@
 
 set -euo pipefail
 
-FRAMEWORK="/opt/pentestfw/pentestfw.py"
+FRAMEWORK="/opt/perfodia/perfodia.py"
 
 # ── Color helpers ──
 RED='\033[0;31m'
@@ -19,41 +19,41 @@ YELLOW='\033[1;33m'
 CYAN='\033[0;36m'
 NC='\033[0m'
 
-log()  { echo -e "${GREEN}[pentestfw]${NC} $*"; }
-warn() { echo -e "${YELLOW}[pentestfw]${NC} $*"; }
-err()  { echo -e "${RED}[pentestfw]${NC} $*" >&2; }
+log()  { echo -e "${GREEN}[perfodia]${NC} $*"; }
+warn() { echo -e "${YELLOW}[perfodia]${NC} $*"; }
+err()  { echo -e "${RED}[perfodia]${NC} $*" >&2; }
 
 # ── First-run: show banner and validate environment ──
 if [ "${1:-}" = "--help" ] || [ "${1:-}" = "-h" ] || [ $# -eq 0 ]; then
     echo ""
     echo -e "${CYAN}╔══════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${CYAN}║  PentestFW — Network Penetration Testing Framework      ║${NC}"
+    echo -e "${CYAN}║  perfodia — Network Penetration Testing Framework      ║${NC}"
     echo -e "${CYAN}║  Docker Edition                                         ║${NC}"
     echo -e "${CYAN}╚══════════════════════════════════════════════════════════╝${NC}"
     echo ""
     echo "Usage:"
-    echo "  docker run --rm --net=host pentestfw -t <target> -m <mode> [options]"
+    echo "  docker run --rm --net=host perfodia -t <target> -m <mode> [options]"
     echo ""
     echo "Quick examples:"
     echo "  # Check installed tools"
-    echo "  docker run --rm pentestfw --check-tools"
+    echo "  docker run --rm perfodia --check-tools"
     echo ""
     echo "  # Scan a target (use --net=host for proper network access)"
-    echo "  docker run --rm --net=host pentestfw -t 192.168.1.100 -m scan -v"
+    echo "  docker run --rm --net=host perfodia -t 192.168.1.100 -m scan -v"
     echo ""
     echo "  # Full pentest with reports saved to host"
-    echo "  docker run --rm --net=host -v ./reports:/opt/pentestfw/reports \\"
-    echo "      pentestfw -t 192.168.1.0/24 -m full -v"
+    echo "  docker run --rm --net=host -v ./reports:/opt/perfodia/reports \\"
+    echo "      perfodia -t 192.168.1.0/24 -m full -v"
     echo ""
     echo "  # Custom nmap options"
-    echo "  docker run --rm --net=host pentestfw -t 192.168.1.100 -m scan \\"
+    echo "  docker run --rm --net=host perfodia -t 192.168.1.100 -m scan \\"
     echo "      --nmap-extra '-sU -Pn' -v"
     echo ""
     echo "  # Interactive shell inside the container"
-    echo "  docker run --rm -it --net=host pentestfw shell"
+    echo "  docker run --rm -it --net=host perfodia shell"
     echo ""
     echo "  # Run a raw tool directly"
-    echo "  docker run --rm --net=host pentestfw nmap -sV -p 80 192.168.1.100"
+    echo "  docker run --rm --net=host perfodia nmap -sV -p 80 192.168.1.100"
     echo ""
 
     # If explicitly asked for --help, also show the framework help
@@ -78,7 +78,7 @@ if [ "$1" = "check" ] || [ "$1" = "check-tools" ]; then
 fi
 
 # If the first argument is a known external tool, run it directly
-# (lets you do: docker run pentestfw nmap -sV 192.168.1.1)
+# (lets you do: docker run perfodia nmap -sV 192.168.1.1)
 DIRECT_TOOLS="nmap masscan nikto gobuster hydra snmpwalk whatweb searchsploit \
     smbclient rpcclient dig whois john hashcat sqlmap dnsrecon nbtscan curl \
     enum4linux-ng responder impacket-secretsdump impacket-psexec \
@@ -96,7 +96,7 @@ if [ "${1:-}" = "-t" ] || [ "${1:-}" = "--target" ] || [[ "${*}" == *"--target"*
     # Check if we can access the network
     if ! ip route 2>/dev/null | grep -q "default"; then
         warn "No default route detected. You may need --net=host:"
-        warn "  docker run --rm --net=host pentestfw $*"
+        warn "  docker run --rm --net=host perfodia $*"
         warn ""
     fi
 
@@ -112,5 +112,5 @@ if [ "${1:-}" = "-t" ] || [ "${1:-}" = "--target" ] || [[ "${*}" == *"--target"*
 fi
 
 # ── Run the framework ──
-log "Starting PentestFW..."
+log "Starting perfodia..."
 exec python3 "$FRAMEWORK" "$@"

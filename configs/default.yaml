@@ -1,5 +1,5 @@
 # =============================================================================
-# PentestFW - Default Configuration
+# Perfodia - Default Configuration
 # =============================================================================
 # Copy this file and customize for your lab environment.
 # WARNING: Only use against systems you own or have authorization to test.
@@ -48,10 +48,10 @@ enumeration:
       - community
   dns:
     enabled: true
-    wordlist: "/usr/share/wordlists/dns.txt"
+    wordlist: "/usr/share/wordlists/common_users.txt"
   http:
     enabled: true
-    wordlist: "/usr/share/wordlists/dirb/common.txt"
+    wordlist: "/usr/share/wordlists/common_users.txt"
     extensions: "php,html,txt,asp,aspx,jsp"
 
 # ── Exploitation Settings ──
@@ -68,7 +68,7 @@ credentials:
     - administrator
     - user
     - test
-  passwords_file: "/usr/share/wordlists/rockyou.txt"
+  passwords_file: "/usr/share/wordlists/quick_passwords.txt"
   spray_lockout_threshold: 3   # max attempts per account
   spray_delay: 30              # seconds between spray rounds
 
@@ -83,7 +83,7 @@ reporting:
 # ── Web Application Testing ──
 webapp:
   enabled: true
-  wordlist: "/usr/share/wordlists/dirb/common.txt"
+  wordlist: "/usr/share/wordlists/common_users.txt"
   extensions: "php,html,txt,bak,old,conf,asp,aspx,jsp,json,xml"
   sqlmap_enabled: true         # SQL injection testing with sqlmap
   sqlmap_level: 1              # sqlmap aggressiveness (1-5, keep low for safety)
@@ -121,6 +121,6 @@ parallel:
 # ── Password Cracking ──
 cracking:
   enabled: true
-  wordlist: "/usr/share/wordlists/rockyou.txt"
+  wordlist: "/usr/share/wordlists/quick_passwords.txt"
   max_runtime: 600             # max seconds per hash type
   use_rules: true              # use hashcat rules (best64.rule)
