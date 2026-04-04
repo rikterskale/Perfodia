@@ -8,6 +8,8 @@ from typing import Dict, List, Any
 from modules.base import BaseModule
 from utils.validators import is_tool_available
 from utils.parsers import parse_enum4linux_output, parse_snmp_output
+from utils.vuln_scorer import Severity
+from utils.credential_vault import CredType
 
 logger = logging.getLogger(__name__)
 
@@ -272,7 +274,6 @@ class EnumerationModule(BaseModule):
                 logger.warning(f"    [!] SNMPv3 noAuthNoPriv access with user: {user}")
                 # Score as finding
                 if self.vuln_scorer:
-                    from utils.vuln_scorer import Severity
                     self._score_finding(
                         title=f"SNMPv3 noAuthNoPriv access (user: {user})",
                         host=ip,
@@ -317,7 +318,6 @@ class EnumerationModule(BaseModule):
                 )
                 # Store credential
                 if self.credential_vault:
-                    from utils.credential_vault import CredType
                     self.credential_vault.add_password(
                         username=user, password=auth_pass,
                         host=ip, port=161, service="snmpv3",
@@ -439,6 +439,15 @@ class EnumerationModule(BaseModule):
                     "listing": result.stdout[:3000],
                 }
                 logger.warning(f"    [!] Anonymous FTP access on {ip}:{port_num}")
+                # Score as a finding
+                self._score_finding(
+                    title=f"Anonymous FTP Access on port {port_num}",
+                    host=ip,
+                    severity=Severity.MEDIUM,
+                    cvss=5.3,
+                    remediation="Disable anonymous FTP access or restrict to read-only non-sensitive files.",
+                    source_tool="curl",
+                )
             else:
                 ftp_results[f"port_{port_num}"] = {"anonymous_access": False}
 
@@ -466,29 +475,32 @@ class EnumerationModule(BaseModule):
     # ─────────────────────────────────────────────────────────────
 
     def _enum_smtp(self, ip: str, port_list: List) -> Dict:
-        """SMTP user enumeration via VRFY command."""
+        """SMTP user enumeration via nmap NSE scripts."""
         smtp_results: Dict[str, Any] = {}
-        usernames = self.config.get("credentials", "usernames", default=["admin", "root"])
 
         for port_num, _ in port_list:
-            valid_users = []
-            for user in usernames:
-                result = self.runner.run(
-                    tool_name="curl",
-                    args=[
-                        "-s",
-                        "--connect-timeout", "5",
-                        "--max-time", "10",
-                        f"smtp://{ip}:{port_num}",
-                        "--mail-from", f"<{user}@test.com>",
-                    ],
-                    timeout=15,
-                    retries=0,
-                )
-                if result.success and "250" in result.stdout:
-                    valid_users.append(user)
+            # Use nmap SMTP enumeration scripts (VRFY, EXPN, RCPT TO)
+            result = self.runner.run(
+                tool_name="nmap",
+                args=[
+                    "--script", "smtp-enum-users,smtp-commands,smtp-open-relay",
+                    "-p", str(port_num),
+                    ip,
+                ],
+                timeout=60,
+                output_file=f"enum/smtp_{ip}_{port_num}.txt",
+                retries=0,
+            )
 
-            smtp_results[f"port_{port_num}"] = {"valid_users": valid_users}
+            port_results: Dict[str, Any] = {"valid_users": []}
+            if result.success and result.stdout:
+                port_results["raw"] = result.stdout[:3000]
+                # Check for open relay
+                if "open-relay" in result.stdout.lower() and "isn't" not in result.stdout.lower():
+                    port_results["open_relay"] = True
+                    logger.warning(f"    [!] SMTP open relay on {ip}:{port_num}")
+
+            smtp_results[f"port_{port_num}"] = port_results
 
         return smtp_results
 

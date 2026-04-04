@@ -57,8 +57,12 @@ class Credential:
     @property
     def identity(self) -> str:
         """Unique identity key for deduplication."""
+        import hashlib
         domain_prefix = f"{self.domain}\\" if self.domain else ""
-        return f"{domain_prefix}{self.username}:{self.cred_type.value}:{self.secret[:32]}"
+        # Use a hash of the full secret to avoid false deduplication of
+        # long hashes that share a common prefix.
+        secret_hash = hashlib.sha256(self.secret.encode(errors="replace")).hexdigest()[:16]
+        return f"{domain_prefix}{self.username}:{self.cred_type.value}:{secret_hash}"
 
     @property
     def display(self) -> str:

@@ -8,9 +8,12 @@
 # ── Core (required) ──
 PyYAML>=6.0.1
 
-# ── Enhanced enumeration (recommended — installed by install_deps.sh) ──
-impacket>=0.11.0
-enum4linux-ng>=1.1.0
+# ── Enhanced enumeration (recommended — install after system deps) ──
+# These require system libraries (libkrb5-dev, libssl-dev, etc.).
+# Run install_deps.sh first, or install system deps manually before
+# uncommenting these lines.
+# impacket>=0.11.0
+# enum4linux-ng>=1.1.0
 
 # ── Interactive TUI dashboard (recommended) ──
 rich>=13.0.0

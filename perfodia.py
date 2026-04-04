@@ -50,11 +50,11 @@ from modules.cracking import CrackingModule
 logger = get_logger(__name__)
 
 BANNER = r"""
- ____            _            _   _____ __        __
-|  _ \ ___ _ __ | |_ ___  ___| |_|  ___\ \      / /
-| |_) / _ \ '_ \| __/ _ \/ __| __| |_   \ \ /\ / /
-|  __/  __/ | | | ||  __/\__ \ |_|  _|   \ V  V /
-|_|   \___|_| |_|\__\___||___/\__|_|      \_/\_/
+ ____            __          _ _
+|  _ \ ___ _ __ / _| ___  __| (_) __ _
+| |_) / _ \ '__| |_ / _ \/ _` | |/ _` |
+|  __/  __/ |  |  _| (_) | (_| | | (_| |
+|_|   \___|_|  |_|  \___/ \__,_|_|\__,_|
 
   Network Penetration Testing Framework v1.0.0
   =============================================
@@ -573,9 +573,9 @@ def main():
     if getattr(args, "nmap_scan_type", None):
         st = args.nmap_scan_type
         nmap_user_opts["scan_type"] = f"-{st}" if not st.startswith("-") else st
-    config._data["nmap_user_opts"] = nmap_user_opts
+    config.set("nmap_user_opts", value=nmap_user_opts)
     if args.ports != "1-65535":
-        config._data.setdefault("nmap", {})["default_ports"] = args.ports
+        config.set("nmap", "default_ports", value=args.ports)
 
     # Handle report-only mode before creating a fresh session tree.
     if args.report_only:

@@ -100,8 +100,24 @@ class ScopeGuard:
             addr = ipaddress.ip_address(target)
             result = self._check_ip(addr)
         except ValueError:
-            # Hostname — check against allowed hostnames
-            result = target.lower() in self._allowed_hosts
+            # Hostname — check against allowed hostnames first
+            if target.lower() in self._allowed_hosts:
+                result = True
+            else:
+                # Resolve hostname to IP and check that IP against scope
+                import socket
+                try:
+                    resolved_ip = socket.gethostbyname(target)
+                    addr = ipaddress.ip_address(resolved_ip)
+                    result = self._check_ip(addr)
+                    if not result:
+                        logger.warning(
+                            f"[SCOPE] Hostname '{target}' resolves to "
+                            f"{resolved_ip} which is OUT OF SCOPE."
+                        )
+                except (socket.gaierror, ValueError):
+                    # Cannot resolve — reject in strict mode
+                    result = not self._strict
 
         if not result:
             self._record_violation(target, tool_name, action)
@@ -148,7 +164,7 @@ class ScopeGuard:
         """
         ips: List[str] = []
         ip_pattern = re.compile(
-            r'(?:^|[@/])(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})(?:[:/\s]|$)'
+            r'(?:^|[@/=\s])(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})(?:[:/\s]|$)'
         )
         for arg in args:
             for match in ip_pattern.finditer(arg):

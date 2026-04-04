@@ -108,26 +108,20 @@ class BaseModule(ABC):
     def _store_credential(self, **kwargs):
         """Store a credential in the vault (if available)."""
         if self.credential_vault:
-            self.credential_vault.add_password(
-                source_phase=self.MODULE_NAME,
-                **kwargs,
-            )
+            kwargs.setdefault("source_phase", self.MODULE_NAME)
+            self.credential_vault.add_password(**kwargs)
 
     def _store_hash(self, **kwargs):
         """Store a hash credential in the vault (if available)."""
         if self.credential_vault:
-            self.credential_vault.add_hash(
-                source_phase=self.MODULE_NAME,
-                **kwargs,
-            )
+            kwargs.setdefault("source_phase", self.MODULE_NAME)
+            self.credential_vault.add_hash(**kwargs)
 
     def _score_finding(self, **kwargs):
         """Score a vulnerability finding (if scorer available)."""
         if self.vuln_scorer:
-            return self.vuln_scorer.score_misconfiguration(
-                source_phase=self.MODULE_NAME,
-                **kwargs,
-            )
+            kwargs.setdefault("source_phase", self.MODULE_NAME)
+            return self.vuln_scorer.score_misconfiguration(**kwargs)
         return None
 
     def log_phase_start(self, phase: str):

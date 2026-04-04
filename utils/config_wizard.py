@@ -226,11 +226,21 @@ def run_config_wizard(output_dir: str = "configs") -> str:
         "include_remediation": True,
         "include_risk_rating": True,
         "include_screenshots": True,
-        "generate_pdf": False,
     }
 
     config["screenshots"] = {"enabled": True, "max_workers": 5, "timeout": 30}
     config["parallel"] = {"enabled": True}
+
+    # ── SNMPv3 Configuration (added to enumeration if SNMP is enabled) ──
+    if has_snmp:
+        config["enumeration"]["snmpv3"] = {
+            "enabled": True,
+            "usernames": ["initial", "public", "admin", "snmpuser"],
+            "credentials": [
+                {"user": "admin", "auth_pass": "admin123", "auth_proto": "SHA"},
+                {"user": "snmpuser", "auth_pass": "snmpuser", "auth_proto": "MD5"},
+            ],
+        }
 
     # ── Write config file ──
     out_dir = Path(output_dir)
