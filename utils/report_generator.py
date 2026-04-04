@@ -32,16 +32,24 @@ class ReportGenerator:
         if format in ("pdf", "all"):
             self._generate_pdf(results)
 
-    def _load_session_data(self) -> Dict:
+    def require_session_data(self) -> Path:
+        """Return the first available session data file or raise a clear error."""
         for name in ["results.json", "session_checkpoint.json"]:
             path = self.session_dir / name
             if path.exists():
-                try:
-                    with open(path, "r") as f:
-                        return json.load(f)
-                except Exception as e:
-                    logger.error(f"Failed to load {name}: {e}")
-        return {}
+                return path
+        raise FileNotFoundError(
+            f"No session data found in {self.session_dir}. Expected results.json or session_checkpoint.json."
+        )
+
+    def _load_session_data(self) -> Dict:
+        path = self.require_session_data()
+        try:
+            with open(path, "r") as f:
+                return json.load(f)
+        except Exception as e:
+            logger.error(f"Failed to load {path.name}: {e}")
+            raise
 
     def _generate_json(self, results: Dict):
         out_path = self.session_dir / "report.json"

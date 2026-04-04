@@ -59,7 +59,7 @@ Perfodia chains tools together so the output of one phase feeds the next automat
 |------------|---------|
 | **OS** | Debian 11/12, Ubuntu 22.04/24.04, Kali Linux 2023+, Parrot OS |
 | **Python** | 3.10+ |
-| **Privileges** | Root/sudo (or `--nmap-scan-type sT` for rootless scanning) |
+| **Privileges** | Root/sudo recommended. Rootless runs are supported; prefer `--nmap-scan-type sT` for non-root scanning and Docker/rootless automation. |
 | **RAM** | 2 GB min, 4 GB recommended |
 | **Disk** | ~3 GB for full install |
 
@@ -70,7 +70,8 @@ Perfodia chains tools together so the output of one phase feeds the next automat
 ### Step 1: Clone
 
 ```bash
-git clone <your-repo-url> perfodia && cd perfodia
+git clone <your-repo-url> perfodia
+cd perfodia
 ```
 
 ### Step 2: Install system tools
@@ -81,7 +82,7 @@ sudo bash install_deps.sh --dry-run   # Preview first
 sudo bash install_deps.sh --full      # Install everything
 ```
 
-The installer handles 12 steps: build tools, nmap, recon tools, enumeration tools, exploitation tools, Python packages (impacket, enum4linux-ng, bloodhound-python, netexec), web tools (ffuf, gowitness, chromium), Responder, Metasploit (optional), and wordlists.
+The installer handles 12 steps: build tools, nmap, recon tools, enumeration tools, exploitation tools, Python packages (impacket, enum4linux-ng, bloodhound-python, and crackmapexec-compatible `netexec`/`nxc`), web tools (ffuf, gowitness, chromium), Responder, Metasploit (optional), and wordlists. Remote installers are only used when they can be pinned and verified.
 
 | Flag | Description |
 |------|-------------|
@@ -104,7 +105,7 @@ Core dependency is PyYAML. Recommended: `rich` (for TUI dashboard). Optional: `w
 sudo python3 perfodia.py --check-tools
 ```
 
-Shows status of all 32 registered tools with version info.
+Shows status of all registered tools with version info, including `crackmapexec` compatibility via `netexec`/`nxc`.
 
 ### Quick Start (Kali Linux)
 
@@ -112,6 +113,8 @@ Shows status of all 32 registered tools with version info.
 pip3 install -r requirements.txt
 sudo python3 perfodia.py -t 192.168.1.100 -m full -v
 ```
+
+For non-interactive or Docker/rootless runs, use `--nmap-scan-type sT` when you want a fully non-root-compatible scan path. The CLI now skips the confirmation prompt automatically in non-interactive sessions and logs a warning instead.
 
 ---
 
@@ -161,7 +164,9 @@ perfodia/                              # ~10,500 lines
 ├── Dockerfile                          # Multi-stage Docker build
 ├── docker-compose.yml                  # Docker services
 ├── docker-entrypoint.sh                # Docker entrypoint
-└── DOCKER.md                           # Docker guide
+├── docker/
+│   └── docker-entrypoint.sh            # Canonical Docker entrypoint
+└── Docker Guide.md                     # Docker guide
 ```
 
 ---
@@ -170,7 +175,7 @@ perfodia/                              # ~10,500 lines
 
 ```bash
 # Config wizard — creates a tailored config file by asking questions
-sudo python3 perfodia.py --init
+python3 perfodia.py --init
 
 # Full 8-phase pentest
 sudo python3 perfodia.py -t 192.168.1.100 -m full -v
@@ -191,7 +196,7 @@ sudo python3 perfodia.py -t 192.168.1.100 -m full --resume --session 20250322_14
 
 ```bash
 # Generate config interactively
-sudo python3 perfodia.py --init
+python3 perfodia.py --init
 
 # Or copy and edit manually
 cp configs/default.yaml configs/mylab.yaml
@@ -633,16 +638,16 @@ All options validated: dangerous flags blocked, shell injection stripped, output
 
 ## Unit Test Suite
 
-**73 tests** covering all core utilities:
+**98 tests** covering all core utilities:
 
 | Test File | Tests | What it covers |
 |-----------|------:|---------------|
-| `test_validators.py` | 11 | Target validation, nmap option parsing |
-| `test_sanitizer.py` | 15 | Shell injection, null bytes, path traversal |
+| `test_validators.py` | 19 | Target validation, dependency checks, nmap option parsing |
+| `test_sanitizer.py` | 20 | Shell injection, null bytes, path traversal, safe paths |
 | `test_scope_guard.py` | 11 | IP/CIDR scope, exclusions, violations, arg scanning |
-| `test_credential_vault.py` | 12 | Add/dedup/persist/verify/mask/reuse credentials |
-| `test_vuln_scorer.py` | 12 | CVSS scoring, heuristics, risk rating, narratives |
-| `test_core.py` | 22 | Session state, parallel runner, all 6 parsers |
+| `test_credential_vault.py` | 11 | Add/dedup/persist/verify/mask/reuse credentials |
+| `test_vuln_scorer.py` | 16 | CVSS scoring, heuristics, risk rating, narratives |
+| `test_core.py` | 21 | Session state, parallel runner, parser coverage |
 
 **Run the tests:**
 ```bash
@@ -698,7 +703,7 @@ docker run --rm --net=host -v ./reports:/opt/perfodia/reports \
     perfodia -t 192.168.1.100 -m full -v
 ```
 
-See `DOCKER.md` for full details. Two variants: `full` (~1.5 GB) and `minimal` (~400 MB).
+See `Docker Guide.md` for full details. Two variants: `full` and `minimal`. In rootless Docker flows, prefer `--nmap-scan-type sT`.
 
 ---
 
