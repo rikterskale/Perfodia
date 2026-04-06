@@ -26,7 +26,6 @@ try:
     from rich.table import Table
     from rich.live import Live
     from rich.text import Text
-    from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TimeElapsedColumn
     from rich import box
     _RICH_AVAILABLE = True
 except ImportError:
