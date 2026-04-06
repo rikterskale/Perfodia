@@ -1,6 +1,5 @@
 """Tests for session state (checkpoint/resume)."""
 
-import pytest
 from utils.session_state import SessionState
 
 
@@ -54,7 +53,7 @@ class TestSessionState:
 # Parallel runner tests
 # ═══════════════════════════════════════════════════════════════
 
-from utils.parallel import ParallelRunner, ParallelResult
+from utils.parallel import ParallelRunner
 
 
 class TestParallelRunner:

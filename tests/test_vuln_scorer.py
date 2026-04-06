@@ -1,7 +1,6 @@
 """Tests for vulnerability scorer."""
 
-import pytest
-from utils.vuln_scorer import VulnScorer, Severity, Finding
+from utils.vuln_scorer import VulnScorer, Severity
 
 
 class TestSeverity:

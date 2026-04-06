@@ -6,12 +6,10 @@ Provides overall risk ratings for the executive summary.
 """
 
 import re
-import json
 import logging
-from typing import Dict, List, Any, Optional, Tuple
+from typing import Dict, List, Any, Optional
 from dataclasses import dataclass, field
 from enum import Enum
-from pathlib import Path
 
 logger = logging.getLogger(__name__)
 

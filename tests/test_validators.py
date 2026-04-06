@@ -8,7 +8,6 @@ Run with: python -m pytest tests/ -v
 # tests/test_validators.py content
 # ═══════════════════════════════════════════════════════════════
 
-import pytest
 from utils.validators import validate_target, validate_nmap_options, validate_config
 
 

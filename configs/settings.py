@@ -3,12 +3,10 @@ Framework configuration management.
 Loads settings from YAML config files with sensible defaults.
 """
 
-import os
 import yaml
 import logging
 from pathlib import Path
-from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Any
+from typing import Dict, Any
 
 logger = logging.getLogger(__name__)
 

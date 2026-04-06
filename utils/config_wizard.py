@@ -7,7 +7,6 @@ questions about their lab environment and testing goals.
 Launch with: perfodia.py --init
 """
 
-import os
 import sys
 import yaml
 import logging
@@ -79,8 +78,8 @@ def run_config_wizard(output_dir: str = "configs") -> str:
     print(f"{BOLD}{CYAN}  Perfodia — Configuration Wizard{NC}")
     print(f"{BOLD}{CYAN}{'='*60}{NC}")
     print()
-    print(f"  This wizard will help you create a tailored configuration")
-    print(f"  file for your lab environment. Press Enter to accept defaults.")
+    print("  This wizard will help you create a tailored configuration")
+    print("  file for your lab environment. Press Enter to accept defaults.")
     print()
 
     config: Dict[str, Any] = {}
@@ -170,7 +169,7 @@ def run_config_wizard(output_dir: str = "configs") -> str:
     has_ad = _ask_bool("Does your lab have an Active Directory environment?")
     if has_ad:
         bloodhound = _ask_bool("Enable BloodHound data collection?")
-        spray = _ask_bool("Enable password spraying?")
+        _ask_bool("Enable password spraying?")
         config["ad"] = {
             "enabled": True,
             "bloodhound_collect": bloodhound,
@@ -264,7 +263,7 @@ def run_config_wizard(output_dir: str = "configs") -> str:
 
         print(f"  {GREEN}✓{NC} Configuration saved to: {BOLD}{out_path}{NC}")
         print()
-        print(f"  Use it with:")
+        print("  Use it with:")
         print(f"    {CYAN}sudo python3 perfodia.py -t <target> -m full -c {out_path} -v{NC}")
         print()
         return str(out_path)

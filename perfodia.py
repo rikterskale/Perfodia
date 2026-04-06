@@ -13,7 +13,6 @@ Unauthorized access to computer systems is illegal.
 
 import argparse
 import sys
-import os
 import signal
 import logging
 from datetime import datetime

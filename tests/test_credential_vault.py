@@ -1,8 +1,6 @@
 """Tests for credential vault."""
 
-import pytest
-import json
-from utils.credential_vault import CredentialVault, Credential, CredType
+from utils.credential_vault import CredentialVault, CredType
 
 
 class TestCredentialVault:

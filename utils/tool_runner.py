@@ -8,7 +8,6 @@ import subprocess
 import shutil
 import time
 import logging
-import json
 from pathlib import Path
 from typing import Optional, List, Dict, Any
 from dataclasses import dataclass, field
@@ -221,7 +220,7 @@ class ToolRunner:
                     f.write(f"# Command: {' '.join(last_result.command)}\n")
                     f.write(f"# Exit code: {last_result.return_code}\n")
                     f.write(f"# Category: {last_result.error_category}\n")
-                    f.write(f"# ---\n")
+                    f.write("# ---\n")
                     f.write(last_result.stderr)
                 last_result.output_files.append(str(err_path))
                 logger.debug(f"Stderr saved to {err_path}")
@@ -479,7 +478,7 @@ class ToolRunner:
             with open(err_file, "w") as f:
                 f.write(f"# Tool: {tool_name}\n")
                 f.write(f"# Time: {time.strftime('%Y-%m-%d %H:%M:%S')}\n")
-                f.write(f"# ---\n")
+                f.write("# ---\n")
                 f.write(stderr)
             logger.debug(f"  stderr saved to {err_file}")
         except Exception as e:

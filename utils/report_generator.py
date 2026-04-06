@@ -6,10 +6,9 @@ vault summary, and evidence screenshot gallery.
 
 import json
 import logging
-from datetime import datetime
 from html import escape as html_escape
 from pathlib import Path
-from typing import Dict, Any, Optional, List
+from typing import Dict
 
 logger = logging.getLogger(__name__)
 

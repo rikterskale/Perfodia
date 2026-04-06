@@ -11,7 +11,7 @@ import logging
 import re
 import threading
 from pathlib import Path
-from typing import List, Set, Optional, Union
+from typing import List, Set, Optional
 
 logger = logging.getLogger(__name__)
 

@@ -14,9 +14,8 @@ and referenced in the final report.
 
 import logging
 import shutil
-import json
 from pathlib import Path
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Optional
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 logger = logging.getLogger(__name__)
@@ -181,7 +180,7 @@ class ScreenshotCapture:
         self, url: str, output: Path, timeout: int
     ) -> Optional[str]:
         """Screenshot using gowitness."""
-        result = self.runner.run(
+        self.runner.run(
             tool_name="gowitness",
             args=[
                 "scan", "single",
@@ -201,7 +200,7 @@ class ScreenshotCapture:
         self, url: str, output: Path, timeout: int
     ) -> Optional[str]:
         """Screenshot using CutyCapt."""
-        result = self.runner.run(
+        self.runner.run(
             tool_name="cutycapt",
             args=[
                 f"--url={url}",
@@ -221,7 +220,7 @@ class ScreenshotCapture:
     ) -> Optional[str]:
         """Screenshot using headless Chrome/Chromium."""
         chrome_bin = "chromium-browser" if self._backend == "chromium" else "google-chrome"
-        result = self.runner.run(
+        self.runner.run(
             tool_name=chrome_bin,
             args=[
                 "--headless",

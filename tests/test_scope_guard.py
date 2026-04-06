@@ -1,6 +1,5 @@
 """Tests for scope guard."""
 
-import pytest
 from utils.scope_guard import ScopeGuard
 
 

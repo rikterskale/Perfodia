@@ -7,7 +7,7 @@ Uses: sqlmap, ffuf, wfuzz, ZAP CLI, curl
 
 import re
 import logging
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Any
 from modules.base import BaseModule
 from utils.validators import is_tool_available
 
@@ -31,7 +31,7 @@ class WebAppModule(BaseModule):
         results: Dict[str, Any] = {"status": "running", "targets": []}
 
         scan_data = (previous_results or {}).get("scan", {})
-        enum_data = (previous_results or {}).get("enum", {})
+        (previous_results or {}).get("enum", {})
         hosts = scan_data.get("hosts", [])
 
         if not hosts:

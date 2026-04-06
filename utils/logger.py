@@ -6,7 +6,6 @@ session-based file logging, dedicated error log, and error summary.
 import logging
 import sys
 from pathlib import Path
-from datetime import datetime
 from collections import Counter
 from typing import Dict
 

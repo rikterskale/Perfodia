@@ -8,7 +8,7 @@ Uses: hashcat, john
 import re
 import logging
 from pathlib import Path
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Any
 
 from modules.base import BaseModule
 from utils.validators import is_tool_available
@@ -178,7 +178,7 @@ class CrackingModule(BaseModule):
         if use_rules and Path("/usr/share/hashcat/rules/best64.rule").exists():
             args.extend(["-r", "/usr/share/hashcat/rules/best64.rule"])
 
-        result = self.runner.run(
+        self.runner.run(
             tool_name="hashcat",
             args=args,
             timeout=max_runtime + 60,
@@ -223,7 +223,7 @@ class CrackingModule(BaseModule):
         fmt = john_format_map.get(hash_type)
         fmt_arg = [f"--format={fmt}"] if fmt else []
 
-        result = self.runner.run(
+        self.runner.run(
             tool_name="john",
             args=[
                 str(hash_file),

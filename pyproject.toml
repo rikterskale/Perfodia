@@ -19,3 +19,7 @@ include-package-data = true
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["configs", "configs.*", "modules", "modules.*", "utils", "utils.*"]
+
+[tool.ruff.lint.per-file-ignores]
+"perfodia.py" = ["E402"]
+"tests/test_core.py" = ["E402"]

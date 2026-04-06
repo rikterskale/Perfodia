@@ -9,7 +9,6 @@ from modules.base import BaseModule
 from utils.validators import is_tool_available
 from utils.parsers import parse_enum4linux_output, parse_snmp_output
 from utils.vuln_scorer import Severity
-from utils.credential_vault import CredType
 
 logger = logging.getLogger(__name__)
 

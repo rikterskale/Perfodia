@@ -5,7 +5,6 @@ Uses: nmap, masscan
 """
 
 import logging
-from pathlib import Path
 from typing import Dict, List, Any, Optional
 from modules.base import BaseModule
 from utils.validators import is_tool_available

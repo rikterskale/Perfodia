@@ -11,7 +11,7 @@ import logging
 import threading
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Any, Optional, Set
+from typing import Dict, List, Any, Set
 from dataclasses import dataclass, field, asdict
 from enum import Enum
 

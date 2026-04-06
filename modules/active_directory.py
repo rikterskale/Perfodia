@@ -7,7 +7,7 @@ Uses: ldapsearch, bloodhound-python, impacket suite, crackmapexec/netexec
 
 import re
 import logging
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Any
 from modules.base import BaseModule
 from utils.validators import is_tool_available
 
@@ -312,7 +312,7 @@ class ActiveDirectoryModule(BaseModule):
         if result.success:
             hash_file = self.session_dir / f"loot/asrep_hashes_{dc_ip}.txt"
             if hash_file.exists():
-                hashes = [l for l in hash_file.read_text().split("\n") if l.strip()]
+                hashes = [line for line in hash_file.read_text().split("\n") if line.strip()]
                 asrep_data["hashes_found"] = len(hashes)
                 if hashes:
                     logger.warning(f"  [!] AS-REP hashes found: {len(hashes)}")
@@ -364,7 +364,7 @@ class ActiveDirectoryModule(BaseModule):
                 if result.success:
                     hash_file = self.session_dir / f"loot/kerberoast_{dc_ip}.txt"
                     if hash_file.exists():
-                        hashes = [l for l in hash_file.read_text().split("\n") if l.strip()]
+                        hashes = [line for line in hash_file.read_text().split("\n") if line.strip()]
                         kerb_data["hashes_found"] = len(hashes)
                         if hashes:
                             logger.warning(f"  [!] Kerberoast hashes: {len(hashes)}")

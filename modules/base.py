@@ -7,7 +7,7 @@ Abstract base classes and shared utilities for the Perfodia penetration testing 
 import logging
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Any
 
 from utils.tool_runner import ToolRunner
 from utils.parallel import ParallelRunner

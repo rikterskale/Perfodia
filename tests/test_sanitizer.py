@@ -1,6 +1,5 @@
 """Tests for input sanitizer."""
 
-import pytest
 from utils.sanitizer import sanitize_arg, sanitize_args, sanitize_hostname, is_safe_path
 
 
