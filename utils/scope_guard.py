@@ -101,7 +101,10 @@ class ScopeGuard:
             result = self._check_ip(addr)
         except ValueError:
             # Hostname — check against allowed hostnames first
-            if target.lower() in self._allowed_hosts:
+            normalized = target.lower()
+            if normalized in self._denied_hosts:
+                result = False
+            elif normalized in self._allowed_hosts:
                 result = True
             else:
                 # Resolve hostname to IP and check that IP against scope

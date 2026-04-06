@@ -31,6 +31,14 @@ class TestScopeGuard:
         assert guard.check("server.lab.local") is True
         assert guard.check("other.lab.local") is False
 
+    def test_hostname_exclusion_takes_priority(self):
+        guard = ScopeGuard(
+            targets=["server.lab.local"],
+            exclusions=["server.lab.local"],
+        )
+        assert guard.check("server.lab.local") is False
+        assert guard.violation_count == 1
+
     def test_multiple_ranges(self):
         guard = ScopeGuard(targets=["192.168.1.0/24", "10.0.0.0/24"])
         assert guard.check("192.168.1.50") is True

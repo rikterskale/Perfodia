@@ -1,3 +1,4 @@
+===== README.md =====
 # Perfodia — Network Penetration Testing Framework
 
 A modular Python 3 framework that orchestrates 30+ security tools into an 8-phase automated workflow with parallel execution, scope enforcement, centralized credential management, vulnerability scoring, password cracking, evidence capture, and multi-format reporting.
@@ -163,7 +164,6 @@ perfodia/                              # ~10,500 lines
 │   └── test_core.py                    # 21 tests (session, parallel, parsers)
 ├── Dockerfile                          # Multi-stage Docker build
 ├── docker-compose.yml                  # Docker services
-├── docker-entrypoint.sh                # Docker entrypoint
 ├── docker/
 │   └── docker-entrypoint.sh            # Canonical Docker entrypoint
 └── Docker Guide.md                     # Docker guide
@@ -779,3 +779,5 @@ Register in `perfodia.py` module_map. Add tools to `TOOL_REGISTRY` in `validator
 ## License
 
 This project is provided as-is for educational and authorized testing purposes only.
+
+
