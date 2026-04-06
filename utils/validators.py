@@ -85,8 +85,8 @@ def validate_target(target: str) -> Tuple[bool, Optional[str]]:
     Returns:
         (is_valid, normalized_target) tuple
 
-    Rejects RFC 1918 violations, multicast, and broadcast addresses
-    are allowed since this is a lab framework.
+    Rejects invalid formats and multicast addresses.
+    Private/internal ranges are allowed since this is a lab framework.
     """
     target = target.strip()
 
