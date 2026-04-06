@@ -17,6 +17,6 @@ jobs:
       - run: pip install pytest ruff mypy bandit pip-audit
       - run: pytest -q
       - run: ruff check .
-      - run: mypy .
+      - run: mypy . --config-file mypy.ini
       - run: bandit -r . -x tests
       - run: pip-audit
