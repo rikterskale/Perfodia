@@ -4,6 +4,8 @@ A modular Python 3 framework that orchestrates 30+ security tools into an 8-phas
 
 > **⚠️ FOR AUTHORIZED LAB USE ONLY.** Unauthorized access to computer systems is illegal.
 
+![CI](https://github.com/rikterskale/Perfodia/actions/workflows/ci.yml/badge.svg)
+
 ---
 
 ## Table of Contents
@@ -50,6 +52,35 @@ Perfodia chains tools together so the output of one phase feeds the next automat
 **8 phases:** Reconnaissance → Scanning → Enumeration → Web App Testing → Exploitation → Active Directory → Password Cracking → Post-Exploitation
 
 **Key capabilities:** parallel execution, scope enforcement (blocks out-of-scope IPs), input sanitization (prevents injection via hostile banners), credential vault (cross-phase credential sharing), CVSS-based vulnerability scoring, resume from checkpoint, evidence screenshots, PDF reports, interactive TUI dashboard, config wizard.
+
+### CI / Quality Gates
+
+Every push and pull request is automatically validated by GitHub Actions.
+
+### What runs automatically
+- **Tests:** `pytest -q`
+- **Linting:** `ruff check .`
+- **Type checks:** `mypy .`
+- **Security static analysis:** `bandit -r . -x tests`
+- **Dependency vulnerability scan:** `pip-audit`
+
+### Why this matters
+These checks catch regressions, style issues, typing problems, and common security risks before code is merged.
+
+### Pass/Fail policy
+All checks are required to pass.  
+If any step fails, the CI workflow fails and the PR should be fixed before merge.
+
+### Run the same checks locally
+```bash
+pip install -r requirements.txt
+pip install pytest ruff mypy bandit pip-audit
+
+pytest -q
+ruff check .
+mypy .
+bandit -r . -x tests
+pip-audit
 
 ---
 
