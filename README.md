@@ -1,4 +1,3 @@
-===== README.md =====
 # Perfodia — Network Penetration Testing Framework
 
 A modular Python 3 framework that orchestrates 30+ security tools into an 8-phase automated workflow with parallel execution, scope enforcement, centralized credential management, vulnerability scoring, password cracking, evidence capture, and multi-format reporting.
