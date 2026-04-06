@@ -1,4 +1,3 @@
-cat > .github/workflows/ci.yml <<'YAML'
 name: CI
 
 on:
@@ -21,4 +20,3 @@ jobs:
       - run: mypy .
       - run: bandit -r . -x tests
       - run: pip-audit
-YAML
