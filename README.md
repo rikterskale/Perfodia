@@ -72,7 +72,7 @@ All checks are required to pass.
 If any step fails, the CI workflow fails and the PR should be fixed before merge.
 
 ### Run the same checks locally
-```bash
+```
 pip install -r requirements.txt
 pip install pytest ruff mypy bandit pip-audit
 
@@ -94,20 +94,21 @@ pip-audit
 | **RAM** | 2 GB min, 4 GB recommended |
 | **Disk** | ~3 GB for full install |
 
+```
 ---
 
 ## Installation
 
 ### Step 1: Clone
 
-```bash
+```
 git clone <your-repo-url> perfodia
 cd perfodia
 ```
 
 ### Step 2: Install system tools
 
-```bash
+```
 chmod +x install_deps.sh
 sudo bash install_deps.sh --dry-run   # Preview first
 sudo bash install_deps.sh --full      # Install everything
@@ -124,7 +125,7 @@ The installer handles 12 steps: build tools, nmap, recon tools, enumeration tool
 
 ### Step 3: Install Python dependencies
 
-```bash
+```
 pip3 install -r requirements.txt
 ```
 
@@ -132,7 +133,7 @@ Core dependency is PyYAML. Recommended: `rich` (for TUI dashboard). Optional: `w
 
 ### Step 4: Verify
 
-```bash
+```
 sudo python3 perfodia.py --check-tools
 ```
 
@@ -140,7 +141,7 @@ Shows status of all registered tools with version info, including `crackmapexec`
 
 ### Quick Start (Kali Linux)
 
-```bash
+```
 pip3 install -r requirements.txt
 sudo python3 perfodia.py -t 192.168.1.100 -m full -v
 ```
@@ -203,7 +204,7 @@ perfodia/                              # ~10,500 lines
 
 ## Quick Start
 
-```bash
+```
 # Config wizard — creates a tailored config file by asking questions
 python3 perfodia.py --init
 
@@ -224,7 +225,7 @@ sudo python3 perfodia.py -t 192.168.1.100 -m full --resume --session 20250322_14
 
 ## Configuration
 
-```bash
+```
 # Generate config interactively
 python3 perfodia.py --init
 
@@ -289,7 +290,7 @@ reporting:
 
 ### Module Selection
 
-```bash
+```
 # Run specific phases in any combination
 sudo python3 perfodia.py -t 192.168.1.100 --modules recon,scan,webapp,ad,crack
 ```
@@ -441,7 +442,7 @@ cracking:
 ```
 
 **Usage:**
-```bash
+```
 # Crack after exploitation phase
 sudo python3 perfodia.py -t 192.168.1.100 -m full -v
 
@@ -502,7 +503,7 @@ enumeration:
 
 **File:** `utils/session_state.py`
 
-```bash
+```
 # Start a scan — gets interrupted
 sudo python3 perfodia.py -t 192.168.1.0/24 -m full --session mylab -v
 # Ctrl+C during enumeration
@@ -532,7 +533,7 @@ Auto-captures screenshots of every web service. Backends (auto-detected): gowitn
 
 Three-backend fallback chain: WeasyPrint (Python) → wkhtmltopdf (CLI) → Chrome headless.
 
-```bash
+```
 sudo python3 perfodia.py -t 192.168.1.100 -m full --report-format pdf
 ```
 
@@ -546,7 +547,7 @@ Install a backend: `pip install weasyprint` or `apt install wkhtmltopdf` or `apt
 
 Real-time terminal dashboard showing scan progress, live findings feed, credential count, and severity breakdown. Uses the `rich` library.
 
-```bash
+```
 pip install rich
 sudo python3 perfodia.py -t 192.168.1.100 -m full --interactive -v
 ```
@@ -568,7 +569,7 @@ Falls back to normal console output if `rich` is not installed.
 
 Interactive walkthrough that creates a tailored YAML config:
 
-```bash
+```
 sudo python3 perfodia.py --init
 ```
 
@@ -589,7 +590,7 @@ Generates a ready-to-use YAML file in `configs/`.
 
 ## Custom Nmap Options
 
-```bash
+```
 --nmap-extra '-sU -Pn --max-rate 500'          # Append to defaults
 --nmap-raw '-sS -sV -p 22,80,443'              # Replace all defaults
 --nmap-scan-type sT                             # Change scan type (sT=no root needed)
@@ -680,13 +681,13 @@ All options validated: dangerous flags blocked, shell injection stripped, output
 | `test_core.py` | 21 | Session state, parallel runner, parser coverage |
 
 **Run the tests:**
-```bash
+```
 pip install pytest
 python -m pytest tests/ -v
 ```
 
 Or without pytest:
-```bash
+```
 python3 tests/test_validators.py   # Each file is also standalone
 ```
 
@@ -727,7 +728,7 @@ reports/20250322_143000/
 
 ## Docker Support
 
-```bash
+```
 docker build -t perfodia .
 docker run --rm --net=host -v ./reports:/opt/perfodia/reports \
     perfodia -t 192.168.1.100 -m full -v
