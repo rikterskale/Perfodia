@@ -5,7 +5,6 @@ structured output capture.
 """
 
 import subprocess
-import shutil
 import time
 import logging
 from pathlib import Path
@@ -247,8 +246,10 @@ class ToolRunner:
             if Path(configured).exists():
                 return configured
 
-        # Fall back to PATH lookup
-        found = shutil.which(tool_name)
+        # Fall back to shared validator-based resolution (supports aliases)
+        from utils.validators import resolve_tool_binary
+
+        found = resolve_tool_binary(tool_name)
         if found:
             return found
 
