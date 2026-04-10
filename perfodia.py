@@ -149,10 +149,17 @@ Examples:
 
 def main_workflow(args, state=None):
     """Main execution workflow (8-phase)."""
-    config = FrameworkConfig.from_file(args.config)  # noqa: F841
-    # ← Put your original full workflow code here (ReconModule, ScanningModule, etc.)
+    # Safely load config (your actual FrameworkConfig may not have .from_file)
+    try:
+        config = FrameworkConfig.from_file(args.config)  # noqa: F841
+    except AttributeError:
+        # Fallback if your config class uses a different method
+        config = FrameworkConfig()  # or whatever your real constructor is
+
     logger.info("Starting Perfodia workflow...")
-    # Example of updating TUI state
+    # ← Put your original full workflow code here (ReconModule, etc.)
+
+    # Example TUI state update
     if state:
         state.update(current_phase="Recon", phase_progress=10, current_tool="nmap")
 

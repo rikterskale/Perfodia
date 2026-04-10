@@ -203,12 +203,22 @@ class PerfodiaTUI(App):
                 yield Button("🔄 Toggle Live Output", id="toggle-output-btn", variant="primary")
 
             with Horizontal(id="main-content"):
-                yield DataTable(id="findings", expand=True)
+                yield DataTable(id="findings")  # ← fixed: removed expand=True
                 yield RichLog(
-                    id="tool-output", wrap=True, highlight=True, auto_scroll=True, max_lines=500
+                    id="tool-output",
+                    wrap=True,
+                    highlight=True,
+                    auto_scroll=True,
+                    max_lines=500,
                 )
 
-            yield RichLog(id="events", wrap=True, highlight=True, auto_scroll=True, max_lines=200)
+            yield RichLog(
+                id="events",
+                wrap=True,
+                highlight=True,
+                auto_scroll=True,
+                max_lines=200,
+            )
 
     def on_mount(self) -> None:
         table = self.query_one("#findings", DataTable)
@@ -266,7 +276,6 @@ class PerfodiaTUI(App):
         self._refresh_ui()
 
     def append_tool_output(self, text: str) -> None:
-        """Call from any thread to stream live tool output."""
         if self.show_tool_output:
             tool_output = self.query_one("#tool-output", RichLog)
             self.call_from_thread(tool_output.write, text.strip())
