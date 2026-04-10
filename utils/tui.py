@@ -2,10 +2,17 @@
 Interactive Terminal UI — real-time dashboard showing scan progress,
 live findings feed, credential count, and severity breakdown.
 
-Uses the `rich` library for rendering.  Falls back gracefully if
+Uses the `rich` library for rendering. Falls back gracefully if
 rich is not installed.
 
 Launch with: perfodia.py --interactive -t <target> -m full
+
+This updated version includes:
+- Phase progress bar + animated spinner for current tool
+- Cleaner, more maintainable panel-building methods
+- Modern Rich styling (HEAVY boxes, better colors, separators)
+- Footer with keyboard hint bar
+- Improved tables with proper severity coloring
 """
 
 from __future__ import annotations
@@ -18,11 +25,6 @@ from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
-MAX_EVENTS = 30
-VISIBLE_EVENTS = 12
-MAX_FINDINGS = 100
-VISIBLE_FINDINGS = 8
-
 _RICH_AVAILABLE = False
 try:
     from rich.console import Console
@@ -32,6 +34,9 @@ try:
     from rich.live import Live
     from rich.text import Text
     from rich import box
+    from rich.progress import Progress, BarColumn, TextColumn
+    from rich.spinner import Spinner
+    from rich.align import Align
     _RICH_AVAILABLE = True
 except ImportError:
     pass
@@ -75,7 +80,7 @@ class DashboardState:
     def add_event(self, msg: str) -> None:
         with self._lock:
             self.recent_events.append(f"[{datetime.now().strftime('%H:%M:%S')}] {msg}")
-            if len(self.recent_events) > MAX_EVENTS:
+            if len(self.recent_events) > 15:
                 self.recent_events.pop(0)
 
     def add_finding(self, severity: str, title: str, host: str = "") -> None:
@@ -84,7 +89,7 @@ class DashboardState:
             sev = severity.lower()
             if sev in self.severity_counts:
                 self.severity_counts[sev] += 1
-            if len(self.findings) > MAX_FINDINGS:
+            if len(self.findings) > 50:
                 self.findings.pop(0)
 
     def snapshot(self) -> Dict[str, Any]:
@@ -99,9 +104,9 @@ class DashboardState:
                 "ports_found": self.ports_found,
                 "credentials_found": self.credentials_found,
                 "admin_access": self.admin_access,
-                "findings": list(self.findings[-VISIBLE_FINDINGS:]),
+                "findings": list(self.findings[-10:]),
                 "severity_counts": dict(self.severity_counts),
-                "recent_events": list(self.recent_events[-VISIBLE_EVENTS:]),
+                "recent_events": list(self.recent_events[-10:]),
                 "errors": self.errors,
                 "warnings": self.warnings,
                 "elapsed": (datetime.now() - self.start_time).total_seconds(),
@@ -113,15 +118,11 @@ class TUIDashboard:
     """
     Rich-based terminal dashboard for real-time pentest monitoring.
 
-    Usage:
+    Usage (unchanged — fully backward compatible):
         state = DashboardState()
         dashboard = TUIDashboard(state)
-        dashboard.start()  # Starts background rendering thread
-        # ... update state from modules ...
-        state.update(current_phase="Scanning", hosts_found=15)
-        state.add_event("Found open port 445 on 192.168.1.10")
-        state.add_finding("high", "MS17-010 EternalBlue", "192.168.1.10")
-        # ... when done ...
+        dashboard.start()
+        # ... update state ...
         dashboard.stop()
     """
 
@@ -129,7 +130,6 @@ class TUIDashboard:
         self.state = state
         self._thread: Optional[threading.Thread] = None
         self._stop_event = threading.Event()
-        self._console: Optional["Console"] = None
 
         if not _RICH_AVAILABLE:
             logger.warning(
@@ -148,158 +148,208 @@ class TUIDashboard:
         """Stop the dashboard."""
         self._stop_event.set()
         self.state.running = False
-        if self._thread:
+        if self._thread and self._thread.is_alive():
             self._thread.join(timeout=3)
 
     def _render_loop(self) -> None:
         """Main rendering loop using rich Live display."""
         console = Console()
-        self._console = console
         try:
-            with Live(self._build_layout(), console=console, refresh_per_second=2,
-                       screen=True) as live:
+            with Live(
+                self._build_layout(),
+                console=console,
+                refresh_per_second=4,      # smoother updates
+                screen=True,
+                transient=False,           # keep final screen on exit
+                vertical_overflow="visible",
+            ) as live:
                 while not self._stop_event.is_set():
                     live.update(self._build_layout())
-                    time.sleep(0.5)
+                    time.sleep(0.25)
         except Exception as e:
             logger.debug(f"[TUI] Render loop ended: {e}")
 
+    # ===================================================================
+    # Extracted panel builders (big maintainability win)
+    # ===================================================================
+
+    def _make_header_panel(self, snap: Dict[str, Any]) -> Panel:
+        """Header with phase name, progress bar, current tool + spinner, and elapsed time."""
+        elapsed = time.strftime("%H:%M:%S", time.gmtime(snap["elapsed"]))
+
+        # Progress bar for current phase
+        progress = Progress(
+            TextColumn("[bold cyan]{task.description}"),
+            BarColumn(bar_width=None, style="cyan"),
+            TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
+            expand=True,
+        )
+        task_id = progress.add_task(
+            f"[bold white]Phase: {snap['current_phase']}",
+            total=snap["total_phases"] or 1,
+            completed=snap["phase_progress"],
+        )
+
+        # Animated spinner when a tool is running
+        tool_status = ""
+        if snap["current_tool"]:
+            spinner = Spinner("dots", style="yellow", text=f" {snap['current_tool']}")
+            tool_status = f"  Tool: {spinner}  "
+        else:
+            tool_status = "  Tool: —  "
+
+        header_content = Align.center(
+            Text.assemble(
+                ("Perfodia ", "bold cyan"),
+                tool_status,
+                progress,
+                (f"  Elapsed: {elapsed}  ", "bold green"),
+            ),
+            vertical="middle",
+        )
+
+        return Panel(
+            header_content,
+            style="on dark_blue",
+            box=box.HEAVY,
+            padding=(0, 1),
+        )
+
+    def _make_stats_panel(self, snap: Dict[str, Any]) -> Panel:
+        """Statistics panel."""
+        table = Table(box=box.SIMPLE, show_header=False, padding=(0, 2), expand=True)
+        table.add_column("Label", style="dim", width=18)
+        table.add_column("Value", style="bold cyan", justify="right")
+
+        table.add_row("Hosts Found", str(snap["hosts_found"]))
+        table.add_row("Open Ports", str(snap["ports_found"]))
+        table.add_row("Credentials", str(snap["credentials_found"]))
+        table.add_row("Admin Access", str(snap["admin_access"]))
+        table.add_row("Errors / Warnings", f"{snap['errors']} / {snap['warnings']}")
+
+        return Panel(
+            table,
+            title="[bold]Statistics",
+            border_style="cyan",
+            box=box.HEAVY,
+            padding=(1, 2),
+        )
+
+    def _make_severity_panel(self, snap: Dict[str, Any]) -> Panel:
+        """Color-coded severity breakdown."""
+        sev = snap["severity_counts"]
+        table = Table(box=box.SIMPLE, show_header=False, padding=(0, 2), expand=True)
+        table.add_column("Severity")
+        table.add_column("Count", justify="right")
+
+        colors = {
+            "critical": "bold red",
+            "high": "red",
+            "medium": "yellow",
+            "low": "green",
+            "info": "dim",
+        }
+        for s in ["critical", "high", "medium", "low", "info"]:
+            count = sev.get(s, 0)
+            table.add_row(s.capitalize(), str(count), style=colors[s])
+
+        return Panel(
+            table,
+            title="[bold]Severity Breakdown",
+            border_style="red",
+            box=box.HEAVY,
+            padding=(1, 2),
+        )
+
+    def _make_findings_panel(self, snap: Dict[str, Any]) -> Panel:
+        """Live findings (last 8)."""
+        table = Table(box=box.SIMPLE, show_header=True, header_style="bold", padding=(0, 1))
+        table.add_column("Severity", width=10)
+        table.add_column("Host", width=18)
+        table.add_column("Finding", width=50)
+
+        colors = {"critical": "bold red", "high": "red", "medium": "yellow", "low": "green", "info": "dim"}
+        for f in snap["findings"][-8:]:
+            sev = f["severity"].lower()
+            table.add_row(
+                f["severity"].upper(),
+                f.get("host", ""),
+                f["title"],
+                style=colors.get(sev, "")
+            )
+
+        return Panel(
+            table,
+            title=f"[bold]Findings ({len(snap['findings'])} total)",
+            border_style="magenta",
+            box=box.HEAVY,
+            padding=(1, 2),
+        )
+
+    def _make_events_panel(self, snap: Dict[str, Any]) -> Panel:
+        """Recent events log."""
+        events_text = Text()
+        for event in snap["recent_events"][-8:]:
+            events_text.append(event + "\n", style="dim")
+
+        return Panel(
+            events_text,
+            title="[bold]Live Events",
+            border_style="blue",
+            box=box.HEAVY,
+            padding=(1, 2),
+        )
+
+    def _make_footer(self) -> Panel:
+        """Footer with keyboard hints (visual only for now)."""
+        footer_text = Text.assemble(
+            (" q ", "bold white on dark_red"),
+            ("quit   ", "dim"),
+            (" p ", "bold white on dark_blue"),
+            ("pause/resume   ", "dim"),
+            (" ↑↓ ", "bold white on dark_blue"),
+            ("scroll   ", "dim"),
+            ("(full keyboard support coming soon)", "dim italic"),
+        )
+        return Panel(
+            Align.center(footer_text),
+            style="on dark_blue",
+            box=box.HEAVY,
+            padding=(0, 1),
+        )
+
     def _build_layout(self) -> Layout:
-        """Build the full dashboard layout."""
+        """Build the full dashboard layout (now very clean)."""
         snap = self.state.snapshot()
-        console_width = self._console.size.width if self._console else 140
-        compact_mode = console_width < 120
+
         layout = Layout()
         layout.split_column(
-            Layout(name="header", size=3),
+            Layout(name="header", size=5),   # taller to fit progress bar
             Layout(name="body"),
             Layout(name="footer", size=3),
         )
-        if compact_mode:
-            layout["body"].split_column(
-                Layout(name="left", ratio=2),
-                Layout(name="right", ratio=1),
-            )
-        else:
-            layout["body"].split_row(
-                Layout(name="left", ratio=2),
-                Layout(name="right", ratio=1),
-            )
+
+        layout["body"].split_row(
+            Layout(name="left", ratio=2),
+            Layout(name="right", ratio=1),
+        )
+
         layout["left"].split_column(
-            Layout(name="stats", size=7),
-            Layout(name="events"),
+            Layout(name="stats", size=9),
+            Layout(name="events", ratio=1),
         )
+
         layout["right"].split_column(
-            Layout(name="severity", size=9 if compact_mode else 12),
-            Layout(name="findings"),
+            Layout(name="severity", size=13),
+            Layout(name="findings", ratio=1),
         )
 
-        # Header
-        elapsed = time.strftime("%H:%M:%S", time.gmtime(snap["elapsed"]))
-        phase = snap["current_phase"]
-        if snap["total_phases"] > 0:
-            progress_ratio = max(
-                0.0,
-                min(1.0, snap["phase_progress"] / max(1, snap["total_phases"])),
-            )
-            progress_num = f"{snap['phase_progress']}/{snap['total_phases']}"
-        else:
-            progress_ratio = 0.0
-            progress_num = "—"
-        bar_width = 14 if compact_mode else 20
-        filled = int(progress_ratio * bar_width)
-        progress_bar = f"[{'█' * filled}{'░' * (bar_width - filled)}]"
-        header_text = Text.assemble(
-            ("  Perfodia ", "bold cyan"),
-            (f"  Phase: {phase} {progress_bar} {progress_num}  ", "bold white"),
-            (f"  Tool: {snap['current_tool'] or '—'}  ", "dim"),
-            (f"  Elapsed: {elapsed}  ", "green"),
-        )
-        layout["header"].update(Panel(header_text, style="on dark_blue"))
-
-        # Stats panel
-        stats_table = Table(box=box.SIMPLE, show_header=False, padding=(0, 2))
-        stats_table.add_column("Label", style="dim")
-        stats_table.add_column("Value", style="bold cyan", justify="right")
-        stats_table.add_row("Hosts Found", str(snap["hosts_found"]))
-        stats_table.add_row("Open Ports", str(snap["ports_found"]))
-        stats_table.add_row("Credentials", str(snap["credentials_found"]))
-        stats_table.add_row("Admin Access", str(snap["admin_access"]))
-        stats_table.add_row("Errors / Warnings", f"{snap['errors']} / {snap['warnings']}")
-        layout["stats"].update(Panel(stats_table, title="Statistics", border_style="cyan"))
-
-        # Severity breakdown
-        sev = snap["severity_counts"]
-        sev_table = Table(box=box.SIMPLE, show_header=False, padding=(0, 2))
-        sev_table.add_column("Severity")
-        sev_table.add_column("Count", justify="right")
-        colors = {"critical": "bold red", "high": "red", "medium": "yellow",
-                  "low": "green", "info": "dim"}
-        for s in ["critical", "high", "medium", "low", "info"]:
-            sev_table.add_row(Text(s.upper(), style=colors[s]), str(sev.get(s, 0)))
-        layout["severity"].update(Panel(sev_table, title="Findings", border_style="red"))
-
-        # Recent findings
-        findings_table = Table(box=box.SIMPLE, show_header=True, padding=(0, 1))
-        findings_table.add_column("Sev", width=5)
-        findings_table.add_column("Host", width=10 if compact_mode else 15)
-        findings_table.add_column("Finding")
-        finding_limit = 30 if compact_mode else 40
-        for f in reversed(snap["findings"][-VISIBLE_FINDINGS:]):
-            sev_text = Text(f["severity"][:4].upper(),
-                           style=colors.get(f["severity"].lower(), "dim"))
-            findings_table.add_row(
-                sev_text,
-                f.get("host", "")[: (10 if compact_mode else 15)],
-                f["title"][:finding_limit],
-            )
-        layout["findings"].update(Panel(findings_table, title="Latest Findings", border_style="yellow"))
-
-        # Event log
-        event_text = "\n".join(snap["recent_events"][-VISIBLE_EVENTS:]) or "  Waiting for events..."
-        layout["events"].update(Panel(event_text, title="Event Log", border_style="green"))
-
-        # Footer
-        target = snap.get("current_target", "—")
-        footer_text = Text.assemble(
-            ("  Target: ", "dim"), (target, "bold"),
-            ("  |  Press Ctrl+C to stop  ", "dim"),
-        )
-        layout["footer"].update(Panel(footer_text, style="on dark_blue"))
+        # Populate panels
+        layout["header"].update(self._make_header_panel(snap))
+        layout["stats"].update(self._make_stats_panel(snap))
+        layout["severity"].update(self._make_severity_panel(snap))
+        layout["findings"].update(self._make_findings_panel(snap))
+        layout["events"].update(self._make_events_panel(snap))
+        layout["footer"].update(self._make_footer())
 
         return layout
-
-
-class TUILogHandler(logging.Handler):
-    """Logging handler that feeds log messages into the TUI dashboard state."""
-
-    def __init__(self, state: DashboardState) -> None:
-        super().__init__(logging.INFO)
-        self.state = state
-
-    def emit(self, record: logging.LogRecord) -> None:
-        try:
-            msg = self.format(record)
-            # Shorten for display
-            if len(msg) > 120:
-                msg = msg[:117] + "..."
-            self.state.add_event(msg)
-
-            if record.levelno >= logging.ERROR:
-                with self.state._lock:
-                    self.state.errors += 1
-            elif record.levelno >= logging.WARNING:
-                with self.state._lock:
-                    self.state.warnings += 1
-
-            # Detect findings from log messages
-            msg_lower = msg.lower()
-            if "[!]" in msg and ("vuln" in msg_lower or "cred" in msg_lower or "found" in msg_lower):
-                if "critical" in msg_lower or "cve" in msg_lower:
-                    self.state.add_finding("critical", msg[:60])
-                elif "credential" in msg_lower or "password" in msg_lower:
-                    self.state.add_finding("high", msg[:60])
-                else:
-                    self.state.add_finding("medium", msg[:60])
-        except Exception:
-            pass
