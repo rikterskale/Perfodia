@@ -18,6 +18,11 @@ from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
+MAX_EVENTS = 30
+VISIBLE_EVENTS = 12
+MAX_FINDINGS = 100
+VISIBLE_FINDINGS = 8
+
 _RICH_AVAILABLE = False
 try:
     from rich.console import Console
@@ -70,7 +75,7 @@ class DashboardState:
     def add_event(self, msg: str) -> None:
         with self._lock:
             self.recent_events.append(f"[{datetime.now().strftime('%H:%M:%S')}] {msg}")
-            if len(self.recent_events) > 15:
+            if len(self.recent_events) > MAX_EVENTS:
                 self.recent_events.pop(0)
 
     def add_finding(self, severity: str, title: str, host: str = "") -> None:
@@ -79,7 +84,7 @@ class DashboardState:
             sev = severity.lower()
             if sev in self.severity_counts:
                 self.severity_counts[sev] += 1
-            if len(self.findings) > 50:
+            if len(self.findings) > MAX_FINDINGS:
                 self.findings.pop(0)
 
     def snapshot(self) -> Dict[str, Any]:
@@ -94,9 +99,9 @@ class DashboardState:
                 "ports_found": self.ports_found,
                 "credentials_found": self.credentials_found,
                 "admin_access": self.admin_access,
-                "findings": list(self.findings[-10:]),
+                "findings": list(self.findings[-VISIBLE_FINDINGS:]),
                 "severity_counts": dict(self.severity_counts),
-                "recent_events": list(self.recent_events[-10:]),
+                "recent_events": list(self.recent_events[-VISIBLE_EVENTS:]),
                 "errors": self.errors,
                 "warnings": self.warnings,
                 "elapsed": (datetime.now() - self.start_time).total_seconds(),
@@ -124,6 +129,7 @@ class TUIDashboard:
         self.state = state
         self._thread: Optional[threading.Thread] = None
         self._stop_event = threading.Event()
+        self._console: Optional["Console"] = None
 
         if not _RICH_AVAILABLE:
             logger.warning(
@@ -148,6 +154,7 @@ class TUIDashboard:
     def _render_loop(self) -> None:
         """Main rendering loop using rich Live display."""
         console = Console()
+        self._console = console
         try:
             with Live(self._build_layout(), console=console, refresh_per_second=2,
                        screen=True) as live:
@@ -160,35 +167,51 @@ class TUIDashboard:
     def _build_layout(self) -> Layout:
         """Build the full dashboard layout."""
         snap = self.state.snapshot()
+        console_width = self._console.size.width if self._console else 140
+        compact_mode = console_width < 120
         layout = Layout()
         layout.split_column(
             Layout(name="header", size=3),
             Layout(name="body"),
             Layout(name="footer", size=3),
         )
-        layout["body"].split_row(
-            Layout(name="left", ratio=2),
-            Layout(name="right", ratio=1),
-        )
+        if compact_mode:
+            layout["body"].split_column(
+                Layout(name="left", ratio=2),
+                Layout(name="right", ratio=1),
+            )
+        else:
+            layout["body"].split_row(
+                Layout(name="left", ratio=2),
+                Layout(name="right", ratio=1),
+            )
         layout["left"].split_column(
             Layout(name="stats", size=7),
             Layout(name="events"),
         )
         layout["right"].split_column(
-            Layout(name="severity", size=12),
+            Layout(name="severity", size=9 if compact_mode else 12),
             Layout(name="findings"),
         )
 
         # Header
         elapsed = time.strftime("%H:%M:%S", time.gmtime(snap["elapsed"]))
         phase = snap["current_phase"]
-        progress_pct = (
-            f"{snap['phase_progress']}/{snap['total_phases']}"
-            if snap["total_phases"] > 0 else "—"
-        )
+        if snap["total_phases"] > 0:
+            progress_ratio = max(
+                0.0,
+                min(1.0, snap["phase_progress"] / max(1, snap["total_phases"])),
+            )
+            progress_num = f"{snap['phase_progress']}/{snap['total_phases']}"
+        else:
+            progress_ratio = 0.0
+            progress_num = "—"
+        bar_width = 14 if compact_mode else 20
+        filled = int(progress_ratio * bar_width)
+        progress_bar = f"[{'█' * filled}{'░' * (bar_width - filled)}]"
         header_text = Text.assemble(
             ("  Perfodia ", "bold cyan"),
-            (f"  Phase: {phase} [{progress_pct}]  ", "bold white"),
+            (f"  Phase: {phase} {progress_bar} {progress_num}  ", "bold white"),
             (f"  Tool: {snap['current_tool'] or '—'}  ", "dim"),
             (f"  Elapsed: {elapsed}  ", "green"),
         )
@@ -219,16 +242,21 @@ class TUIDashboard:
         # Recent findings
         findings_table = Table(box=box.SIMPLE, show_header=True, padding=(0, 1))
         findings_table.add_column("Sev", width=5)
-        findings_table.add_column("Host", width=15)
+        findings_table.add_column("Host", width=10 if compact_mode else 15)
         findings_table.add_column("Finding")
-        for f in reversed(snap["findings"][-8:]):
+        finding_limit = 30 if compact_mode else 40
+        for f in reversed(snap["findings"][-VISIBLE_FINDINGS:]):
             sev_text = Text(f["severity"][:4].upper(),
                            style=colors.get(f["severity"].lower(), "dim"))
-            findings_table.add_row(sev_text, f.get("host", "")[:15], f["title"][:40])
+            findings_table.add_row(
+                sev_text,
+                f.get("host", "")[: (10 if compact_mode else 15)],
+                f["title"][:finding_limit],
+            )
         layout["findings"].update(Panel(findings_table, title="Latest Findings", border_style="yellow"))
 
         # Event log
-        event_text = "\n".join(snap["recent_events"][-12:]) or "  Waiting for events..."
+        event_text = "\n".join(snap["recent_events"][-VISIBLE_EVENTS:]) or "  Waiting for events..."
         layout["events"].update(Panel(event_text, title="Event Log", border_style="green"))
 
         # Footer

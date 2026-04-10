@@ -429,6 +429,7 @@ def run_workflow(args, config, targets, exclusions, session_dir,
                 current_phase=phase_name,
                 phase_progress=idx,
                 total_phases=total_modules,
+                current_tool=module_key,
             )
 
         try:
@@ -487,6 +488,8 @@ def run_workflow(args, config, targets, exclusions, session_dir,
                 session_state.save_checkpoint(results, completed_phase=module_key)
 
             logger.info(f"[+] {phase_name} phase completed successfully")
+            if tui_state:
+                tui_state.update(current_tool="")
 
         except KeyboardInterrupt:
             logger.warning(f"[!] {phase_name} phase interrupted by user")
