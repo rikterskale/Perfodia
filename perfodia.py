@@ -3,12 +3,6 @@
 Perfodia - Network Penetration Testing Framework
 ===================================================
 A modular Python-based penetration testing framework for lab environments.
-Integrates common security tools with structured workflows, verbose error
-checking, and automated reporting.
-
-WARNING: This tool is intended ONLY for authorized penetration testing
-against systems you own or have explicit written permission to test.
-Unauthorized access to computer systems is illegal.
 """
 
 import argparse
@@ -17,19 +11,15 @@ import signal
 import sys
 from pathlib import Path
 
-# Add project root to path
 PROJECT_ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
 from utils.logger import setup_logging, get_logger
 
-# All imports kept for your real workflow (marked noqa so ruff doesn't complain)
+# Imports kept for future real workflow (ruff-safe)
 from utils.validators import (  # noqa: F401
-    validate_target,
-    validate_tool_dependencies,
-    check_root_privileges,
-    validate_config,
-    validate_nmap_options,
+    validate_target, validate_tool_dependencies, check_root_privileges,
+    validate_config, validate_nmap_options,
 )
 from utils.report_generator import ReportGenerator  # noqa: F401
 from utils.credential_vault import CredentialVault  # noqa: F401
@@ -63,9 +53,8 @@ BANNER = r"""
 
 
 def signal_handler(sig, frame):
-    """Handle interrupt signals gracefully."""
     logger.warning("\n[!] Interrupt received. Cleaning up...")
-    print("\n[!] Framework interrupted. Partial results may be in the reports directory.")
+    print("\n[!] Framework interrupted.")
     sys.exit(130)
 
 
@@ -74,60 +63,19 @@ signal.signal(signal.SIGTERM, signal_handler)
 
 
 def parse_arguments():
-    """Parse and validate command-line arguments."""
     parser = argparse.ArgumentParser(
         description="Perfodia - Network Penetration Testing Framework",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="""
-Examples:
-  # Full pentest with beautiful TUI
-  %(prog)s --target 127.0.0.1 --mode full --interactive
-        """,
     )
-
-    target_group = parser.add_argument_group("Target Specification")
-    target_group.add_argument("-t", "--target", help="Target IP, hostname, or CIDR range")
-    target_group.add_argument("-tL", "--target-list", help="Path to file containing target list")
-    target_group.add_argument("--exclude", help="Comma-separated IPs/ranges to exclude")
-
-    mode_group = parser.add_argument_group("Execution Mode")
-    mode_group.add_argument(
-        "-m",
-        "--mode",
-        choices=["recon", "scan", "enum", "exploit", "post", "webapp", "ad", "crack", "full"],
-        default="full",
-        help="Execution mode (default: full)",
-    )
-    mode_group.add_argument("--resume", action="store_true", help="Resume interrupted session")
-
-    ux_group = parser.add_argument_group("User Experience")
-    ux_group.add_argument(
-        "--interactive",
-        action="store_true",
-        help="Launch real-time Textual TUI dashboard (recommended)",
-    )
-
-    config_group = parser.add_argument_group("Configuration")
-    config_group.add_argument(
-        "-c",
-        "--config",
-        default=str(PROJECT_ROOT / "configs" / "default.yaml"),
-        help="Path to configuration file",
-    )
-    config_group.add_argument(
-        "-o",
-        "--output-dir",
-        default=str(PROJECT_ROOT / "reports"),
-        help="Output directory",
-    )
-
+    parser.add_argument("-t", "--target", default="127.0.0.1", help="Target IP")
+    parser.add_argument("-m", "--mode", default="full", help="Execution mode")
+    parser.add_argument("--interactive", action="store_true",
+                        help="Launch Textual TUI")
     return parser.parse_args()
 
 
-def main_workflow(args, state=None):
-    """Demo workflow that shows open ports in the Live Tool Output pane."""
-    logger.info("Starting demo workflow...")
-
+def main_workflow(state, target):
+    """Demo workflow – shows open ports in Live Tool Output pane."""
     if not state or not state.tui_app:
         logger.warning("TUI not available")
         return
@@ -143,11 +91,10 @@ def main_workflow(args, state=None):
             current_phase=phase,
             phase_progress=phase_idx * 20,
             current_tool=tools[phase_idx % len(tools)],
-            current_target=args.target or "127.0.0.1",
+            current_target=target,
         )
         state.add_event(f"▶ Starting phase: {phase}")
 
-        # Simulate port scanning with clear live output
         if "Scanning" in phase or "Port" in phase:
             open_ports = [22, 80, 443, 445, 3389, 8080, 3306]
             for port in open_ports:
@@ -155,7 +102,7 @@ def main_workflow(args, state=None):
                     break
                 service = random.choice(["ssh", "http", "https", "smb", "rdp", "mysql"])
                 line = f"✅ OPEN PORT → {port}/tcp   (service: {service})"
-                state.tui_app.append_tool_output(line)
+                state.tui_app.append_tool_output(line)      # ← Live Tool Output
                 state.add_event(f"Discovered open port {port}/tcp")
                 state.ports_found += 1
                 time.sleep(0.7)
@@ -163,7 +110,7 @@ def main_workflow(args, state=None):
             for i in range(6):
                 if not state.running:
                     break
-                state.add_event(f"Processing {i + 1}/6")
+                state.add_event(f"Processing {i+1}/6")
                 time.sleep(0.5)
 
     state.update(current_phase="Completed", phase_progress=100, current_tool="—")
@@ -173,39 +120,26 @@ def main_workflow(args, state=None):
 
 
 def main():
-    """Main entry point."""
     print(BANNER)
     args = parse_arguments()
 
     setup_logging()
     logger.info("Perfodia framework starting...")
 
-    # === TEXTUAL TUI INTEGRATION ===
     if args.interactive:
         from utils.tui import DashboardState, TUILogHandler, run_tui
 
         state = DashboardState()
 
-        # Attach TUI log handler
         tui_handler = TUILogHandler(state)
         logging.getLogger().addHandler(tui_handler)
 
-        # Run workflow in background thread
-        import threading
-
-        scan_thread = threading.Thread(
-            target=main_workflow,
-            args=(args, state),
-            daemon=True,
-        )
-        scan_thread.start()
-
         logger.info("Launching Textual TUI dashboard...")
-        run_tui(state)  # Blocks until user presses q
+        run_tui(state)          # This now starts the workflow inside on_mount
         return
 
-    # Normal (non-interactive) execution
-    main_workflow(args)
+    # Non-interactive mode (placeholder)
+    logger.info("Non-interactive mode not implemented in demo.")
 
 
 if __name__ == "__main__":
