@@ -104,19 +104,19 @@ RUN apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # === NetExec (official install from GitHub - requires build deps + Rust) ===
-RUN apt-get install -y --no-install-recommends \
+RUN apt-get update && apt-get install -y --no-install-recommends \
         git \
         python3-dev \
         build-essential \
         libffi-dev \
         libxml2-dev \
-        libxslt-dev \
+        libxslt1-dev \
         libssl-dev \
     && curl -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable \
     && . "$HOME/.cargo/env" \
     && pip3 install --no-cache-dir git+https://github.com/Pennyw0rth/NetExec.git \
     && rm -rf /root/.cargo /root/.rustup /root/.cache/pip \
-    && apt-get purge -y git python3-dev build-essential libffi-dev libxml2-dev libxslt-dev libssl-dev \
+    && apt-get purge -y git python3-dev build-essential libffi-dev libxml2-dev libxslt1-dev libssl-dev \
     && apt-get autoremove -y \
     && rm -rf /var/lib/apt/lists/*
 
