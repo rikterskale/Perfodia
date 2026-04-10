@@ -39,7 +39,13 @@ class DashboardState:
         self.credentials_found: int = 0
         self.admin_access: int = 0
         self.findings = deque(maxlen=MAX_FINDINGS)
-        self.severity_counts: Dict[str, int] = {"critical": 0, "high": 0, "medium": 0, "low": 0, "info": 0}
+        self.severity_counts: Dict[str, int] = {
+            "critical": 0,
+            "high": 0,
+            "medium": 0,
+            "low": 0,
+            "info": 0,
+        }
         self.recent_events = deque(maxlen=MAX_EVENTS)
         self.errors: int = 0
         self.warnings: int = 0
@@ -143,7 +149,9 @@ class SettingsModal(ModalScreen):
     def compose(self) -> ComposeResult:
         snap = self.state.snapshot()
         yield Static(f"Target: {snap['current_target'] or '—'}")
-        yield Static(f"Phase: {snap['current_phase']} ({snap['phase_progress']}/{snap['total_phases']})")
+        yield Static(
+            f"Phase: {snap['current_phase']} ({snap['phase_progress']}/{snap['total_phases']})"
+        )
         yield Static(f"Tool: {snap['current_tool'] or '—'}")
         yield Static(f"Paused: {'Yes' if snap['paused'] else 'No'}")
         yield Static(f"Findings: {snap['total_findings']} | Errors: {snap['errors']}")
@@ -188,7 +196,7 @@ class PerfodiaTUI(App):
                 yield Button("🔄 Toggle Live Output", id="toggle-output-btn", variant="primary")
 
             with Horizontal(id="main-content", expand=True):
-                yield DataTable(id="findings")                    # ← no expand=True here
+                yield DataTable(id="findings")  # ← no expand=True here
                 yield RichLog(
                     id="tool-output",
                     wrap=True,
@@ -233,9 +241,13 @@ class PerfodiaTUI(App):
         table = self.query_one("#findings", DataTable)
         table.clear()
         for f in snap["findings"]:
-            color = {"critical": "red", "high": "bright_red", "medium": "yellow", "low": "green", "info": "blue"}.get(
-                f["severity"].lower(), "white"
-            )
+            color = {
+                "critical": "red",
+                "high": "bright_red",
+                "medium": "yellow",
+                "low": "green",
+                "info": "blue",
+            }.get(f["severity"].lower(), "white")
             table.add_row(f"[{color}]{f['severity'].upper()}[/]", f.get("host", ""), f["title"])
 
         events_log = self.query_one("#events", RichLog)
