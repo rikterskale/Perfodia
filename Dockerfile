@@ -103,7 +103,7 @@ RUN apt-get install -y --no-install-recommends \
         chromium \
     && rm -rf /var/lib/apt/lists/*
 
-# === NetExec + SecLists + Exploit-DB (all in one layer) ===
+# === NetExec (build deps + Rust + install) ===
 RUN apt-get update && apt-get install -y --no-install-recommends \
         git \
         python3-dev \
@@ -115,15 +115,19 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && curl -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable \
     && . "$HOME/.cargo/env" \
     && pip3 install --no-cache-dir git+https://github.com/Pennyw0rth/NetExec.git \
-    && git clone --depth 1 https://github.com/danielmiessler/SecLists.git /usr/share/wordlists/SecLists \
-    && ln -s /usr/share/wordlists/SecLists /usr/share/seclists \
-    && git clone --depth 1 https://github.com/offensive-security/exploitdb.git /opt/exploitdb \
-    && ln -sf /opt/exploitdb/searchsploit /usr/local/bin/searchsploit \
-    && chmod +x /usr/local/bin/searchsploit \
     && rm -rf /root/.cargo /root/.rustup /root/.cache/pip \
     && apt-get purge -y git python3-dev build-essential libffi-dev libxml2-dev libxslt1-dev libssl-dev \
     && apt-get autoremove -y \
     && rm -rf /var/lib/apt/lists/*
+
+# SecLists
+RUN git clone --depth 1 https://github.com/danielmiessler/SecLists.git /usr/share/wordlists/SecLists && \
+    ln -s /usr/share/wordlists/SecLists /usr/share/seclists
+
+# Exploit-DB / searchsploit
+RUN git clone --depth 1 https://github.com/offensive-security/exploitdb.git /opt/exploitdb && \
+    ln -sf /opt/exploitdb/searchsploit /usr/local/bin/searchsploit && \
+    chmod +x /usr/local/bin/searchsploit
 
 RUN pip3 install --no-cache-dir \
         impacket \
