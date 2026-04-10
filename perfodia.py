@@ -22,28 +22,30 @@ PROJECT_ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
 from utils.logger import setup_logging, get_logger
-from utils.validators import (
+
+# The following imports are kept for your full workflow (they will be used once you restore the real main_workflow code)
+from utils.validators import (  # noqa: F401
     validate_target,
     validate_tool_dependencies,
     check_root_privileges,
     validate_config,
     validate_nmap_options,
 )
-from utils.report_generator import ReportGenerator
-from utils.credential_vault import CredentialVault
-from utils.vuln_scorer import VulnScorer
-from utils.session_state import SessionState
-from utils.screenshot import ScreenshotCapture
-from utils.scope_guard import ScopeGuard
+from utils.report_generator import ReportGenerator  # noqa: F401
+from utils.credential_vault import CredentialVault  # noqa: F401
+from utils.vuln_scorer import VulnScorer  # noqa: F401
+from utils.session_state import SessionState  # noqa: F401
+from utils.screenshot import ScreenshotCapture  # noqa: F401
+from utils.scope_guard import ScopeGuard  # noqa: F401
 from configs.settings import FrameworkConfig
-from modules.recon import ReconModule
-from modules.scanning import ScanningModule
-from modules.enumeration import EnumerationModule
-from modules.exploitation import ExploitationModule
-from modules.post_exploitation import PostExploitationModule
-from modules.web_app import WebAppModule
-from modules.active_directory import ActiveDirectoryModule
-from modules.cracking import CrackingModule
+from modules.recon import ReconModule  # noqa: F401
+from modules.scanning import ScanningModule  # noqa: F401
+from modules.enumeration import EnumerationModule  # noqa: F401
+from modules.exploitation import ExploitationModule  # noqa: F401
+from modules.post_exploitation import PostExploitationModule  # noqa: F401
+from modules.web_app import WebAppModule  # noqa: F401
+from modules.active_directory import ActiveDirectoryModule  # noqa: F401
+from modules.cracking import CrackingModule  # noqa: F401
 
 logger = get_logger(__name__)
 
@@ -63,7 +65,9 @@ BANNER = r"""
 def signal_handler(sig, frame):
     """Handle interrupt signals gracefully."""
     logger.warning("\n[!] Interrupt received. Cleaning up...")
-    print("\n[!] Framework interrupted. Partial results may be in the reports directory.")
+    print(
+        "\n[!] Framework interrupted. Partial results may be in the reports directory."
+    )
     sys.exit(130)
 
 
@@ -90,9 +94,15 @@ Examples:
     )
 
     target_group = parser.add_argument_group("Target Specification")
-    target_group.add_argument("-t", "--target", help="Target IP, hostname, or CIDR range")
-    target_group.add_argument("-tL", "--target-list", help="Path to file containing target list")
-    target_group.add_argument("--exclude", help="Comma-separated IPs/ranges to exclude")
+    target_group.add_argument(
+        "-t", "--target", help="Target IP, hostname, or CIDR range"
+    )
+    target_group.add_argument(
+        "-tL", "--target-list", help="Path to file containing target list"
+    )
+    target_group.add_argument(
+        "--exclude", help="Comma-separated IPs/ranges to exclude"
+    )
 
     mode_group = parser.add_argument_group("Execution Mode")
     mode_group.add_argument(
@@ -112,8 +122,12 @@ Examples:
         default="full",
         help="Execution mode (default: full)",
     )
-    mode_group.add_argument("--modules", help="Comma-separated list of specific modules")
-    mode_group.add_argument("--resume", action="store_true", help="Resume interrupted session")
+    mode_group.add_argument(
+        "--modules", help="Comma-separated list of specific modules"
+    )
+    mode_group.add_argument(
+        "--resume", action="store_true", help="Resume interrupted session"
+    )
 
     ux_group = parser.add_argument_group("User Experience")
     ux_group.add_argument(
@@ -140,18 +154,19 @@ Examples:
         default=str(PROJECT_ROOT / "reports"),
         help="Output directory",
     )
-    config_group.add_argument("--session", help="Session name/ID (default: timestamp)")
+    config_group.add_argument(
+        "--session", help="Session name/ID (default: timestamp)"
+    )
 
     return parser.parse_args()
 
 
 def main_workflow(args, state=None):
     """Main execution workflow (8-phase)."""
-    config = FrameworkConfig.from_file(args.config)
-    # ← Your original full workflow code goes here (ReconModule, ScanningModule, etc.)
-    # All the phase logic you already had remains unchanged.
+    config = FrameworkConfig.from_file(args.config)  # noqa: F841
+    # ← Put your original full workflow code here (ReconModule, ScanningModule, etc.)
     logger.info("Starting Perfodia workflow...")
-    # Example of updating TUI state (safe even if state is None)
+    # Example of updating TUI state
     if state:
         state.update(current_phase="Recon", phase_progress=10, current_tool="nmap")
 
@@ -176,7 +191,6 @@ def main():
 
         # Run the scan workflow in a background thread
         import threading
-
         scan_thread = threading.Thread(
             target=main_workflow,
             args=(args, state),
@@ -185,7 +199,7 @@ def main():
         scan_thread.start()
 
         logger.info("Launching Textual TUI dashboard...")
-        run_tui(state)  # Blocks until user presses q
+        run_tui(state)          # Blocks until user presses q
         return
 
     # Normal (non-interactive) execution
