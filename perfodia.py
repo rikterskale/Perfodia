@@ -148,7 +148,7 @@ Examples:
 
 
 def main_workflow(args, state=None):
-    """Temporary demo workflow to verify TUI is working."""
+    """Improved demo workflow that runs longer and clearly shows completion."""
     logger.info("Starting demo workflow...")
 
     if not state:
@@ -167,36 +167,27 @@ def main_workflow(args, state=None):
             current_tool=tools[phase_idx % len(tools)],
             current_target=args.target or "127.0.0.1",
         )
-        state.add_event(f"Starting phase: {phase}")
+        state.add_event(f"▶ Starting phase: {phase}")
 
-        # Simulate tool output streaming
-        for i in range(8):
+        # Simulate real tool output for ~8 seconds per phase
+        for i in range(12):
             if not state.running:
                 break
-            line = f"[{tools[phase_idx % len(tools)]}] Processing {i + 1}/8 → found {random.randint(1, 15)} items"
-            if hasattr(state, "_tui_app") and state._tui_app:  # future-proof
-                pass
-            else:
-                # Direct call to TUI (works because we have the instance in the thread)
-                # We’ll expose it properly later
-                pass
+            line = f"[{tools[phase_idx % len(tools)]}] {i+1}/12 → discovered {random.randint(3, 25)} items on {args.target or '127.0.0.1'}"
+            state.add_event(line)
+            time.sleep(0.65)
 
-            # Use the TUI's live output method
-            try:
-                # This will be replaced with proper integration later
-                from utils.tui import PerfodiaTUI
+        state.add_finding(
+            random.choice(["low", "medium", "high"]),
+            f"Interesting finding in {phase}",
+            args.target or "127.0.0.1",
+        )
 
-                # For now we just log so it appears in the events pane
-                state.add_event(line)
-                time.sleep(0.6)
-            except:
-                time.sleep(0.6)
-
-        state.add_finding("medium", f"Open port discovered in {phase}", args.target or "127.0.0.1")
-
-    state.add_event("✅ Demo workflow completed!")
+    # Final completion state
+    state.update(current_phase="Completed", phase_progress=100, current_tool="—")
+    state.add_event("✅ Full scan completed successfully!")
+    state.add_event("Press 'q' to exit the TUI")
     logger.info("Demo workflow finished")
-
 
 def main():
     """Main entry point."""
