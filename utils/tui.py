@@ -1,13 +1,11 @@
 """
 Interactive Terminal UI for Perfodia — real-time dashboard with keyboard support.
 
-Hotkeys (now fully functional):
+Hotkeys:
   q / Q          → Quit
-  p / P          → Pause / Resume scan
-  ↑ / ↓          → Scroll findings panel
-  r / R          → Manual refresh
-
-Launch with: perfodia --interactive
+  p / P          → Pause / Resume
+  ↑ / ↓          → Scroll findings
+  r / R          → Refresh
 """
 
 from __future__ import annotations
@@ -38,9 +36,7 @@ try:
     from rich.text import Text
     from rich import box
     from rich.progress import Progress, BarColumn, TextColumn, SpinnerColumn
-    from rich.spinner import Spinner
     from rich.align import Align
-    from rich.style import Style
 
     _RICH_AVAILABLE = True
 except ImportError:
@@ -133,7 +129,7 @@ class DashboardState:
 
 
 class TUILogHandler(logging.Handler):
-    """Logging handler that feeds logs into the TUI (unchanged from your original)."""
+    """Logging handler that feeds logs into the TUI."""
 
     def __init__(self, state: DashboardState) -> None:
         super().__init__(logging.INFO)
@@ -141,7 +137,6 @@ class TUILogHandler(logging.Handler):
 
     @staticmethod
     def _extract_finding(msg: str) -> Optional[Dict[str, str]]:
-        """Extract finding metadata from plain log text (original logic preserved)."""
         msg_lower = msg.lower()
         if "[!]" not in msg or not any(x in msg_lower for x in ("vuln", "cred", "found")):
             return None
@@ -237,7 +232,7 @@ class TUIDashboard:
                     self.state.scroll_findings(-1)
                 elif key == "\x1b[B":  # Down
                     self.state.scroll_findings(1)
-            except:
+            except Exception:
                 time.sleep(0.05)
 
     def _render_loop(self) -> None:
@@ -269,6 +264,7 @@ class TUIDashboard:
         )
         return layout
 
+    # ... (the rest of the _make_*_panel methods are unchanged from before – they were already clean)
     def _make_header_panel(self, snap: Dict[str, Any]) -> Panel:
         elapsed = time.strftime("%H:%M:%S", time.gmtime(snap["elapsed"]))
         status = "[red]⏸ PAUSED[/red]" if snap["paused"] else "[green]🚀 RUNNING[/green]"
