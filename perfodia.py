@@ -148,20 +148,53 @@ Examples:
 
 
 def main_workflow(args, state=None):
-    """Main execution workflow (8-phase)."""
-    # Safely load config (your actual FrameworkConfig may not have .from_file)
-    try:
-        config = FrameworkConfig.from_file(args.config)  # noqa: F841
-    except AttributeError:
-        # Fallback if your config class uses a different method
-        config = FrameworkConfig()  # or whatever your real constructor is
+    """Temporary demo workflow to verify TUI is working."""
+    logger.info("Starting demo workflow...")
 
-    logger.info("Starting Perfodia workflow...")
-    # ← Put your original full workflow code here (ReconModule, etc.)
+    if not state:
+        return
 
-    # Example TUI state update
-    if state:
-        state.update(current_phase="Recon", phase_progress=10, current_tool="nmap")
+    import time
+    import random
+
+    tools = ["nmap", "gobuster", "hydra", "enum4linux", "crackmapexec"]
+    phases = ["Recon", "Scanning", "Enumeration", "Exploitation", "Post-Exploitation"]
+
+    for phase_idx, phase in enumerate(phases, 1):
+        state.update(
+            current_phase=phase,
+            phase_progress=phase_idx * 20,
+            current_tool=tools[phase_idx % len(tools)],
+            current_target=args.target or "127.0.0.1",
+        )
+        state.add_event(f"Starting phase: {phase}")
+
+        # Simulate tool output streaming
+        for i in range(8):
+            if not state.running:
+                break
+            line = f"[{tools[phase_idx % len(tools)]}] Processing {i+1}/8 → found {random.randint(1, 15)} items"
+            if hasattr(state, '_tui_app') and state._tui_app:   # future-proof
+                pass
+            else:
+                # Direct call to TUI (works because we have the instance in the thread)
+                # We’ll expose it properly later
+                pass
+
+            # Use the TUI's live output method
+            try:
+                # This will be replaced with proper integration later
+                from utils.tui import PerfodiaTUI
+                # For now we just log so it appears in the events pane
+                state.add_event(line)
+                time.sleep(0.6)
+            except:
+                time.sleep(0.6)
+
+        state.add_finding("medium", f"Open port discovered in {phase}", args.target or "127.0.0.1")
+
+    state.add_event("✅ Demo workflow completed!")
+    logger.info("Demo workflow finished")
 
 
 def main():
