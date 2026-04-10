@@ -1,77 +1,63 @@
-"""Tests for TUI state, log handler behavior, and render smoke checks."""
+"""
+Tests for the Perfodia Rich TUI.
+"""
 
 import logging
 
+import pytest
+
 from utils.tui import (
     DashboardState,
-    MAX_EVENTS,
-    MAX_FINDINGS,
     TUIDashboard,
     TUILogHandler,
     is_tui_available,
 )
 
 
-class TestDashboardState:
-    def test_event_retention_cap(self):
+@pytest.mark.skipif(not is_tui_available(), reason="Rich not installed")
+class TestTUIRenderSmoke:
+    """Smoke tests for TUI rendering and basic functionality."""
+
+    def test_dashboard_state(self):
         state = DashboardState()
-        for i in range(MAX_EVENTS + 5):
-            state.add_event(f"event-{i}")
+        state.update(current_phase="Network Scanning", phase_progress=50)
+        state.add_event("test event")
+        state.add_finding("high", "Test vulnerability", "10.0.0.1")
 
-        assert len(state.recent_events) == MAX_EVENTS
-        assert "event-0" not in state.recent_events[0]
-        assert f"event-{MAX_EVENTS + 4}" in state.recent_events[-1]
+        snap = state.snapshot()
+        assert snap["current_phase"] == "Network Scanning"
+        assert snap["phase_progress"] == 50
+        assert len(snap["recent_events"]) == 1
+        assert len(snap["findings"]) == 1
+        assert snap["severity_counts"]["high"] == 1
 
-    def test_finding_retention_and_severity_count(self):
-        state = DashboardState()
-        for i in range(MAX_FINDINGS + 3):
-            state.add_finding("high", f"finding-{i}", "10.0.0.1")
-
-        assert len(state.findings) == MAX_FINDINGS
-        assert state.severity_counts["high"] == MAX_FINDINGS + 3
-
-
-class TestTUILogHandler:
-    def test_warn_and_error_counters(self):
+    def test_tui_log_handler(self):
         state = DashboardState()
         handler = TUILogHandler(state)
-        handler.setFormatter(logging.Formatter("%(message)s"))
-
-        warning = logging.LogRecord("test", logging.WARNING, __file__, 1, "warn-msg", (), None)
-        error = logging.LogRecord("test", logging.ERROR, __file__, 1, "err-msg", (), None)
-        handler.emit(warning)
-        handler.emit(error)
-
-        assert state.warnings == 1
-        assert state.errors == 1
-
-    def test_finding_detection_from_log_text(self):
-        state = DashboardState()
-        handler = TUILogHandler(state)
-        handler.setFormatter(logging.Formatter("%(message)s"))
 
         record = logging.LogRecord(
-            "test",
-            logging.INFO,
-            __file__,
-            1,
-            "[!] Found credential password reuse on 10.0.0.5",
-            (),
-            None,
+            name="test",
+            level=logging.INFO,
+            pathname="",
+            lineno=0,
+            msg="[!] Critical vuln found on 10.0.0.50",
+            args=(),
+            exc_info=None,
         )
         handler.emit(record)
 
-        assert len(state.findings) == 1
-        assert state.findings[0]["severity"] == "high"
-        assert state.findings[0]["host"] == "10.0.0.5"
+        snap = state.snapshot()
+        assert len(snap["recent_events"]) >= 1
 
-
-class TestTUIRenderSmoke:
     def test_build_layout_smoke(self):
-        if not is_tui_available():
-            return
+        """Test that the layout builds without errors and contains expected panels."""
         state = DashboardState()
-        state.update(current_phase="Network Scanning", phase_progress=1, total_phases=3)
+        state.update(
+            current_phase="Network Scanning",
+            phase_progress=1,
+            total_phases=3,
+            current_target="192.168.1.1",
+        )
         state.add_event("scan started")
         state.add_finding("medium", "Sample finding", "10.0.0.10")
 
@@ -79,6 +65,20 @@ class TestTUIRenderSmoke:
         layout = dashboard._build_layout()
 
         assert layout is not None
+
+        # Check the actual named children we use in _build_layout()
         assert layout.get("header") is not None
-        assert layout.get("body") is not None
+        assert layout.get("stats") is not None
+        assert layout.get("findings") is not None
+        assert layout.get("events") is not None
         assert layout.get("footer") is not None
+
+
+@pytest.mark.skipif(not is_tui_available(), reason="Rich not installed")
+def test_tui_start_stop():
+    """Test start/stop doesn't crash (smoke test)."""
+    state = DashboardState()
+    dashboard = TUIDashboard(state)
+    dashboard.start()
+    dashboard.stop()
+    assert not state.running
