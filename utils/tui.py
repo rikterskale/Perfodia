@@ -252,7 +252,9 @@ class TUIDashboard:
 
         tool_status: Any
         if snap["current_tool"]:
-            tool_status = Spinner("dots", style="yellow", text=f" Tool: {snap['current_tool']}")
+            tool_status = Spinner(
+                "dots", style="yellow", text=f" Tool: {snap['current_tool']}"
+            )
         else:
             tool_status = Text("Tool: —", style="dim")
 
