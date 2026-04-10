@@ -111,7 +111,7 @@ jobs:
       - name: Run pip-audit
         run: pip-audit
 
-  docker:
+   docker:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -124,6 +124,9 @@ jobs:
             --build-arg EXPLOITDB_REF=f36dd3d4d512ecd7197e079d87eb69ee7cd9d6b0 \
             --build-arg ENUM4LINUX_REF=288826fd9ee89b61d846e59f17b77bae4fb671ee \
             -t perfodia:test .
+
+      - name: Smoke test Docker container
+        run: docker run --rm perfodia:test
 
       - name: Smoke test Docker container
         run: docker run --rm perfodia:test
