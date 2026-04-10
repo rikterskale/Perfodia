@@ -28,6 +28,7 @@ INSTALL_MODE="full"
 INSTALL_MSF=true
 DRY_RUN=false
 LOG_FILE="/tmp/perfodia_install_$(date +%Y%m%d_%H%M%S).log"
+SKIPPED_VERIFIED=0
 
 FFUF_URL_DEFAULT=""
 FFUF_SHA256_DEFAULT=""
@@ -170,6 +171,7 @@ install_metasploit() {
         rm -f /tmp/msfinstall
     else
         warn "Skipping Metasploit automatic install. Set MSFINSTALL_URL and MSFINSTALL_SHA256 to enable verified installation."
+        ((SKIPPED_VERIFIED+=1))
     fi
 }
 
@@ -208,6 +210,7 @@ install_ffuf() {
         log "ffuf installed from verified archive"
     else
         warn "ffuf not installed automatically. Set FFUF_URL and FFUF_SHA256 or install via apt/manual package."
+        ((SKIPPED_VERIFIED+=1))
     fi
 }
 
@@ -230,6 +233,7 @@ install_gowitness() {
         log "gowitness installed from verified binary"
     else
         warn "gowitness not installed automatically. Set GOWITNESS_URL and GOWITNESS_SHA256 or install manually."
+        ((SKIPPED_VERIFIED+=1))
     fi
 }
 
@@ -462,6 +466,9 @@ else
     log "All tools installed successfully!"
 fi
 info "Full log: $LOG_FILE"
+if [[ $SKIPPED_VERIFIED -gt 0 ]]; then
+    warn "Verified remote installs skipped: $SKIPPED_VERIFIED (set *_URL/*_SHA256 env vars to enable)."
+fi
 
 echo ""
 log "Next steps:"
