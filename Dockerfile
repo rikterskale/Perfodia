@@ -49,10 +49,15 @@ RUN pip3 install --no-cache-dir PyYAML && \
     mkdir -p /opt/perfodia/reports /opt/perfodia/logs && \
     chown -R pentester:pentester /opt/perfodia
 
+# ===================================================================
 FROM base AS minimal
 LABEL variant="minimal"
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
+# Enable non-free for snmp-mibs-downloader
+RUN sed -i 's/Components: main/Components: main contrib non-free non-free-firmware/' /etc/apt/sources.list.d/debian.sources && \
+    apt-get update
+
+RUN apt-get install -y --no-install-recommends \
         netcat-openbsd \
         traceroute \
         nbtscan \
@@ -71,10 +76,15 @@ USER pentester
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 CMD ["--help"]
 
+# ===================================================================
 FROM base AS full
 LABEL variant="full"
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
+# Enable contrib + non-free repositories (required for nikto, snmp-mibs-downloader, etc.)
+RUN sed -i 's/Components: main/Components: main contrib non-free non-free-firmware/' /etc/apt/sources.list.d/debian.sources && \
+    apt-get update
+
+RUN apt-get install -y --no-install-recommends \
         smbclient \
         nbtscan \
         snmp \
@@ -87,17 +97,26 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         traceroute \
         dnsrecon \
         ffuf \
-        seclists \
         hydra \
         john \
         hashcat \
-        exploitdb \
         sqlmap \
         dirb \
         gobuster \
-        netexec \
         chromium \
     && rm -rf /var/lib/apt/lists/*
+
+# Tools not available via apt (Kali-only)
+RUN pip3 install --no-cache-dir netexec
+
+# SecLists
+RUN git clone --depth 1 https://github.com/danielmiessler/SecLists.git /usr/share/wordlists/SecLists && \
+    ln -s /usr/share/wordlists/SecLists /usr/share/seclists
+
+# Exploit-DB / searchsploit
+RUN git clone --depth 1 https://github.com/offensive-security/exploitdb.git /opt/exploitdb && \
+    ln -sf /opt/exploitdb/searchsploit /usr/local/bin/searchsploit && \
+    chmod +x /usr/local/bin/searchsploit
 
 RUN pip3 install --no-cache-dir \
         impacket \
@@ -145,7 +164,7 @@ RUN mkdir -p /usr/share/wordlists && \
 
 COPY docker/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh && \
-    chown -R pentester:pentester /opt/perfodia
+    chown -R pentester:pentester /opt/perfodia /usr/share/wordlists /opt/exploitdb /usr/share/seclists
 
 USER pentester
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
