@@ -95,11 +95,15 @@ def parse_arguments():
     parser.add_argument("-tL", "--target-list", help="File containing one target per line")
     parser.add_argument("-m", "--mode", default="full", choices=sorted(MODE_MAP.keys()))
     parser.add_argument("--modules", help="Comma-separated explicit modules (overrides mode)")
-    parser.add_argument("-c", "--config", default="configs/default.yaml", help="Path to config YAML")
+    parser.add_argument(
+        "-c", "--config", default="configs/default.yaml", help="Path to config YAML"
+    )
     parser.add_argument("--exclude", action="append", default=[], help="Exclude target/IP/CIDR")
     parser.add_argument("--enum", action="store_true", help="With -m scan, also run enum phase")
     parser.add_argument("--session", help="Session name (required with --resume)")
-    parser.add_argument("--resume", action="store_true", help="Resume previous session if checkpoint exists")
+    parser.add_argument(
+        "--resume", action="store_true", help="Resume previous session if checkpoint exists"
+    )
     parser.add_argument("--dry-run", action="store_true", help="Print commands without execution")
     parser.add_argument("--nmap-extra", help="Extra nmap options appended to defaults")
     parser.add_argument("--nmap-raw", help="Raw nmap options replacing defaults")
@@ -113,8 +117,12 @@ def parse_arguments():
     )
     parser.add_argument("-v", "--verbose", action="count", default=0, help="Increase verbosity")
     parser.add_argument("--interactive", action="store_true", help="Launch Textual TUI")
-    parser.add_argument("--check-tools", action="store_true", help="Validate tool dependencies and show versions")
-    parser.add_argument("--init", action="store_true", help="Launch interactive configuration wizard")
+    parser.add_argument(
+        "--check-tools", action="store_true", help="Validate tool dependencies and show versions"
+    )
+    parser.add_argument(
+        "--init", action="store_true", help="Launch interactive configuration wizard"
+    )
     return parser.parse_args()
 
 
@@ -220,7 +228,9 @@ def run_workflow(args) -> int:
         checkpoint = session_state.load_checkpoint()
         resumed_completed = set(checkpoint.get("_completed_phases", []))
         results.update({k: v for k, v in checkpoint.items() if not k.startswith("_")})
-        logger.info("Resuming session '%s' with %d completed modules", session_name, len(resumed_completed))
+        logger.info(
+            "Resuming session '%s' with %d completed modules", session_name, len(resumed_completed)
+        )
 
     for module_name in chain:
         if args.resume and module_name in resumed_completed:
@@ -257,7 +267,11 @@ def main():
     print(BANNER)
     args = parse_arguments()
 
-    log_level = logging.DEBUG if args.verbose >= 2 else (logging.INFO if args.verbose >= 1 else logging.WARNING)
+    log_level = (
+        logging.DEBUG
+        if args.verbose >= 2
+        else (logging.INFO if args.verbose >= 1 else logging.WARNING)
+    )
     setup_logging(level=log_level)
     logger.info("Perfodia framework starting...")
 
