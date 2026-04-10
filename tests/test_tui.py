@@ -1,8 +1,15 @@
-"""Tests for TUI state and log handler behavior."""
+"""Tests for TUI state, log handler behavior, and render smoke checks."""
 
 import logging
 
-from utils.tui import DashboardState, TUILogHandler, MAX_EVENTS, MAX_FINDINGS
+from utils.tui import (
+    DashboardState,
+    MAX_EVENTS,
+    MAX_FINDINGS,
+    TUIDashboard,
+    TUILogHandler,
+    is_tui_available,
+)
 
 
 class TestDashboardState:
@@ -60,3 +67,22 @@ class TestTUILogHandler:
 
         assert len(state.findings) == 1
         assert state.findings[0]["severity"] == "high"
+        assert state.findings[0]["host"] == "10.0.0.5"
+
+
+class TestTUIRenderSmoke:
+    def test_build_layout_smoke(self):
+        if not is_tui_available():
+            return
+        state = DashboardState()
+        state.update(current_phase="Network Scanning", phase_progress=1, total_phases=3)
+        state.add_event("scan started")
+        state.add_finding("medium", "Sample finding", "10.0.0.10")
+
+        dashboard = TUIDashboard(state)
+        layout = dashboard._build_layout()
+
+        assert layout is not None
+        assert layout.get("header") is not None
+        assert layout.get("body") is not None
+        assert layout.get("footer") is not None

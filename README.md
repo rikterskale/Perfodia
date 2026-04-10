@@ -555,8 +555,8 @@ sudo python3 perfodia.py -t 192.168.1.100 -m full --interactive -v
 **Dashboard panels:**
 - **Header** — current phase, progress bar, active tool, elapsed time
 - **Statistics** — hosts found, open ports, credentials, admin access, errors/warnings
-- **Severity breakdown** — critical/high/medium/low finding counts (color-coded)
-- **Latest findings** — live feed of discovered vulnerabilities
+- **Severity breakdown** — critical/high/medium/low/info lifetime finding counts (color-coded)
+- **Latest findings** — live feed of the newest findings (last 8 entries shown)
 - **Event log** — real-time tool execution and result stream
 
 Falls back to normal console output if `rich` is not installed.
@@ -810,5 +810,4 @@ Register in `perfodia.py` module_map. Add tools to `TOOL_REGISTRY` in `validator
 ## License
 
 This project is provided as-is for educational and authorized testing purposes only.
-
 

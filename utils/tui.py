@@ -11,8 +11,10 @@ Launch with: perfodia.py --interactive -t <target> -m full
 from __future__ import annotations
 
 import logging
+import re
 import threading
 import time
+from collections import deque
 from typing import Dict, Any, Optional, List
 from datetime import datetime
 
@@ -26,7 +28,7 @@ VISIBLE_FINDINGS = 8
 
 _RICH_AVAILABLE = False
 try:
-    from rich.console import Console
+    from rich.console import Console, Group
     from rich.layout import Layout
     from rich.panel import Panel
     from rich.table import Table
@@ -61,7 +63,7 @@ class DashboardState:
         self.ports_found: int = 0
         self.credentials_found: int = 0
         self.admin_access: int = 0
-        self.findings: List[Dict[str, str]] = []
+        self.findings = deque(maxlen=MAX_FINDINGS)
         self.severity_counts: Dict[str, int] = {
             "critical": 0,
             "high": 0,
@@ -69,7 +71,7 @@ class DashboardState:
             "low": 0,
             "info": 0,
         }
-        self.recent_events: List[str] = []
+        self.recent_events = deque(maxlen=MAX_EVENTS)
         self.errors: int = 0
         self.warnings: int = 0
         self.start_time: datetime = datetime.now()
@@ -84,8 +86,6 @@ class DashboardState:
     def add_event(self, msg: str) -> None:
         with self._lock:
             self.recent_events.append(f"[{datetime.now().strftime('%H:%M:%S')}] {msg}")
-            if len(self.recent_events) > MAX_EVENTS:
-                self.recent_events.pop(0)
 
     def add_finding(self, severity: str, title: str, host: str = "") -> None:
         with self._lock:
@@ -93,11 +93,11 @@ class DashboardState:
             sev = severity.lower()
             if sev in self.severity_counts:
                 self.severity_counts[sev] += 1
-            if len(self.findings) > MAX_FINDINGS:
-                self.findings.pop(0)
 
     def snapshot(self) -> Dict[str, Any]:
         with self._lock:
+            findings = list(self.findings)
+            recent_events = list(self.recent_events)
             return {
                 "current_phase": self.current_phase,
                 "phase_progress": self.phase_progress,
@@ -108,9 +108,9 @@ class DashboardState:
                 "ports_found": self.ports_found,
                 "credentials_found": self.credentials_found,
                 "admin_access": self.admin_access,
-                "findings": list(self.findings[-VISIBLE_FINDINGS:]),
+                "findings": findings[-VISIBLE_FINDINGS:],
                 "severity_counts": dict(self.severity_counts),
-                "recent_events": list(self.recent_events[-VISIBLE_EVENTS:]),
+                "recent_events": recent_events[-VISIBLE_EVENTS:],
                 "errors": self.errors,
                 "warnings": self.warnings,
                 "elapsed": (datetime.now() - self.start_time).total_seconds(),
@@ -124,6 +124,35 @@ class TUILogHandler(logging.Handler):
     def __init__(self, state: DashboardState) -> None:
         super().__init__(logging.INFO)
         self.state = state
+
+    @staticmethod
+    def _extract_finding(msg: str) -> Optional[Dict[str, str]]:
+        """Extract finding metadata from plain log text."""
+        msg_lower = msg.lower()
+        if "[!]" not in msg or not (
+            "vuln" in msg_lower or "cred" in msg_lower or "found" in msg_lower
+        ):
+            return None
+
+        host_match = re.search(
+            r"\b(?:\d{1,3}\.){3}\d{1,3}\b|\b[a-z0-9](?:[a-z0-9\-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9\-]{0,61}[a-z0-9])?)+\b",
+            msg,
+            re.IGNORECASE,
+        )
+        host = host_match.group(0) if host_match else ""
+
+        cve_match = re.search(r"\bCVE-\d{4}-\d{4,7}\b", msg, re.IGNORECASE)
+        if cve_match or "critical" in msg_lower:
+            severity = "critical"
+        elif "credential" in msg_lower or "password" in msg_lower:
+            severity = "high"
+        elif "vuln" in msg_lower:
+            severity = "medium"
+        else:
+            severity = "medium"
+
+        clean_title = re.sub(r"\s+", " ", msg).strip()[:80]
+        return {"severity": severity, "title": clean_title, "host": host}
 
     def emit(self, record: logging.LogRecord) -> None:
         try:
@@ -139,17 +168,11 @@ class TUILogHandler(logging.Handler):
                 with self.state._lock:
                     self.state.warnings += 1
 
-            # Auto-detect findings (satisfies test_finding_detection_from_log_text)
-            msg_lower = msg.lower()
-            if "[!]" in msg and (
-                "vuln" in msg_lower or "cred" in msg_lower or "found" in msg_lower
-            ):
-                if "critical" in msg_lower or "cve" in msg_lower:
-                    self.state.add_finding("critical", msg[:60])
-                elif "credential" in msg_lower or "password" in msg_lower:
-                    self.state.add_finding("high", msg[:60])
-                else:
-                    self.state.add_finding("medium", msg[:60])
+            finding = self._extract_finding(msg)
+            if finding:
+                self.state.add_finding(
+                    finding["severity"], finding["title"], finding.get("host", "")
+                )
         except Exception:
             pass  # never break logging
 
@@ -227,19 +250,18 @@ class TUIDashboard:
             completed=snap["phase_progress"],
         )
 
-        tool_status = ""
+        tool_status: Any
         if snap["current_tool"]:
-            spinner = Spinner("dots", style="yellow", text=f" {snap['current_tool']}")
-            tool_status = f"  Tool: {spinner}  "
+            tool_status = Spinner("dots", style="yellow", text=f" Tool: {snap['current_tool']}")
         else:
-            tool_status = "  Tool: —  "
+            tool_status = Text("Tool: —", style="dim")
 
         header_content = Align.center(
-            Text.assemble(
-                ("Perfodia ", "bold cyan"),
+            Group(
+                Text("Perfodia", style="bold cyan"),
                 tool_status,
                 progress,
-                (f"  Elapsed: {elapsed}  ", "bold green"),
+                Text(f"Elapsed: {elapsed}", style="bold green"),
             ),
             vertical="middle",
         )
@@ -289,7 +311,7 @@ class TUIDashboard:
 
         return Panel(
             table,
-            title="[bold]Severity Breakdown",
+            title="[bold]Severity Breakdown (lifetime)",
             border_style="red",
             box=box.HEAVY,
             padding=(1, 2),
@@ -342,12 +364,10 @@ class TUIDashboard:
 
     def _make_footer(self) -> Panel:
         footer_text = Text.assemble(
-            (" q ", "bold white on dark_red"),
-            ("quit   ", "dim"),
-            (" p ", "bold white on dark_blue"),
-            ("pause   ", "dim"),
-            (" ↑↓ ", "bold white on dark_blue"),
-            ("scroll", "dim"),
+            (" Live ", "bold white on dark_blue"),
+            ("auto-refresh every 250ms   ", "dim"),
+            (" Findings ", "bold white on dark_magenta"),
+            ("latest 8 shown / lifetime severity counts", "dim"),
         )
         return Panel(
             Align.center(footer_text),
