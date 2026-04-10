@@ -14,31 +14,9 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from utils.logger import setup_logging, get_logger
-
-# Imports kept for future real workflow (ruff-safe)
-from utils.validators import (  # noqa: F401
-    validate_target,
-    validate_tool_dependencies,
-    check_root_privileges,
-    validate_config,
-    validate_nmap_options,
-)
-from utils.report_generator import ReportGenerator  # noqa: F401
-from utils.credential_vault import CredentialVault  # noqa: F401
-from utils.vuln_scorer import VulnScorer  # noqa: F401
-from utils.session_state import SessionState  # noqa: F401
-from utils.screenshot import ScreenshotCapture  # noqa: F401
-from utils.scope_guard import ScopeGuard  # noqa: F401
-from configs.settings import FrameworkConfig  # noqa: F401
-from modules.recon import ReconModule  # noqa: F401
-from modules.scanning import ScanningModule  # noqa: F401
-from modules.enumeration import EnumerationModule  # noqa: F401
-from modules.exploitation import ExploitationModule  # noqa: F401
-from modules.post_exploitation import PostExploitationModule  # noqa: F401
-from modules.web_app import WebAppModule  # noqa: F401
-from modules.active_directory import ActiveDirectoryModule  # noqa: F401
-from modules.cracking import CrackingModule  # noqa: F401
+from utils.config_wizard import run_config_wizard
+from utils.logger import get_logger, setup_logging
+from utils.validators import validate_tool_dependencies
 
 logger = get_logger(__name__)
 
@@ -73,6 +51,16 @@ def parse_arguments():
     parser.add_argument("-t", "--target", default="127.0.0.1", help="Target IP")
     parser.add_argument("-m", "--mode", default="full", help="Execution mode")
     parser.add_argument("--interactive", action="store_true", help="Launch Textual TUI")
+    parser.add_argument(
+        "--check-tools",
+        action="store_true",
+        help="Validate tool dependencies and show versions",
+    )
+    parser.add_argument(
+        "--init",
+        action="store_true",
+        help="Launch interactive configuration wizard",
+    )
     return parser.parse_args()
 
 
@@ -82,8 +70,8 @@ def main_workflow(state, target):
         logger.warning("TUI not available")
         return
 
-    import time
     import random
+    import time
 
     tools = ["nmap", "masscan"]
     phases = ["Recon", "Port Scanning", "Enumeration", "Exploitation", "Post-Exploitation"]
@@ -104,7 +92,7 @@ def main_workflow(state, target):
                     break
                 service = random.choice(["ssh", "http", "https", "smb", "rdp", "mysql"])
                 line = f"✅ OPEN PORT → {port}/tcp   (service: {service})"
-                state.tui_app.append_tool_output(line)  # ← Live Tool Output
+                state.tui_app.append_tool_output(line)
                 state.add_event(f"Discovered open port {port}/tcp")
                 state.ports_found += 1
                 time.sleep(0.7)
@@ -128,6 +116,19 @@ def main():
     setup_logging()
     logger.info("Perfodia framework starting...")
 
+    if args.check_tools:
+        logger.info("Running tool dependency check...")
+        ok = validate_tool_dependencies(verbose=True)
+        sys.exit(0 if ok else 1)
+
+    if args.init:
+        generated = run_config_wizard(output_dir="configs")
+        if generated:
+            logger.info("Config wizard completed: %s", generated)
+            sys.exit(0)
+        logger.error("Config wizard did not generate a file")
+        sys.exit(1)
+
     if args.interactive:
         from utils.tui import DashboardState, TUILogHandler, run_tui
 
@@ -137,11 +138,10 @@ def main():
         logging.getLogger().addHandler(tui_handler)
 
         logger.info("Launching Textual TUI dashboard...")
-        run_tui(state)  # This now starts the workflow inside on_mount
+        run_tui(state)
         return
 
-    # Non-interactive mode (placeholder)
-    logger.info("Non-interactive mode not implemented in demo.")
+    logger.info("Non-interactive orchestration path is not yet implemented.")
 
 
 if __name__ == "__main__":
