@@ -104,6 +104,7 @@ RUN apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # === NetExec (build deps + Rust + install) ===
+# Note: we NO LONGER purge git so SecLists/Exploit-DB/Responder can still use it
 RUN apt-get update && apt-get install -y --no-install-recommends \
         git \
         python3-dev \
@@ -116,7 +117,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && . "$HOME/.cargo/env" \
     && pip3 install --no-cache-dir git+https://github.com/Pennyw0rth/NetExec.git \
     && rm -rf /root/.cargo /root/.rustup /root/.cache/pip \
-    && apt-get purge -y git python3-dev build-essential libffi-dev libxml2-dev libxslt1-dev libssl-dev \
+    && apt-get purge -y python3-dev build-essential libffi-dev libxml2-dev libxslt1-dev libssl-dev \
     && apt-get autoremove -y \
     && rm -rf /var/lib/apt/lists/*
 
