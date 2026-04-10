@@ -64,9 +64,7 @@ def parse_nmap_xml(xml_path: str) -> Dict[str, Any]:
         results["hosts_down"] = int(hosts_stat.get("down", 0))
         results["hosts_total"] = int(hosts_stat.get("total", 0))
 
-    logger.info(
-        f"Parsed nmap XML: {len(results['hosts'])} hosts found"
-    )
+    logger.info(f"Parsed nmap XML: {len(results['hosts'])} hosts found")
     return results
 
 
@@ -112,19 +110,23 @@ def _parse_nmap_host(host_elem) -> Optional[Dict]:
     os_elem = host_elem.find("os")
     if os_elem is not None:
         for osmatch in os_elem.findall("osmatch"):
-            host["os_matches"].append({
-                "name": osmatch.get("name", ""),
-                "accuracy": osmatch.get("accuracy", ""),
-            })
+            host["os_matches"].append(
+                {
+                    "name": osmatch.get("name", ""),
+                    "accuracy": osmatch.get("accuracy", ""),
+                }
+            )
 
     # Host scripts
     hostscript = host_elem.find("hostscript")
     if hostscript is not None:
         for script in hostscript.findall("script"):
-            host["scripts"].append({
-                "id": script.get("id", ""),
-                "output": script.get("output", ""),
-            })
+            host["scripts"].append(
+                {
+                    "id": script.get("id", ""),
+                    "output": script.get("output", ""),
+                }
+            )
 
     return host
 
@@ -159,10 +161,12 @@ def _parse_nmap_port(port_elem) -> Optional[Dict]:
 
     # Port scripts (NSE)
     for script in port_elem.findall("script"):
-        port["scripts"].append({
-            "id": script.get("id", ""),
-            "output": script.get("output", ""),
-        })
+        port["scripts"].append(
+            {
+                "id": script.get("id", ""),
+                "output": script.get("output", ""),
+            }
+        )
 
     return port
 
@@ -199,7 +203,7 @@ def parse_nmap_gnmap(gnmap_path: str) -> List[Dict]:
 
 def _parse_gnmap_line(line: str) -> Optional[Dict]:
     """Parse a single grepable nmap output line."""
-    host_match = re.search(r'Host:\s+(\S+)\s+\(([^)]*)\)', line)
+    host_match = re.search(r"Host:\s+(\S+)\s+\(([^)]*)\)", line)
     if not host_match:
         return None
 
@@ -207,20 +211,22 @@ def _parse_gnmap_line(line: str) -> Optional[Dict]:
     hostname = host_match.group(2)
 
     ports = []
-    ports_section = re.search(r'Ports:\s+(.*?)(?:\t|$)', line)
+    ports_section = re.search(r"Ports:\s+(.*?)(?:\t|$)", line)
     if ports_section:
         port_entries = ports_section.group(1).split(",")
         for entry in port_entries:
             entry = entry.strip()
             parts = entry.split("/")
             if len(parts) >= 5:
-                ports.append({
-                    "port": int(parts[0]) if parts[0].isdigit() else 0,
-                    "state": parts[1],
-                    "protocol": parts[2],
-                    "service": parts[4],
-                    "version": parts[6] if len(parts) > 6 else "",
-                })
+                ports.append(
+                    {
+                        "port": int(parts[0]) if parts[0].isdigit() else 0,
+                        "state": parts[1],
+                        "protocol": parts[2],
+                        "service": parts[4],
+                        "version": parts[6] if len(parts) > 6 else "",
+                    }
+                )
 
     return {"ip": ip, "hostname": hostname, "ports": ports}
 
@@ -241,39 +247,45 @@ def parse_enum4linux_output(output: str) -> Dict[str, Any]:
     }
 
     # Users
-    user_pattern = re.compile(r'user:\[([^\]]+)\]\s+rid:\[([^\]]+)\]')
+    user_pattern = re.compile(r"user:\[([^\]]+)\]\s+rid:\[([^\]]+)\]")
     for match in user_pattern.finditer(output):
-        result["users"].append({
-            "username": match.group(1),
-            "rid": match.group(2),
-        })
+        result["users"].append(
+            {
+                "username": match.group(1),
+                "rid": match.group(2),
+            }
+        )
 
     # Shares
-    share_pattern = re.compile(r'(\S+)\s+(?:Disk|IPC|Printer)\s+(.*)')
+    share_pattern = re.compile(r"(\S+)\s+(?:Disk|IPC|Printer)\s+(.*)")
     for match in share_pattern.finditer(output):
-        result["shares"].append({
-            "name": match.group(1),
-            "comment": match.group(2).strip(),
-        })
+        result["shares"].append(
+            {
+                "name": match.group(1),
+                "comment": match.group(2).strip(),
+            }
+        )
 
     # Groups
-    group_pattern = re.compile(r'group:\[([^\]]+)\]\s+rid:\[([^\]]+)\]')
+    group_pattern = re.compile(r"group:\[([^\]]+)\]\s+rid:\[([^\]]+)\]")
     for match in group_pattern.finditer(output):
-        result["groups"].append({
-            "name": match.group(1),
-            "rid": match.group(2),
-        })
+        result["groups"].append(
+            {
+                "name": match.group(1),
+                "rid": match.group(2),
+            }
+        )
 
     # OS info
-    os_match = re.search(r'OS:\s*(.+)', output)
+    os_match = re.search(r"OS:\s*(.+)", output)
     if os_match:
         result["os_info"] = os_match.group(1).strip()
 
     # Password policy
-    lockout_match = re.search(r'Account Lockout Threshold:\s*(\S+)', output)
+    lockout_match = re.search(r"Account Lockout Threshold:\s*(\S+)", output)
     if lockout_match:
         result["password_policy"]["lockout_threshold"] = lockout_match.group(1)
-    min_len = re.search(r'Minimum password length:\s*(\S+)', output)
+    min_len = re.search(r"Minimum password length:\s*(\S+)", output)
     if min_len:
         result["password_policy"]["min_length"] = min_len.group(1)
 
@@ -291,13 +303,15 @@ def parse_snmp_output(output: str) -> List[Dict]:
         line = line.strip()
         if not line or line.startswith("Timeout") or line.startswith("No Response"):
             continue
-        match = re.match(r'(\S+)\s+=\s+(\S+):\s+(.*)', line)
+        match = re.match(r"(\S+)\s+=\s+(\S+):\s+(.*)", line)
         if match:
-            results.append({
-                "oid": match.group(1),
-                "type": match.group(2),
-                "value": match.group(3).strip('"'),
-            })
+            results.append(
+                {
+                    "oid": match.group(1),
+                    "type": match.group(2),
+                    "value": match.group(3).strip('"'),
+                }
+            )
     return results
 
 
@@ -305,16 +319,18 @@ def parse_hydra_output(output: str) -> List[Dict]:
     """Parse hydra output for successful credentials."""
     creds = []
     pattern = re.compile(
-        r'\[(\d+)\]\[(\S+)\]\s+host:\s+(\S+)\s+login:\s+(\S+)\s+password:\s+(\S+)'
+        r"\[(\d+)\]\[(\S+)\]\s+host:\s+(\S+)\s+login:\s+(\S+)\s+password:\s+(\S+)"
     )
     for match in pattern.finditer(output):
-        creds.append({
-            "port": match.group(1),
-            "service": match.group(2),
-            "host": match.group(3),
-            "username": match.group(4),
-            "password": match.group(5),
-        })
+        creds.append(
+            {
+                "port": match.group(1),
+                "service": match.group(2),
+                "host": match.group(3),
+                "username": match.group(4),
+                "password": match.group(5),
+            }
+        )
     return creds
 
 
@@ -324,12 +340,14 @@ def parse_searchsploit_json(output: str) -> List[Dict]:
         data = json.loads(output)
         exploits = []
         for entry in data.get("RESULTS_EXPLOIT", []):
-            exploits.append({
-                "title": entry.get("Title", ""),
-                "path": entry.get("Path", ""),
-                "type": entry.get("Type", ""),
-                "platform": entry.get("Platform", ""),
-            })
+            exploits.append(
+                {
+                    "title": entry.get("Title", ""),
+                    "path": entry.get("Path", ""),
+                    "type": entry.get("Type", ""),
+                    "platform": entry.get("Platform", ""),
+                }
+            )
         return exploits
     except json.JSONDecodeError as e:
         logger.warning(f"Failed to parse searchsploit JSON: {e}")

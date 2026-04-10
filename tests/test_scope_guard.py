@@ -56,10 +56,15 @@ class TestScopeGuard:
 
     def test_extract_ips_from_args(self):
         guard = ScopeGuard(targets=["192.168.1.0/24"])
-        ips = guard.extract_ips_from_args([
-            "-sV", "192.168.1.100", "--max-rate", "500",
-            "admin:pass@10.0.0.1",
-        ])
+        ips = guard.extract_ips_from_args(
+            [
+                "-sV",
+                "192.168.1.100",
+                "--max-rate",
+                "500",
+                "admin:pass@10.0.0.1",
+            ]
+        )
         assert "192.168.1.100" in ips
         assert "10.0.0.1" in ips
 

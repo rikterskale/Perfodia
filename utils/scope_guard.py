@@ -53,7 +53,7 @@ class ScopeGuard:
         # Parse exclusions
         self._denied_networks: List[ipaddress.IPv4Network] = []
         self._denied_hosts: Set[str] = set()
-        for e in (exclusions or []):
+        for e in exclusions or []:
             self._add_exclusion(e)
 
         logger.info(
@@ -109,6 +109,7 @@ class ScopeGuard:
             else:
                 # Resolve hostname to IP and check that IP against scope
                 import socket
+
                 try:
                     resolved_ip = socket.gethostbyname(target)
                     addr = ipaddress.ip_address(resolved_ip)
@@ -146,6 +147,7 @@ class ScopeGuard:
         """Record and log a scope violation."""
         with self._lock:
             from datetime import datetime
+
             violation = {
                 "target": target,
                 "tool": tool_name,
@@ -167,7 +169,7 @@ class ScopeGuard:
         """
         ips: List[str] = []
         ip_pattern = re.compile(
-            r'(?:^|[@/=\s])(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})(?:[:/\s]|$)'
+            r"(?:^|[@/=\s])(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})(?:[:/\s]|$)"
         )
         for arg in args:
             for match in ip_pattern.finditer(arg):
@@ -182,7 +184,9 @@ class ScopeGuard:
         """
         ips = self.extract_ips_from_args(args)
         for ip in ips:
-            if not self.check(ip, tool_name=tool_name, action=f"args: {' '.join(args[:5])}"):
+            if not self.check(
+                ip, tool_name=tool_name, action=f"args: {' '.join(args[:5])}"
+            ):
                 return False
         return True
 
@@ -203,11 +207,14 @@ class ScopeGuard:
         if not self._violations:
             return
         import json
+
         path = session_dir / "logs" / "scope_violations.json"
         path.parent.mkdir(parents=True, exist_ok=True)
         try:
             with open(path, "w") as f:
                 json.dump(self._violations, f, indent=2)
-            logger.warning(f"[SCOPE] {len(self._violations)} violations saved to {path}")
+            logger.warning(
+                f"[SCOPE] {len(self._violations)} violations saved to {path}"
+            )
         except Exception as e:
             logger.error(f"[SCOPE] Failed to save violations: {e}")

@@ -16,11 +16,12 @@ logger = logging.getLogger(__name__)
 
 class Severity(str, Enum):
     """Severity levels aligned with CVSS v3 rating scale."""
-    CRITICAL = "critical"   # CVSS 9.0-10.0
-    HIGH = "high"           # CVSS 7.0-8.9
-    MEDIUM = "medium"       # CVSS 4.0-6.9
-    LOW = "low"             # CVSS 0.1-3.9
-    INFO = "info"           # Informational (no direct risk)
+
+    CRITICAL = "critical"  # CVSS 9.0-10.0
+    HIGH = "high"  # CVSS 7.0-8.9
+    MEDIUM = "medium"  # CVSS 4.0-6.9
+    LOW = "low"  # CVSS 0.1-3.9
+    INFO = "info"  # Informational (no direct risk)
 
     @classmethod
     def from_cvss(cls, score: float) -> "Severity":
@@ -43,6 +44,7 @@ class Severity(str, Enum):
 @dataclass
 class Finding:
     """A scored vulnerability finding."""
+
     title: str
     severity: Severity
     cvss_score: float = 0.0
@@ -82,48 +84,104 @@ class Finding:
 
 _HEURISTIC_RULES = [
     # (pattern_in_output, severity, cvss, title, remediation)
-    (r"ms17-010|eternalblue", Severity.CRITICAL, 9.8,
-     "MS17-010 (EternalBlue) SMB Remote Code Execution",
-     "Patch with MS17-010. Disable SMBv1."),
-    (r"ms08-067", Severity.CRITICAL, 10.0,
-     "MS08-067 Windows Server Service Remote Code Execution",
-     "Apply MS08-067 patch. Isolate system."),
-    (r"heartbleed|ssl-heartbleed", Severity.HIGH, 7.5,
-     "OpenSSL Heartbleed Information Disclosure",
-     "Update OpenSSL to 1.0.1g+ or 1.0.2+."),
-    (r"shellshock|CVE-2014-6271", Severity.CRITICAL, 9.8,
-     "Bash Shellshock Remote Code Execution",
-     "Update bash to patched version."),
-    (r"anonymous.*ftp|ftp.*anonymous", Severity.MEDIUM, 5.3,
-     "Anonymous FTP Access Enabled",
-     "Disable anonymous FTP access or restrict to read-only non-sensitive files."),
-    (r"null.*session|anonymous.*smb", Severity.MEDIUM, 5.3,
-     "SMB Null Session / Anonymous Access",
-     "Disable null sessions. Restrict anonymous access in Group Policy."),
-    (r"default.*credentials|default.*password", Severity.HIGH, 8.1,
-     "Default Credentials In Use",
-     "Change all default credentials immediately."),
-    (r"ssl-cert.*expired", Severity.LOW, 3.1,
-     "Expired SSL/TLS Certificate",
-     "Renew the SSL certificate."),
-    (r"ssl.*weak|sslv[23]|tlsv1\.0", Severity.MEDIUM, 5.9,
-     "Weak SSL/TLS Protocol Version",
-     "Disable SSLv2, SSLv3, TLS 1.0. Enforce TLS 1.2+."),
-    (r"dns.*recursion|recursion.*enabled", Severity.MEDIUM, 5.0,
-     "DNS Recursion Enabled (Potential Amplification)",
-     "Disable DNS recursion for external-facing servers."),
-    (r"snmp.*public|community.*public", Severity.MEDIUM, 5.3,
-     "SNMP Default Community String",
-     "Change SNMP community strings. Use SNMPv3 with authentication."),
-    (r"smb-vuln-cve-2020-0796|smbghost", Severity.CRITICAL, 10.0,
-     "SMBGhost (CVE-2020-0796) Remote Code Execution",
-     "Apply KB4551762 patch."),
-    (r"log4j|log4shell|CVE-2021-44228", Severity.CRITICAL, 10.0,
-     "Log4Shell Remote Code Execution",
-     "Update Log4j to 2.17.0+. Set log4j2.formatMsgNoLookups=true."),
-    (r"bluekeep|CVE-2019-0708", Severity.CRITICAL, 9.8,
-     "BlueKeep RDP Remote Code Execution",
-     "Patch with KB4499175. Disable RDP if not needed. Enable NLA."),
+    (
+        r"ms17-010|eternalblue",
+        Severity.CRITICAL,
+        9.8,
+        "MS17-010 (EternalBlue) SMB Remote Code Execution",
+        "Patch with MS17-010. Disable SMBv1.",
+    ),
+    (
+        r"ms08-067",
+        Severity.CRITICAL,
+        10.0,
+        "MS08-067 Windows Server Service Remote Code Execution",
+        "Apply MS08-067 patch. Isolate system.",
+    ),
+    (
+        r"heartbleed|ssl-heartbleed",
+        Severity.HIGH,
+        7.5,
+        "OpenSSL Heartbleed Information Disclosure",
+        "Update OpenSSL to 1.0.1g+ or 1.0.2+.",
+    ),
+    (
+        r"shellshock|CVE-2014-6271",
+        Severity.CRITICAL,
+        9.8,
+        "Bash Shellshock Remote Code Execution",
+        "Update bash to patched version.",
+    ),
+    (
+        r"anonymous.*ftp|ftp.*anonymous",
+        Severity.MEDIUM,
+        5.3,
+        "Anonymous FTP Access Enabled",
+        "Disable anonymous FTP access or restrict to read-only non-sensitive files.",
+    ),
+    (
+        r"null.*session|anonymous.*smb",
+        Severity.MEDIUM,
+        5.3,
+        "SMB Null Session / Anonymous Access",
+        "Disable null sessions. Restrict anonymous access in Group Policy.",
+    ),
+    (
+        r"default.*credentials|default.*password",
+        Severity.HIGH,
+        8.1,
+        "Default Credentials In Use",
+        "Change all default credentials immediately.",
+    ),
+    (
+        r"ssl-cert.*expired",
+        Severity.LOW,
+        3.1,
+        "Expired SSL/TLS Certificate",
+        "Renew the SSL certificate.",
+    ),
+    (
+        r"ssl.*weak|sslv[23]|tlsv1\.0",
+        Severity.MEDIUM,
+        5.9,
+        "Weak SSL/TLS Protocol Version",
+        "Disable SSLv2, SSLv3, TLS 1.0. Enforce TLS 1.2+.",
+    ),
+    (
+        r"dns.*recursion|recursion.*enabled",
+        Severity.MEDIUM,
+        5.0,
+        "DNS Recursion Enabled (Potential Amplification)",
+        "Disable DNS recursion for external-facing servers.",
+    ),
+    (
+        r"snmp.*public|community.*public",
+        Severity.MEDIUM,
+        5.3,
+        "SNMP Default Community String",
+        "Change SNMP community strings. Use SNMPv3 with authentication.",
+    ),
+    (
+        r"smb-vuln-cve-2020-0796|smbghost",
+        Severity.CRITICAL,
+        10.0,
+        "SMBGhost (CVE-2020-0796) Remote Code Execution",
+        "Apply KB4551762 patch.",
+    ),
+    (
+        r"log4j|log4shell|CVE-2021-44228",
+        Severity.CRITICAL,
+        10.0,
+        "Log4Shell Remote Code Execution",
+        "Update Log4j to 2.17.0+. Set log4j2.formatMsgNoLookups=true.",
+    ),
+    (
+        r"bluekeep|CVE-2019-0708",
+        Severity.CRITICAL,
+        9.8,
+        "BlueKeep RDP Remote Code Execution",
+        "Patch with KB4499175. Disable RDP if not needed. Enable NLA.",
+    ),
 ]
 
 
@@ -168,7 +226,7 @@ class VulnScorer:
                     )
                     if finding:
                         # Extract CVE IDs from output
-                        cves = re.findall(r'CVE-\d{4}-\d{4,}', output, re.IGNORECASE)
+                        cves = re.findall(r"CVE-\d{4}-\d{4,}", output, re.IGNORECASE)
                         finding.cve_ids = list(set(cves))
                         finding.evidence = output[:500]
                         findings.append(finding)
@@ -197,7 +255,7 @@ class VulnScorer:
         findings = []
         for exploit in exploits:
             title = exploit.get("title", "")
-            cves = re.findall(r'CVE-\d{4}-\d{4,}', title, re.IGNORECASE)
+            cves = re.findall(r"CVE-\d{4}-\d{4,}", title, re.IGNORECASE)
 
             finding = Finding(
                 title=f"Known Exploit: {title[:100]}",
@@ -288,8 +346,13 @@ class VulnScorer:
             counts[f.severity] += 1
 
         # Risk score: weighted sum
-        weights = {Severity.CRITICAL: 40, Severity.HIGH: 10,
-                   Severity.MEDIUM: 3, Severity.LOW: 1, Severity.INFO: 0}
+        weights = {
+            Severity.CRITICAL: 40,
+            Severity.HIGH: 10,
+            Severity.MEDIUM: 3,
+            Severity.LOW: 1,
+            Severity.INFO: 0,
+        }
         score = sum(counts[s] * weights[s] for s in Severity)
 
         # Overall rating
@@ -315,9 +378,7 @@ class VulnScorer:
             "attack_narrative": narrative,
         }
 
-    def get_findings(
-        self, min_severity: Severity = Severity.INFO
-    ) -> List[Finding]:
+    def get_findings(self, min_severity: Severity = Severity.INFO) -> List[Finding]:
         """Return all findings sorted by severity (worst first)."""
         return sorted(
             [f for f in self._findings if f.severity.numeric >= min_severity.numeric],
@@ -344,8 +405,13 @@ class VulnScorer:
         }
 
     def _match_heuristic(
-        self, text: str, host: str = "", port: int = 0,
-        service: str = "", source_tool: str = "", source_phase: str = "",
+        self,
+        text: str,
+        host: str = "",
+        port: int = 0,
+        service: str = "",
+        source_tool: str = "",
+        source_phase: str = "",
     ) -> Optional[Finding]:
         """Match text against known vulnerability patterns."""
         text_lower = text.lower()
@@ -369,7 +435,9 @@ class VulnScorer:
         critical = [f for f in self._findings if f.severity == Severity.CRITICAL]
         high = [f for f in self._findings if f.severity == Severity.HIGH]
         creds = [f for f in self._findings if "credential" in f.title.lower()]
-        admin = [f for f in self._findings if f.mitre_attack or "admin" in f.title.lower()]
+        admin = [
+            f for f in self._findings if f.mitre_attack or "admin" in f.title.lower()
+        ]
 
         parts = []
         if not self._findings:

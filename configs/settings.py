@@ -58,9 +58,7 @@ class FrameworkConfig:
             self._load_config(config_path)
         else:
             if config_path:
-                logger.warning(
-                    f"Config file not found: {config_path} — using defaults"
-                )
+                logger.warning(f"Config file not found: {config_path} — using defaults")
             self._apply_defaults()
 
     def _load_config(self, path: str):
@@ -97,7 +95,7 @@ class FrameworkConfig:
             },
             "nmap": {
                 "default_ports": "1-65535",
-                "timing_template": 4,      # T4
+                "timing_template": 4,  # T4
                 "max_retries": 2,
                 "host_timeout": "5m",
                 "scripts": [
@@ -115,7 +113,10 @@ class FrameworkConfig:
                 "smb": {"enabled": True, "depth": "full"},
                 "snmp": {"enabled": True, "community_strings": ["public", "private"]},
                 "dns": {"enabled": True, "wordlist": "/usr/share/wordlists/dns.txt"},
-                "http": {"enabled": True, "wordlist": "/usr/share/wordlists/dirb/common.txt"},
+                "http": {
+                    "enabled": True,
+                    "wordlist": "/usr/share/wordlists/dirb/common.txt",
+                },
             },
             "exploitation": {
                 "auto_exploit": False,
@@ -174,7 +175,9 @@ class FrameworkConfig:
                 for key, val in values.items():
                     if key not in self._data[section]:
                         self._data[section][key] = val
-                    elif isinstance(val, dict) and isinstance(self._data[section][key], dict):
+                    elif isinstance(val, dict) and isinstance(
+                        self._data[section][key], dict
+                    ):
                         # Recurse one more level for nested dicts like
                         # enumeration.smb, enumeration.snmp, etc.
                         for subkey, subval in val.items():

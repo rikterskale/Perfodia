@@ -37,39 +37,39 @@ def resolve_tool_binary(tool_name: str) -> Optional[str]:
 
 TOOL_REGISTRY: Dict[str, tuple[str, str, bool]] = {
     # (logical_name, package_hint, required)
-    "nmap":              ("nmap",              "nmap",                True),
-    "masscan":           ("masscan",           "masscan",             False),
-    "nikto":             ("nikto",             "nikto",               False),
-    "enum4linux-ng":     ("enum4linux-ng",     "pip: enum4linux-ng",  False),
-    "gobuster":          ("gobuster",          "gobuster",            False),
-    "hydra":             ("hydra",             "hydra",               False),
-    "snmpwalk":          ("snmpwalk",          "snmp",                False),
-    "onesixtyone":       ("onesixtyone",       "onesixtyone",         False),
-    "whatweb":           ("whatweb",            "whatweb",             False),
-    "smbclient":         ("smbclient",         "smbclient",           False),
-    "rpcclient":         ("rpcclient",         "smbclient",           False),
-    "dig":               ("dig",               "dnsutils",            False),
-    "whois":             ("whois",             "whois",               False),
-    "searchsploit":      ("searchsploit",      "exploitdb",           False),
-    "msfconsole":        ("msfconsole",        "metasploit-framework",False),
-    "crackmapexec":      ("crackmapexec",      "pip: netexec (or crackmapexec)", False),
-    "john":              ("john",              "john",                False),
-    "hashcat":           ("hashcat",           "hashcat",             False),
+    "nmap": ("nmap", "nmap", True),
+    "masscan": ("masscan", "masscan", False),
+    "nikto": ("nikto", "nikto", False),
+    "enum4linux-ng": ("enum4linux-ng", "pip: enum4linux-ng", False),
+    "gobuster": ("gobuster", "gobuster", False),
+    "hydra": ("hydra", "hydra", False),
+    "snmpwalk": ("snmpwalk", "snmp", False),
+    "onesixtyone": ("onesixtyone", "onesixtyone", False),
+    "whatweb": ("whatweb", "whatweb", False),
+    "smbclient": ("smbclient", "smbclient", False),
+    "rpcclient": ("rpcclient", "smbclient", False),
+    "dig": ("dig", "dnsutils", False),
+    "whois": ("whois", "whois", False),
+    "searchsploit": ("searchsploit", "exploitdb", False),
+    "msfconsole": ("msfconsole", "metasploit-framework", False),
+    "crackmapexec": ("crackmapexec", "pip: netexec (or crackmapexec)", False),
+    "john": ("john", "john", False),
+    "hashcat": ("hashcat", "hashcat", False),
     "impacket-secretsdump": ("impacket-secretsdump", "pip: impacket", False),
-    "impacket-psexec":   ("impacket-psexec",   "pip: impacket",       False),
-    "impacket-GetNPUsers": ("impacket-GetNPUsers", "pip: impacket",   False),
+    "impacket-psexec": ("impacket-psexec", "pip: impacket", False),
+    "impacket-GetNPUsers": ("impacket-GetNPUsers", "pip: impacket", False),
     "impacket-GetUserSPNs": ("impacket-GetUserSPNs", "pip: impacket", False),
-    "responder":         ("responder",         "responder",           False),
-    "nbtscan":           ("nbtscan",           "nbtscan",             False),
-    "dnsrecon":          ("dnsrecon",          "dnsrecon",            False),
-    "wfuzz":             ("wfuzz",             "pip: wfuzz",          False),
-    "curl":              ("curl",              "curl",                True),
+    "responder": ("responder", "responder", False),
+    "nbtscan": ("nbtscan", "nbtscan", False),
+    "dnsrecon": ("dnsrecon", "dnsrecon", False),
+    "wfuzz": ("wfuzz", "pip: wfuzz", False),
+    "curl": ("curl", "curl", True),
     # ── New tools ──
-    "ffuf":              ("ffuf",              "github: ffuf/ffuf",   False),
-    "sqlmap":            ("sqlmap",            "sqlmap",              False),
-    "gowitness":         ("gowitness",         "github: sensepost/gowitness", False),
-    "ldapsearch":        ("ldapsearch",        "ldap-utils",          False),
-    "bloodhound-python": ("bloodhound-python", "pip: bloodhound",    False),
+    "ffuf": ("ffuf", "github: ffuf/ffuf", False),
+    "sqlmap": ("sqlmap", "sqlmap", False),
+    "gowitness": ("gowitness", "github: sensepost/gowitness", False),
+    "ldapsearch": ("ldapsearch", "ldap-utils", False),
+    "bloodhound-python": ("bloodhound-python", "pip: bloodhound", False),
 }
 
 
@@ -122,7 +122,7 @@ def validate_target(target: str) -> Tuple[bool, Optional[str]]:
 
     # Try as hostname
     hostname_pattern = re.compile(
-        r'^(?!-)[A-Za-z0-9-]{1,63}(?<!-)(\.[A-Za-z0-9-]{1,63})*$'
+        r"^(?!-)[A-Za-z0-9-]{1,63}(?<!-)(\.[A-Za-z0-9-]{1,63})*$"
     )
     if hostname_pattern.match(target):
         try:
@@ -170,11 +170,15 @@ def validate_tool_dependencies(verbose: bool = False) -> bool:
             if required:
                 all_required_ok = False
                 if verbose:
-                    print(f"  [✗] {name:<28} MISSING (REQUIRED) — install: {package_hint}")
+                    print(
+                        f"  [✗] {name:<28} MISSING (REQUIRED) — install: {package_hint}"
+                    )
             else:
                 missing_optional.append(name)
                 if verbose:
-                    print(f"  [—] {name:<28} not found (optional) — install: {package_hint}")
+                    print(
+                        f"  [—] {name:<28} not found (optional) — install: {package_hint}"
+                    )
 
     total = len(TOOL_REGISTRY)
     print(f"\n  Tools found: {available_count}/{total}")
@@ -253,16 +257,28 @@ def is_tool_available(tool_name: str) -> bool:
 
 # Flags that could cause damage or scan the entire internet
 _NMAP_DANGEROUS_FLAGS = {
-    "--script-updatedb",   # Modifies local system
-    "-iR",                 # Random targets — never in a controlled lab framework
+    "--script-updatedb",  # Modifies local system
+    "-iR",  # Random targets — never in a controlled lab framework
 }
 
 # Flags that override output files (framework manages its own)
 _NMAP_OUTPUT_FLAGS = {"-oX", "-oN", "-oG", "-oA", "-oS"}
 
 # Flags that the framework already handles (informational warning only)
-_NMAP_MANAGED_FLAGS = {"-sS", "-sV", "-sC", "-O", "-T0", "-T1", "-T2",
-                       "-T3", "-T4", "-T5", "--open", "--reason"}
+_NMAP_MANAGED_FLAGS = {
+    "-sS",
+    "-sV",
+    "-sC",
+    "-O",
+    "-T0",
+    "-T1",
+    "-T2",
+    "-T3",
+    "-T4",
+    "-T5",
+    "--open",
+    "--reason",
+}
 
 
 def validate_nmap_options(
@@ -327,10 +343,14 @@ def validate_nmap_options(
 
         # Dangerous flags
         if token in _NMAP_DANGEROUS_FLAGS:
-            return False, [], [
-                f"Flag '{token}' is blocked — it is dangerous in an "
-                f"automated framework.  Run nmap manually if you need it."
-            ]
+            return (
+                False,
+                [],
+                [
+                    f"Flag '{token}' is blocked — it is dangerous in an "
+                    f"automated framework.  Run nmap manually if you need it."
+                ],
+            )
 
         # Output file flags — framework manages these; skip flag AND its value
         if token in _NMAP_OUTPUT_FLAGS:

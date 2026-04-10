@@ -71,7 +71,9 @@ class WebAppModule(BaseModule):
 
             # ── SQL injection testing with sqlmap ──
             webapp_config = self.config.get("webapp", default={})
-            if webapp_config.get("sqlmap_enabled", True) and is_tool_available("sqlmap"):
+            if webapp_config.get("sqlmap_enabled", True) and is_tool_available(
+                "sqlmap"
+            ):
                 target_results["sqlmap"] = self._sqlmap_scan(url, ip, port)
 
             # ── Common vulnerability checks ──
@@ -101,16 +103,29 @@ class WebAppModule(BaseModule):
                 tunnel = svc.get("tunnel", "")
                 port_num = port.get("port", 0)
 
-                if svc_name in http_services or port_num in (80, 443, 8080, 8443, 8000, 8888):
-                    scheme = "https" if (tunnel == "ssl" or port_num in (443, 8443)) else "http"
-                    targets.append({
-                        "url": f"{scheme}://{ip}:{port_num}",
-                        "ip": ip,
-                        "port": port_num,
-                        "scheme": scheme,
-                        "product": svc.get("product", ""),
-                        "version": svc.get("version", ""),
-                    })
+                if svc_name in http_services or port_num in (
+                    80,
+                    443,
+                    8080,
+                    8443,
+                    8000,
+                    8888,
+                ):
+                    scheme = (
+                        "https"
+                        if (tunnel == "ssl" or port_num in (443, 8443))
+                        else "http"
+                    )
+                    targets.append(
+                        {
+                            "url": f"{scheme}://{ip}:{port_num}",
+                            "ip": ip,
+                            "port": port_num,
+                            "scheme": scheme,
+                            "product": svc.get("product", ""),
+                            "version": svc.get("version", ""),
+                        }
+                    )
         return targets
 
     def _ffuf_scan(self, url: str, ip: str, port: int) -> Dict:
@@ -118,9 +133,7 @@ class WebAppModule(BaseModule):
         self.log_phase_start(f"ffuf scan on {url}")
 
         webapp_config = self.config.get("webapp", default={})
-        wordlist = webapp_config.get(
-            "wordlist", "/usr/share/wordlists/dirb/common.txt"
-        )
+        wordlist = webapp_config.get("wordlist", "/usr/share/wordlists/dirb/common.txt")
         extensions = webapp_config.get("extensions", "php,html,txt,bak,old,conf")
 
         output_file = self.session_dir / f"enum/ffuf_{ip}_{port}.json"
@@ -128,15 +141,24 @@ class WebAppModule(BaseModule):
         result = self.runner.run(
             tool_name="ffuf",
             args=[
-                "-u", f"{url}/FUZZ",
-                "-w", wordlist,
-                "-e", f".{extensions.replace(',', ',.')}",
-                "-mc", "200,201,204,301,302,307,401,403,405",
-                "-fc", "404",
-                "-t", "40",
-                "-timeout", "10",
-                "-o", str(output_file),
-                "-of", "json",
+                "-u",
+                f"{url}/FUZZ",
+                "-w",
+                wordlist,
+                "-e",
+                f".{extensions.replace(',', ',.')}",
+                "-mc",
+                "200,201,204,301,302,307,401,403,405",
+                "-fc",
+                "404",
+                "-t",
+                "40",
+                "-timeout",
+                "10",
+                "-o",
+                str(output_file),
+                "-of",
+                "json",
                 "-s",  # Silent mode
             ],
             timeout=300,
@@ -148,6 +170,7 @@ class WebAppModule(BaseModule):
         if result.success and output_file.exists():
             try:
                 import json
+
                 with open(output_file) as f:
                     data = json.load(f)
                 for entry in data.get("results", []):
@@ -181,9 +204,13 @@ class WebAppModule(BaseModule):
         result = self.runner.run(
             tool_name="wfuzz",
             args=[
-                "-c", "--hc", "404",
-                "-t", "40",
-                "-w", wordlist,
+                "-c",
+                "--hc",
+                "404",
+                "-t",
+                "40",
+                "-w",
+                wordlist,
                 f"{url}/FUZZ",
             ],
             timeout=300,
@@ -201,7 +228,11 @@ class WebAppModule(BaseModule):
             timeout=20,
         )
 
-        headers_data: Dict[str, Any] = {"raw": "", "missing_security_headers": [], "issues": []}
+        headers_data: Dict[str, Any] = {
+            "raw": "",
+            "missing_security_headers": [],
+            "issues": [],
+        }
 
         if not result.success:
             return headers_data
@@ -236,7 +267,7 @@ class WebAppModule(BaseModule):
         if server:
             headers_data["server"] = server
             if any(v in server.lower() for v in ["apache", "nginx", "iis"]):
-                if re.search(r'\d+\.\d+', server):
+                if re.search(r"\d+\.\d+", server):
                     headers_data["issues"].append(
                         f"Server header discloses version: {server}"
                     )
@@ -254,11 +285,17 @@ class WebAppModule(BaseModule):
         result = self.runner.run(
             tool_name="curl",
             args=[
-                "-s", "-k", "-L",
-                "--connect-timeout", "10",
-                "--max-time", "15",
-                "-o", "/dev/null",
-                "-w", "%{content_type}|%{redirect_url}|%{http_code}",
+                "-s",
+                "-k",
+                "-L",
+                "--connect-timeout",
+                "10",
+                "--max-time",
+                "15",
+                "-o",
+                "/dev/null",
+                "-w",
+                "%{content_type}|%{redirect_url}|%{http_code}",
                 url,
             ],
             timeout=20,
@@ -291,10 +328,16 @@ class WebAppModule(BaseModule):
             check = self.runner.run(
                 tool_name="curl",
                 args=[
-                    "-s", "-k", "-o", "/dev/null",
-                    "-w", "%{http_code}",
-                    "--connect-timeout", "5",
-                    "--max-time", "8",
+                    "-s",
+                    "-k",
+                    "-o",
+                    "/dev/null",
+                    "-w",
+                    "%{http_code}",
+                    "--connect-timeout",
+                    "5",
+                    "--max-time",
+                    "8",
                     f"{url}{path}",
                 ],
                 timeout=10,
@@ -318,18 +361,20 @@ class WebAppModule(BaseModule):
         result = self.runner.run(
             tool_name="sqlmap",
             args=[
-                "-u", url,
+                "-u",
+                url,
                 "--crawl=2",
-                "--batch",            # Non-interactive
+                "--batch",  # Non-interactive
                 "--random-agent",
                 "--level=1",
-                "--risk=1",           # Low risk — safe for lab
+                "--risk=1",  # Low risk — safe for lab
                 "--threads=3",
-                "--output-dir", str(output_dir),
+                "--output-dir",
+                str(output_dir),
                 "--timeout=15",
                 "--retries=1",
-                "--forms",            # Test form parameters
-                "--smart",            # Only test if heuristic positive
+                "--forms",  # Test form parameters
+                "--smart",  # Only test if heuristic positive
             ],
             timeout=300,
             output_file=f"enum/sqlmap_{ip}_{port}_stdout.txt",
@@ -340,20 +385,24 @@ class WebAppModule(BaseModule):
 
         if result.success and result.stdout:
             # Parse for injection findings
-            if "is vulnerable" in result.stdout.lower() or "sqlmap identified" in result.stdout.lower():
+            if (
+                "is vulnerable" in result.stdout.lower()
+                or "sqlmap identified" in result.stdout.lower()
+            ):
                 sqlmap_results["vulnerable"] = True
                 logger.warning(f"  [!] SQL injection found on {url}")
 
             # Extract injection points
             inject_pattern = re.compile(
-                r'Parameter:\s+(\S+).*?Type:\s+(.+?)(?:\n|Title:)',
-                re.DOTALL
+                r"Parameter:\s+(\S+).*?Type:\s+(.+?)(?:\n|Title:)", re.DOTALL
             )
             for match in inject_pattern.finditer(result.stdout):
-                sqlmap_results["injections"].append({
-                    "parameter": match.group(1),
-                    "type": match.group(2).strip(),
-                })
+                sqlmap_results["injections"].append(
+                    {
+                        "parameter": match.group(1),
+                        "type": match.group(2).strip(),
+                    }
+                )
 
             sqlmap_results["raw_output"] = result.stdout[:5000]
 
@@ -366,8 +415,17 @@ class WebAppModule(BaseModule):
         # ── Robots.txt ──
         result = self.runner.run(
             tool_name="curl",
-            args=["-s", "-k", "--connect-timeout", "5", "--max-time", "10", f"{url}/robots.txt"],
-            timeout=15, retries=0,
+            args=[
+                "-s",
+                "-k",
+                "--connect-timeout",
+                "5",
+                "--max-time",
+                "10",
+                f"{url}/robots.txt",
+            ],
+            timeout=15,
+            retries=0,
         )
         if result.success and result.stdout and "disallow" in result.stdout.lower():
             checks["robots_txt"] = {
@@ -379,9 +437,19 @@ class WebAppModule(BaseModule):
         # ── .git exposure ──
         result = self.runner.run(
             tool_name="curl",
-            args=["-s", "-k", "-o", "/dev/null", "-w", "%{http_code}",
-                  "--connect-timeout", "5", f"{url}/.git/HEAD"],
-            timeout=10, retries=0,
+            args=[
+                "-s",
+                "-k",
+                "-o",
+                "/dev/null",
+                "-w",
+                "%{http_code}",
+                "--connect-timeout",
+                "5",
+                f"{url}/.git/HEAD",
+            ],
+            timeout=10,
+            retries=0,
         )
         if result.success and result.stdout.strip() == "200":
             checks["git_exposed"] = True
@@ -390,9 +458,19 @@ class WebAppModule(BaseModule):
         # ── .env file exposure ──
         result = self.runner.run(
             tool_name="curl",
-            args=["-s", "-k", "-o", "/dev/null", "-w", "%{http_code}",
-                  "--connect-timeout", "5", f"{url}/.env"],
-            timeout=10, retries=0,
+            args=[
+                "-s",
+                "-k",
+                "-o",
+                "/dev/null",
+                "-w",
+                "%{http_code}",
+                "--connect-timeout",
+                "5",
+                f"{url}/.env",
+            ],
+            timeout=10,
+            retries=0,
         )
         if result.success and result.stdout.strip() == "200":
             checks["env_exposed"] = True
@@ -405,9 +483,19 @@ class WebAppModule(BaseModule):
                 check_url = f"{url}/{base}{ext}"
                 result = self.runner.run(
                     tool_name="curl",
-                    args=["-s", "-k", "-o", "/dev/null", "-w", "%{http_code}",
-                          "--connect-timeout", "3", check_url],
-                    timeout=5, retries=0,
+                    args=[
+                        "-s",
+                        "-k",
+                        "-o",
+                        "/dev/null",
+                        "-w",
+                        "%{http_code}",
+                        "--connect-timeout",
+                        "3",
+                        check_url,
+                    ],
+                    timeout=5,
+                    retries=0,
                 )
                 if result.success and result.stdout.strip() in ("200", "301"):
                     checks.setdefault("backup_files", []).append(check_url)
@@ -420,7 +508,8 @@ class WebAppModule(BaseModule):
         result = self.runner.run(
             tool_name="curl",
             args=["-s", "-k", "-L", "--connect-timeout", "10", "--max-time", "15", url],
-            timeout=20, retries=0,
+            timeout=20,
+            retries=0,
         )
 
         params: Dict[str, Any] = {"url_params": [], "form_fields": []}
@@ -430,15 +519,13 @@ class WebAppModule(BaseModule):
         body = result.stdout
 
         # Extract form fields
-        form_pattern = re.compile(
-            r'<input[^>]+name=["\']([^"\']+)["\']', re.IGNORECASE
-        )
+        form_pattern = re.compile(r'<input[^>]+name=["\']([^"\']+)["\']', re.IGNORECASE)
         params["form_fields"] = list(set(form_pattern.findall(body)))
 
         # Extract links with query parameters
         link_pattern = re.compile(r'href=["\']([^"\']*\?[^"\']*)["\']', re.IGNORECASE)
         for link in link_pattern.findall(body):
-            for param in re.findall(r'[?&](\w+)=', link):
+            for param in re.findall(r"[?&](\w+)=", link):
                 if param not in params["url_params"]:
                     params["url_params"].append(param)
 

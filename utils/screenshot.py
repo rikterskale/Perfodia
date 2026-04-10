@@ -96,9 +96,7 @@ class ScreenshotCapture:
                 url = target.get("url", "")
                 if not url:
                     continue
-                future = executor.submit(
-                    self._capture_single, url, timeout
-                )
+                future = executor.submit(self._capture_single, url, timeout)
                 futures[future] = url
 
             for future in as_completed(futures):
@@ -110,12 +108,12 @@ class ScreenshotCapture:
                 except Exception as e:
                     logger.warning(f"[SCREENSHOT] Failed for {url}: {e}")
 
-        logger.info(f"[SCREENSHOT] Captured {len(results)}/{len(web_targets)} screenshots")
+        logger.info(
+            f"[SCREENSHOT] Captured {len(results)}/{len(web_targets)} screenshots"
+        )
         return results
 
-    def _gowitness_batch(
-        self, targets: List[Dict], timeout: int
-    ) -> Dict[str, str]:
+    def _gowitness_batch(self, targets: List[Dict], timeout: int) -> Dict[str, str]:
         """Use gowitness to capture all URLs in batch mode."""
         # Write URLs to file
         url_file = self.evidence_dir / "urls.txt"
@@ -129,11 +127,16 @@ class ScreenshotCapture:
         result = self.runner.run(
             tool_name="gowitness",
             args=[
-                "scan", "file",
-                "-f", str(url_file),
-                "--screenshot-path", str(self.evidence_dir),
-                "--timeout", str(timeout),
-                "--threads", "5",
+                "scan",
+                "file",
+                "-f",
+                str(url_file),
+                "--screenshot-path",
+                str(self.evidence_dir),
+                "--timeout",
+                str(timeout),
+                "--threads",
+                "5",
                 "--disable-logging",
             ],
             timeout=timeout * len(urls),
@@ -176,17 +179,19 @@ class ScreenshotCapture:
         else:
             return self._capture_curl_fallback(url, output_path, timeout)
 
-    def _capture_gowitness(
-        self, url: str, output: Path, timeout: int
-    ) -> Optional[str]:
+    def _capture_gowitness(self, url: str, output: Path, timeout: int) -> Optional[str]:
         """Screenshot using gowitness."""
         self.runner.run(
             tool_name="gowitness",
             args=[
-                "scan", "single",
-                "--url", url,
-                "--screenshot-path", str(output.parent),
-                "--timeout", str(timeout),
+                "scan",
+                "single",
+                "--url",
+                url,
+                "--screenshot-path",
+                str(output.parent),
+                "--timeout",
+                str(timeout),
             ],
             timeout=timeout + 10,
             retries=0,
@@ -196,9 +201,7 @@ class ScreenshotCapture:
             return str(f)
         return None
 
-    def _capture_cutycapt(
-        self, url: str, output: Path, timeout: int
-    ) -> Optional[str]:
+    def _capture_cutycapt(self, url: str, output: Path, timeout: int) -> Optional[str]:
         """Screenshot using CutyCapt."""
         self.runner.run(
             tool_name="cutycapt",
@@ -215,11 +218,11 @@ class ScreenshotCapture:
         )
         return str(output) if output.exists() else None
 
-    def _capture_chrome(
-        self, url: str, output: Path, timeout: int
-    ) -> Optional[str]:
+    def _capture_chrome(self, url: str, output: Path, timeout: int) -> Optional[str]:
         """Screenshot using headless Chrome/Chromium."""
-        chrome_bin = "chromium-browser" if self._backend == "chromium" else "google-chrome"
+        chrome_bin = (
+            "chromium-browser" if self._backend == "chromium" else "google-chrome"
+        )
         self.runner.run(
             tool_name=chrome_bin,
             args=[
@@ -249,11 +252,16 @@ class ScreenshotCapture:
         result = self.runner.run(
             tool_name="curl",
             args=[
-                "-s", "-k",
-                "--connect-timeout", "10",
-                "--max-time", str(timeout),
-                "-o", str(html_output),
-                "-D", str(output.with_suffix(".headers")),
+                "-s",
+                "-k",
+                "--connect-timeout",
+                "10",
+                "--max-time",
+                str(timeout),
+                "-o",
+                str(html_output),
+                "-D",
+                str(output.with_suffix(".headers")),
                 url,
             ],
             timeout=timeout + 5,
@@ -271,8 +279,9 @@ class ScreenshotCapture:
     def _safe_filename(url: str) -> str:
         """Convert a URL to a safe filename."""
         import re
-        safe = re.sub(r'https?://', '', url)
-        safe = re.sub(r'[^\w\-.]', '_', safe)
+
+        safe = re.sub(r"https?://", "", url)
+        safe = re.sub(r"[^\w\-.]", "_", safe)
         return safe[:100]
 
     @staticmethod
@@ -295,15 +304,28 @@ class ScreenshotCapture:
                 tunnel = svc.get("tunnel", "")
                 port_num = port.get("port", 0)
 
-                if svc_name in http_services or port_num in (80, 443, 8080, 8443, 8000, 8888):
-                    scheme = "https" if (tunnel == "ssl" or port_num in (443, 8443)) else "http"
+                if svc_name in http_services or port_num in (
+                    80,
+                    443,
+                    8080,
+                    8443,
+                    8000,
+                    8888,
+                ):
+                    scheme = (
+                        "https"
+                        if (tunnel == "ssl" or port_num in (443, 8443))
+                        else "http"
+                    )
                     url = f"{scheme}://{ip}:{port_num}"
-                    targets.append({
-                        "url": url,
-                        "ip": ip,
-                        "port": port_num,
-                        "scheme": scheme,
-                        "service": svc_name,
-                    })
+                    targets.append(
+                        {
+                            "url": url,
+                            "ip": ip,
+                            "port": port_num,
+                            "scheme": scheme,
+                            "service": svc_name,
+                        }
+                    )
 
         return targets

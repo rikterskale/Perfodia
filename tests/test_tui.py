@@ -30,8 +30,12 @@ class TestTUILogHandler:
         handler = TUILogHandler(state)
         handler.setFormatter(logging.Formatter("%(message)s"))
 
-        warning = logging.LogRecord("test", logging.WARNING, __file__, 1, "warn-msg", (), None)
-        error = logging.LogRecord("test", logging.ERROR, __file__, 1, "err-msg", (), None)
+        warning = logging.LogRecord(
+            "test", logging.WARNING, __file__, 1, "warn-msg", (), None
+        )
+        error = logging.LogRecord(
+            "test", logging.ERROR, __file__, 1, "err-msg", (), None
+        )
         handler.emit(warning)
         handler.emit(error)
 

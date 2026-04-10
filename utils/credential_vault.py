@@ -20,34 +20,36 @@ logger = logging.getLogger(__name__)
 
 class CredType(str, Enum):
     """Types of credentials the vault can store."""
-    PASSWORD = "password"         # Cleartext password
-    NTLM_HASH = "ntlm_hash"     # NTLM hash (LM:NT format)
-    NET_NTLMV2 = "net_ntlmv2"   # Net-NTLMv2 hash (from Responder, etc.)
-    KERBEROS_TGT = "krb_tgt"    # Kerberos TGT
-    KERBEROS_TGS = "krb_tgs"    # Kerberos TGS (Kerberoast)
-    ASREP_HASH = "asrep_hash"   # AS-REP roastable hash
-    SSH_KEY = "ssh_key"          # SSH private key
-    TOKEN = "token"              # API token, session token, etc.
-    COOKIE = "cookie"            # Session cookie
+
+    PASSWORD = "password"  # Cleartext password
+    NTLM_HASH = "ntlm_hash"  # NTLM hash (LM:NT format)
+    NET_NTLMV2 = "net_ntlmv2"  # Net-NTLMv2 hash (from Responder, etc.)
+    KERBEROS_TGT = "krb_tgt"  # Kerberos TGT
+    KERBEROS_TGS = "krb_tgs"  # Kerberos TGS (Kerberoast)
+    ASREP_HASH = "asrep_hash"  # AS-REP roastable hash
+    SSH_KEY = "ssh_key"  # SSH private key
+    TOKEN = "token"  # API token, session token, etc.
+    COOKIE = "cookie"  # Session cookie
     OTHER = "other"
 
 
 @dataclass
 class Credential:
     """A single discovered credential."""
+
     username: str
-    secret: str                        # Password, hash, key content
+    secret: str  # Password, hash, key content
     cred_type: CredType = CredType.PASSWORD
-    domain: str = ""                   # AD domain if applicable
-    host: str = ""                     # Host where it was found
-    port: int = 0                      # Service port
-    service: str = ""                  # Service name (ssh, smb, http, etc.)
-    source_phase: str = ""             # Which module discovered it
-    source_tool: str = ""              # Which tool discovered it
-    timestamp: str = ""                # When it was discovered
-    verified: bool = False             # Has it been tested and confirmed working?
+    domain: str = ""  # AD domain if applicable
+    host: str = ""  # Host where it was found
+    port: int = 0  # Service port
+    service: str = ""  # Service name (ssh, smb, http, etc.)
+    source_phase: str = ""  # Which module discovered it
+    source_tool: str = ""  # Which tool discovered it
+    timestamp: str = ""  # When it was discovered
+    verified: bool = False  # Has it been tested and confirmed working?
     verified_on: List[str] = field(default_factory=list)  # Hosts where it works
-    admin_access: bool = False         # Grants admin/root?
+    admin_access: bool = False  # Grants admin/root?
     notes: str = ""
 
     def __post_init__(self):
@@ -58,10 +60,13 @@ class Credential:
     def identity(self) -> str:
         """Unique identity key for deduplication."""
         import hashlib
+
         domain_prefix = f"{self.domain}\\" if self.domain else ""
         # Use a hash of the full secret to avoid false deduplication of
         # long hashes that share a common prefix.
-        secret_hash = hashlib.sha256(self.secret.encode(errors="replace")).hexdigest()[:16]
+        secret_hash = hashlib.sha256(self.secret.encode(errors="replace")).hexdigest()[
+            :16
+        ]
         return f"{domain_prefix}{self.username}:{self.cred_type.value}:{secret_hash}"
 
     @property
@@ -99,7 +104,7 @@ class CredentialVault:
 
     def __init__(self, session_dir: Path):
         self.session_dir = session_dir
-        self._creds: Dict[str, Credential] = {}    # identity -> Credential
+        self._creds: Dict[str, Credential] = {}  # identity -> Credential
         self._lock = threading.Lock()
         self._save_path = session_dir / "loot" / "credential_vault.json"
         self._save_path.parent.mkdir(parents=True, exist_ok=True)
@@ -149,12 +154,21 @@ class CredentialVault:
         admin_access: bool = False,
     ) -> bool:
         """Convenience method to add a cleartext password credential."""
-        return self.add(Credential(
-            username=username, secret=password, cred_type=CredType.PASSWORD,
-            host=host, port=port, service=service, domain=domain,
-            source_phase=source_phase, source_tool=source_tool,
-            verified=verified, admin_access=admin_access,
-        ))
+        return self.add(
+            Credential(
+                username=username,
+                secret=password,
+                cred_type=CredType.PASSWORD,
+                host=host,
+                port=port,
+                service=service,
+                domain=domain,
+                source_phase=source_phase,
+                source_tool=source_tool,
+                verified=verified,
+                admin_access=admin_access,
+            )
+        )
 
     def add_hash(
         self,
@@ -167,11 +181,17 @@ class CredentialVault:
         domain: str = "",
     ) -> bool:
         """Convenience method to add a hash credential."""
-        return self.add(Credential(
-            username=username, secret=hash_value, cred_type=hash_type,
-            host=host, domain=domain,
-            source_phase=source_phase, source_tool=source_tool,
-        ))
+        return self.add(
+            Credential(
+                username=username,
+                secret=hash_value,
+                cred_type=hash_type,
+                host=host,
+                domain=domain,
+                source_phase=source_phase,
+                source_tool=source_tool,
+            )
+        )
 
     def mark_verified(self, username: str, secret: str, host: str, admin: bool = False):
         """Mark a credential as verified working on a specific host."""
@@ -235,9 +255,15 @@ class CredentialVault:
         """Get all hash credentials (NTLM, Net-NTLMv2, etc.)."""
         with self._lock:
             return [
-                c for c in self._creds.values()
-                if c.cred_type in (CredType.NTLM_HASH, CredType.NET_NTLMV2,
-                                   CredType.ASREP_HASH, CredType.KERBEROS_TGS)
+                c
+                for c in self._creds.values()
+                if c.cred_type
+                in (
+                    CredType.NTLM_HASH,
+                    CredType.NET_NTLMV2,
+                    CredType.ASREP_HASH,
+                    CredType.KERBEROS_TGS,
+                )
             ]
 
     def get_admin_creds(self) -> List[Credential]:
@@ -257,10 +283,25 @@ class CredentialVault:
         return {
             "total": len(creds),
             "passwords": len([c for c in creds if c.cred_type == CredType.PASSWORD]),
-            "hashes": len([c for c in creds if c.cred_type in
-                          (CredType.NTLM_HASH, CredType.NET_NTLMV2)]),
-            "kerberos": len([c for c in creds if c.cred_type in
-                            (CredType.KERBEROS_TGT, CredType.KERBEROS_TGS, CredType.ASREP_HASH)]),
+            "hashes": len(
+                [
+                    c
+                    for c in creds
+                    if c.cred_type in (CredType.NTLM_HASH, CredType.NET_NTLMV2)
+                ]
+            ),
+            "kerberos": len(
+                [
+                    c
+                    for c in creds
+                    if c.cred_type
+                    in (
+                        CredType.KERBEROS_TGT,
+                        CredType.KERBEROS_TGS,
+                        CredType.ASREP_HASH,
+                    )
+                ]
+            ),
             "ssh_keys": len([c for c in creds if c.cred_type == CredType.SSH_KEY]),
             "verified": len([c for c in creds if c.verified]),
             "admin_access": len([c for c in creds if c.admin_access]),
@@ -288,7 +329,9 @@ class CredentialVault:
                 entry["cred_type"] = CredType(entry.get("cred_type", "password"))
                 cred = Credential(**entry)
                 self._creds[cred.identity] = cred
-            logger.info(f"[VAULT] Loaded {len(self._creds)} credentials from previous session")
+            logger.info(
+                f"[VAULT] Loaded {len(self._creds)} credentials from previous session"
+            )
         except Exception as e:
             logger.warning(f"[VAULT] Could not load existing vault: {e}")
 
@@ -301,7 +344,11 @@ class CredentialVault:
                 # Mask secrets in report
                 if cred.cred_type == CredType.PASSWORD:
                     if len(cred.secret) > 3:
-                        masked["secret"] = cred.secret[:2] + "*" * (len(cred.secret) - 3) + cred.secret[-1]
+                        masked["secret"] = (
+                            cred.secret[:2]
+                            + "*" * (len(cred.secret) - 3)
+                            + cred.secret[-1]
+                        )
                 elif len(cred.secret) > 10:
                     masked["secret"] = cred.secret[:6] + "..." + cred.secret[-4:]
                 results.append(masked)

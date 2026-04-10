@@ -6,8 +6,9 @@ from utils.credential_vault import CredentialVault, CredType
 class TestCredentialVault:
     def test_add_password(self, tmp_session):
         vault = CredentialVault(tmp_session)
-        is_new = vault.add_password(username="admin", password="pass123",
-                                    host="192.168.1.1", service="ssh")
+        is_new = vault.add_password(
+            username="admin", password="pass123", host="192.168.1.1", service="ssh"
+        )
         assert is_new is True
         assert vault.stats()["total"] == 1
         assert vault.stats()["passwords"] == 1
@@ -21,28 +22,42 @@ class TestCredentialVault:
     def test_different_types_not_deduped(self, tmp_session):
         vault = CredentialVault(tmp_session)
         vault.add_password(username="admin", password="pass123")
-        vault.add_hash(username="admin", hash_value="aad3b:31d6c",
-                       hash_type=CredType.NTLM_HASH)
+        vault.add_hash(
+            username="admin", hash_value="aad3b:31d6c", hash_type=CredType.NTLM_HASH
+        )
         assert vault.stats()["total"] == 2
 
     def test_add_hash(self, tmp_session):
         vault = CredentialVault(tmp_session)
-        vault.add_hash(username="admin", hash_value="aad3b435:31d6cfe0",
-                       hash_type=CredType.NTLM_HASH, host="1.1.1.1")
+        vault.add_hash(
+            username="admin",
+            hash_value="aad3b435:31d6cfe0",
+            hash_type=CredType.NTLM_HASH,
+            host="1.1.1.1",
+        )
         assert vault.stats()["hashes"] == 1
 
     def test_get_for_host(self, tmp_session):
         vault = CredentialVault(tmp_session)
-        vault.add_password(username="admin", password="pass", host="1.1.1.1", service="ssh")
-        vault.add_password(username="root", password="toor", host="2.2.2.2", service="ssh")
+        vault.add_password(
+            username="admin", password="pass", host="1.1.1.1", service="ssh"
+        )
+        vault.add_password(
+            username="root", password="toor", host="2.2.2.2", service="ssh"
+        )
         creds = vault.get_for_host("1.1.1.1", service="ssh")
         assert len(creds) >= 1
         assert any(c.username == "admin" for c in creds)
 
     def test_domain_creds_apply_everywhere(self, tmp_session):
         vault = CredentialVault(tmp_session)
-        vault.add_password(username="admin", password="pass", domain="LAB",
-                           host="1.1.1.1", service="smb")
+        vault.add_password(
+            username="admin",
+            password="pass",
+            domain="LAB",
+            host="1.1.1.1",
+            service="smb",
+        )
         creds = vault.get_for_host("2.2.2.2")  # Different host
         assert len(creds) >= 1  # Domain creds are reusable
 

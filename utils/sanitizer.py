@@ -14,17 +14,17 @@ from typing import List
 logger = logging.getLogger(__name__)
 
 # Characters that could enable shell injection or argument confusion
-_DANGEROUS_CHARS = set(';&|`$(){}!\\<>\n\r\x00')
+_DANGEROUS_CHARS = set(";&|`$(){}!\\<>\n\r\x00")
 
 # Patterns that look like command chaining
 _INJECTION_PATTERNS = [
-    re.compile(r';\s*\w'),          # ; command
-    re.compile(r'\|\s*\w'),         # | command
-    re.compile(r'&&\s*\w'),         # && command
-    re.compile(r'\|\|\s*\w'),       # || command
-    re.compile(r'\$\('),            # $(command)
-    re.compile(r'`[^`]+`'),         # `command`
-    re.compile(r'\$\{'),            # ${variable}
+    re.compile(r";\s*\w"),  # ; command
+    re.compile(r"\|\s*\w"),  # | command
+    re.compile(r"&&\s*\w"),  # && command
+    re.compile(r"\|\|\s*\w"),  # || command
+    re.compile(r"\$\("),  # $(command)
+    re.compile(r"`[^`]+`"),  # `command`
+    re.compile(r"\$\{"),  # ${variable}
 ]
 
 
@@ -44,14 +44,14 @@ def sanitize_arg(arg: str, tool_name: str = "") -> str:
 
     original = arg
     # Remove null bytes
-    arg = arg.replace('\x00', '')
+    arg = arg.replace("\x00", "")
     # Remove newlines (can break argument parsing)
-    arg = arg.replace('\n', ' ').replace('\r', '')
+    arg = arg.replace("\n", " ").replace("\r", "")
 
     # Check for injection patterns
     for pattern in _INJECTION_PATTERNS:
         if pattern.search(arg):
-            cleaned = pattern.sub('', arg)
+            cleaned = pattern.sub("", arg)
             logger.warning(
                 f"[SANITIZE] Injection pattern removed from {tool_name} arg: "
                 f"'{original[:60]}' → '{cleaned[:60]}'"
@@ -63,7 +63,7 @@ def sanitize_arg(arg: str, tool_name: str = "") -> str:
     dangerous_found = _DANGEROUS_CHARS & set(arg)
     if dangerous_found:
         for ch in dangerous_found:
-            arg = arg.replace(ch, '')
+            arg = arg.replace(ch, "")
         if arg != original:
             logger.warning(
                 f"[SANITIZE] Dangerous chars {dangerous_found} removed from "
@@ -99,7 +99,7 @@ def is_safe_path(path: str) -> bool:
     if not path:
         return False
     # Block path traversal
-    if '..' in path:
+    if ".." in path:
         return False
     # Block shell chars in paths
     if _DANGEROUS_CHARS & set(path):
@@ -110,4 +110,4 @@ def is_safe_path(path: str) -> bool:
 def sanitize_hostname(hostname: str) -> str:
     """Sanitize a hostname/IP extracted from scan results."""
     # Only allow alphanumeric, dots, dashes, colons (IPv6)
-    return re.sub(r'[^a-zA-Z0-9.\-:]', '', hostname)
+    return re.sub(r"[^a-zA-Z0-9.\-:]", "", hostname)

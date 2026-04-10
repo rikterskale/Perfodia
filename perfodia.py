@@ -64,7 +64,9 @@ BANNER = r"""
 def signal_handler(sig, frame):
     """Handle interrupt signals gracefully."""
     logger.warning("\n[!] Interrupt received. Cleaning up...")
-    print("\n[!] Framework interrupted. Partial results may be in the reports directory.")
+    print(
+        "\n[!] Framework interrupted. Partial results may be in the reports directory."
+    )
     sys.exit(130)
 
 
@@ -116,11 +118,13 @@ Examples:
 
     target_group = parser.add_argument_group("Target Specification")
     target_group.add_argument(
-        "-t", "--target",
+        "-t",
+        "--target",
         help="Target IP, hostname, or CIDR range (e.g., 192.168.1.0/24)",
     )
     target_group.add_argument(
-        "-tL", "--target-list",
+        "-tL",
+        "--target-list",
         help="Path to file containing target list (one per line)",
     )
     target_group.add_argument(
@@ -130,8 +134,19 @@ Examples:
 
     mode_group = parser.add_argument_group("Execution Mode")
     mode_group.add_argument(
-        "-m", "--mode",
-        choices=["recon", "scan", "enum", "exploit", "post", "webapp", "ad", "crack", "full"],
+        "-m",
+        "--mode",
+        choices=[
+            "recon",
+            "scan",
+            "enum",
+            "exploit",
+            "post",
+            "webapp",
+            "ad",
+            "crack",
+            "full",
+        ],
         default="full",
         help="Execution mode: recon|scan|enum|exploit|post|webapp|ad|crack|full (default: full)",
     )
@@ -164,12 +179,14 @@ Examples:
 
     config_group = parser.add_argument_group("Configuration")
     config_group.add_argument(
-        "-c", "--config",
+        "-c",
+        "--config",
         default=str(PROJECT_ROOT / "configs" / "default.yaml"),
         help="Path to configuration file (default: configs/default.yaml)",
     )
     config_group.add_argument(
-        "-o", "--output-dir",
+        "-o",
+        "--output-dir",
         default=str(PROJECT_ROOT / "reports"),
         help="Output directory for reports and results",
     )
@@ -269,7 +286,8 @@ Examples:
 
     misc_group = parser.add_argument_group("Miscellaneous")
     misc_group.add_argument(
-        "-v", "--verbose",
+        "-v",
+        "--verbose",
         action="count",
         default=0,
         help="Increase verbosity (-v, -vv, -vvv)",
@@ -293,8 +311,16 @@ Examples:
     args = parser.parse_args()
 
     # Validation
-    if not args.check_tools and not args.report_only and not args.init and not args.target and not args.target_list:
-        parser.error("--target or --target-list is required unless using --check-tools, --report-only, or --init")
+    if (
+        not args.check_tools
+        and not args.report_only
+        and not args.init
+        and not args.target
+        and not args.target_list
+    ):
+        parser.error(
+            "--target or --target-list is required unless using --check-tools, --report-only, or --init"
+        )
 
     return args
 
@@ -347,9 +373,18 @@ def load_targets(args):
     return valid_targets, exclusions
 
 
-def run_workflow(args, config, targets, exclusions, session_dir,
-                 credential_vault=None, vuln_scorer=None, session_state=None,
-                 scope_guard=None, tui_state=None):
+def run_workflow(
+    args,
+    config,
+    targets,
+    exclusions,
+    session_dir,
+    credential_vault=None,
+    vuln_scorer=None,
+    session_state=None,
+    scope_guard=None,
+    tui_state=None,
+):
     """Execute the penetration testing workflow with all integrated subsystems."""
     results = {
         "session_id": session_dir.name,
@@ -371,7 +406,16 @@ def run_workflow(args, config, targets, exclusions, session_dir,
     if args.modules:
         module_list = [m.strip().lower() for m in args.modules.split(",")]
     elif args.mode == "full":
-        module_list = ["recon", "scan", "enum", "webapp", "exploit", "ad", "crack", "post"]
+        module_list = [
+            "recon",
+            "scan",
+            "enum",
+            "webapp",
+            "exploit",
+            "ad",
+            "crack",
+            "post",
+        ]
     elif args.mode == "recon":
         module_list = ["recon"]
     elif args.mode == "scan":
@@ -495,15 +539,20 @@ def run_workflow(args, config, targets, exclusions, session_dir,
             logger.warning(f"[!] {phase_name} phase interrupted by user")
             results["phases"][module_key] = {"status": "interrupted"}
             if session_state:
-                session_state.save_checkpoint(results, completed_phase=f"{module_key}_partial")
+                session_state.save_checkpoint(
+                    results, completed_phase=f"{module_key}_partial"
+                )
             raise
         except Exception as e:
             logger.error(f"[!] {phase_name} phase failed: {e}", exc_info=True)
             results["phases"][module_key] = {"status": "error", "error": str(e)}
             if session_state:
-                session_state.save_checkpoint(results, completed_phase=f"{module_key}_error")
+                session_state.save_checkpoint(
+                    results, completed_phase=f"{module_key}_error"
+                )
             if args.verbose >= 2:
                 import traceback
+
                 traceback.print_exc()
 
     results["end_time"] = datetime.now().isoformat()
@@ -529,6 +578,7 @@ def main():
     # ── Config wizard (--init) ──
     if getattr(args, "init", False):
         from utils.config_wizard import run_config_wizard
+
         run_config_wizard()
         sys.exit(0)
 
@@ -608,7 +658,9 @@ def main():
             if response != "y":
                 sys.exit(0)
         else:
-            logger.warning("[!] Non-interactive session detected; continuing without prompt.")
+            logger.warning(
+                "[!] Non-interactive session detected; continuing without prompt."
+            )
 
     # Create session directory
     session_name = args.session or datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -624,6 +676,7 @@ def main():
 
     # Enable file logging
     from utils.logger import add_session_file_logging
+
     add_session_file_logging(session_dir / "logs")
 
     # Load targets
@@ -647,14 +700,24 @@ def main():
         else:
             logger.warning("[RESUME] No checkpoint found — starting fresh")
 
-    logger.info(f"[INIT] Credential vault: {credential_vault.stats().get('total', 0)} existing")
-    logger.info(f"[INIT] Scope guard: {len(targets)} targets, {len(exclusions)} exclusions")
+    logger.info(
+        f"[INIT] Credential vault: {credential_vault.stats().get('total', 0)} existing"
+    )
+    logger.info(
+        f"[INIT] Scope guard: {len(targets)} targets, {len(exclusions)} exclusions"
+    )
 
     # ── Interactive TUI ──
     tui_state = None
     tui_dashboard = None
     if getattr(args, "interactive", False):
-        from utils.tui import is_tui_available, DashboardState, TUIDashboard, TUILogHandler
+        from utils.tui import (
+            is_tui_available,
+            DashboardState,
+            TUIDashboard,
+            TUILogHandler,
+        )
+
         if is_tui_available():
             tui_state = DashboardState()
             tui_state.update(current_target=", ".join(targets[:3]))
@@ -665,12 +728,18 @@ def main():
             tui_dashboard.start()
             logger.info("[TUI] Interactive dashboard started")
         else:
-            logger.warning("[TUI] Install 'rich' for interactive mode: pip install rich")
+            logger.warning(
+                "[TUI] Install 'rich' for interactive mode: pip install rich"
+            )
 
     # ── Run the workflow ──
     try:
         results = run_workflow(
-            args, config, targets, exclusions, session_dir,
+            args,
+            config,
+            targets,
+            exclusions,
+            session_dir,
             credential_vault=credential_vault,
             vuln_scorer=vuln_scorer,
             session_state=session_state,
@@ -694,8 +763,14 @@ def main():
             logger.info(f"\n[SCREENSHOT] Capturing {len(web_targets)} screenshots...")
             try:
                 from utils.tool_runner import ToolRunner as _TR
-                sr = _TR(config, session_dir, dry_run=args.dry_run, verbose=args.verbose,
-                         scope_guard=scope_guard)
+
+                sr = _TR(
+                    config,
+                    session_dir,
+                    dry_run=args.dry_run,
+                    verbose=args.verbose,
+                    scope_guard=scope_guard,
+                )
                 capture = ScreenshotCapture(session_dir, sr, config)
                 results["screenshots"] = capture.capture_all(web_targets)
             except Exception as e:
@@ -718,7 +793,9 @@ def main():
     # ── Scope violation report ──
     if scope_guard.violation_count > 0:
         scope_guard.save_violations(session_dir)
-        logger.warning(f"\n[SCOPE] {scope_guard.violation_count} scope violations detected!")
+        logger.warning(
+            f"\n[SCOPE] {scope_guard.violation_count} scope violations detected!"
+        )
 
     # ── Risk rating summary ──
     if vuln_scorer:
@@ -729,8 +806,10 @@ def main():
         logger.info(f"  Overall Risk:   {risk['overall_risk']}")
         logger.info(f"  Risk Score:     {risk['risk_score']}")
         bd = risk["breakdown"]
-        logger.info(f"  Critical: {bd.get('critical',0)}  High: {bd.get('high',0)}  "
-                     f"Medium: {bd.get('medium',0)}  Low: {bd.get('low',0)}")
+        logger.info(
+            f"  Critical: {bd.get('critical', 0)}  High: {bd.get('high', 0)}  "
+            f"Medium: {bd.get('medium', 0)}  Low: {bd.get('low', 0)}"
+        )
         if risk.get("attack_narrative"):
             logger.info(f"  {risk['attack_narrative']}")
 
@@ -740,16 +819,19 @@ def main():
         logger.info("\n" + "=" * 60)
         logger.info("  CREDENTIAL VAULT")
         logger.info("=" * 60)
-        logger.info(f"  Total: {stats['total']}  Passwords: {stats['passwords']}  "
-                     f"Hashes: {stats['hashes']}  Admin: {stats['admin_access']}")
+        logger.info(
+            f"  Total: {stats['total']}  Passwords: {stats['passwords']}  "
+            f"Hashes: {stats['hashes']}  Admin: {stats['admin_access']}"
+        )
 
     # ── Error summary ──
     from utils.logger import get_error_summary
+
     ec = get_error_summary()
     logger.info("\n" + "=" * 60)
     logger.info("  SESSION SUMMARY")
     logger.info("=" * 60)
-    logger.info(f"  Errors: {ec.get('ERROR',0)}  Warnings: {ec.get('WARNING',0)}")
+    logger.info(f"  Errors: {ec.get('ERROR', 0)}  Warnings: {ec.get('WARNING', 0)}")
     logger.info(f"  Session: {session_dir}")
     logger.info(f"  Completed: {datetime.now().isoformat()}")
     logger.info("=" * 60)

@@ -61,9 +61,7 @@ class ScanningModule(BaseModule):
                         if p.get("state") == "open"
                     ]
                     if open_ports:
-                        vuln_data = self._vuln_scan(
-                            host_data["ip"], open_ports
-                        )
+                        vuln_data = self._vuln_scan(host_data["ip"], open_ports)
                         if vuln_data:
                             # Merge vuln script results into port data
                             self._merge_vuln_results(host_data, vuln_data)
@@ -96,12 +94,18 @@ class ScanningModule(BaseModule):
         result = self.runner.run(
             tool_name="nmap",
             args=[
-                "-sn",               # No port scan
-                "-PE", "-PP",        # ICMP echo + timestamp
+                "-sn",  # No port scan
+                "-PE",
+                "-PP",  # ICMP echo + timestamp
                 "-PS80,443,22,445",  # TCP SYN probes
-                "-PA80,443",         # TCP ACK probes
-                "--min-rate", "300",
-                "-oG", str(self.session_dir / f"nmap/discovery_{target.replace('/', '_')}.gnmap"),
+                "-PA80,443",  # TCP ACK probes
+                "--min-rate",
+                "300",
+                "-oG",
+                str(
+                    self.session_dir
+                    / f"nmap/discovery_{target.replace('/', '_')}.gnmap"
+                ),
                 target,
             ],
             timeout=120,
@@ -116,7 +120,9 @@ class ScanningModule(BaseModule):
                     parts = line.split()
                     ip = parts[-1].strip("()")
                     # Use scope_guard for exclusion check (supports CIDR ranges)
-                    if self.scope_guard and not self.scope_guard.check(ip, tool_name="nmap", action="host_discovery"):
+                    if self.scope_guard and not self.scope_guard.check(
+                        ip, tool_name="nmap", action="host_discovery"
+                    ):
                         logger.debug(f"  Excluding {ip} (out of scope or excluded)")
                     elif ip in self.exclusions:
                         # Fallback string check when no scope_guard
@@ -142,10 +148,15 @@ class ScanningModule(BaseModule):
             tool_name="masscan",
             args=[
                 target,
-                "-p", ports,
-                "--rate", str(rate),
+                "-p",
+                ports,
+                "--rate",
+                str(rate),
                 "--open-only",
-                "-oG", str(self.session_dir / f"nmap/masscan_{target.replace('/', '_')}.gnmap"),
+                "-oG",
+                str(
+                    self.session_dir / f"nmap/masscan_{target.replace('/', '_')}.gnmap"
+                ),
             ],
             timeout=600,
             output_file=f"nmap/masscan_{target.replace('/', '_')}.txt",
@@ -194,20 +205,30 @@ class ScanningModule(BaseModule):
             port_list = ",".join(str(p) for p in sorted(quick_ports[host_ip]))
             port_arg = ["-p", port_list]
         else:
-            port_arg = ["-p", self.config.get("nmap", "default_ports", default="1-65535")]
+            port_arg = [
+                "-p",
+                self.config.get("nmap", "default_ports", default="1-65535"),
+            ]
 
         # ── Retrieve user nmap overrides ──
         user_opts = self.config.get("nmap_user_opts", default={})
-        raw_flags = user_opts.get("raw")       # list or None
-        extra_flags = user_opts.get("extra")   # list or None
-        scan_type = user_opts.get("scan_type") # e.g. "-sT" or None
+        raw_flags = user_opts.get("raw")  # list or None
+        extra_flags = user_opts.get("extra")  # list or None
+        scan_type = user_opts.get("scan_type")  # e.g. "-sT" or None
 
         if raw_flags is not None:
             # ── RAW mode: user replaces all default flags ──
-            nmap_args = list(raw_flags) + [
-                "-oX", xml_path,
-                "-oN", nmap_path,
-            ] + port_arg + [host_ip]
+            nmap_args = (
+                list(raw_flags)
+                + [
+                    "-oX",
+                    xml_path,
+                    "-oN",
+                    nmap_path,
+                ]
+                + port_arg
+                + [host_ip]
+            )
 
             logger.info(
                 f"[NMAP RAW] Using user-supplied flags for {host_ip}: "
@@ -223,24 +244,33 @@ class ScanningModule(BaseModule):
             include_os_detection = effective_scan_type not in rootless_scan_types
 
             nmap_args = [
-                effective_scan_type,            # SYN scan (or user override)
-                "-sV",                          # Service version detection
-                "-sC",                          # Default scripts
+                effective_scan_type,  # SYN scan (or user override)
+                "-sV",  # Service version detection
+                "-sC",  # Default scripts
             ]
 
             if include_os_detection:
-                nmap_args.append("-O")          # OS detection (requires root)
+                nmap_args.append("-O")  # OS detection (requires root)
 
-            nmap_args.extend([
-                f"-T{timing}",
-                "--reason",
-                "--open",                       # Only show open ports
-                "--min-rate", "300",
-                "--max-retries", str(self.config.get("nmap", "max_retries", default=2)),
-                "--host-timeout", self.config.get("nmap", "host_timeout", default="5m"),
-                "-oX", xml_path,
-                "-oN", nmap_path,
-            ] + port_arg + [host_ip])
+            nmap_args.extend(
+                [
+                    f"-T{timing}",
+                    "--reason",
+                    "--open",  # Only show open ports
+                    "--min-rate",
+                    "300",
+                    "--max-retries",
+                    str(self.config.get("nmap", "max_retries", default=2)),
+                    "--host-timeout",
+                    self.config.get("nmap", "host_timeout", default="5m"),
+                    "-oX",
+                    xml_path,
+                    "-oN",
+                    nmap_path,
+                ]
+                + port_arg
+                + [host_ip]
+            )
 
             # Add any extra args from config file
             config_extra = self.config.get("nmap", "extra_args", default=[])
@@ -267,14 +297,16 @@ class ScanningModule(BaseModule):
 
         if not result.success:
             logger.error(
-                f"Nmap scan failed for {host_ip} "
-                f"(exit code {result.return_code})"
+                f"Nmap scan failed for {host_ip} (exit code {result.return_code})"
             )
             if result.stderr:
                 # Log first 5 stderr lines for quick diagnosis
                 for line in result.stderr.strip().split("\n")[:5]:
                     logger.error(f"  nmap stderr: {line}")
-            if result.return_code == 1 and "requires root" in (result.stderr or "").lower():
+            if (
+                result.return_code == 1
+                and "requires root" in (result.stderr or "").lower()
+            ):
                 logger.error(
                     "  HINT: This scan type requires root privileges. "
                     "Run with sudo or use --nmap-scan-type sT for a "
@@ -322,10 +354,14 @@ class ScanningModule(BaseModule):
 
         vuln_args = [
             "-sV",
-            "--script", script_str,
-            "-p", port_str,
-            "-oX", xml_path,
-            "--host-timeout", "10m",
+            "--script",
+            script_str,
+            "-p",
+            port_str,
+            "-oX",
+            xml_path,
+            "--host-timeout",
+            "10m",
             host_ip,
         ]
 
@@ -365,9 +401,7 @@ class ScanningModule(BaseModule):
             return
 
         vuln_host = vuln_hosts[0]
-        vuln_port_map = {
-            p["port"]: p for p in vuln_host.get("ports", [])
-        }
+        vuln_port_map = {p["port"]: p for p in vuln_host.get("ports", [])}
 
         for port in host_data.get("ports", []):
             vuln_port = vuln_port_map.get(port["port"])

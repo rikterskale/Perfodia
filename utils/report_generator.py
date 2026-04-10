@@ -74,7 +74,9 @@ class ReportGenerator:
             f"**End:** {results.get('end_time', 'N/A')}  ",
             f"**Targets:** {', '.join(results.get('targets', []))}  ",
             f"**Mode:** {results.get('mode', 'N/A')}  ",
-            "", "---", "",
+            "",
+            "---",
+            "",
         ]
 
         phases = results.get("phases", {})
@@ -143,8 +145,7 @@ class ReportGenerator:
             phases = results.get("phases", {})
             total_hosts = len(phases.get("scan", {}).get("hosts", []))
             total_ports = sum(
-                len(h.get("ports", []))
-                for h in phases.get("scan", {}).get("hosts", [])
+                len(h.get("ports", [])) for h in phases.get("scan", {}).get("hosts", [])
             )
             total_exploits = len(phases.get("exploit", {}).get("exploits_found", []))
             lines.append(f"- **Hosts discovered:** {total_hosts}")
@@ -154,17 +155,19 @@ class ReportGenerator:
 
         # Recommendations
         if self.config.get("reporting", "include_remediation"):
-            lines.extend([
-                "### Priority Recommendations",
-                "",
-                "1. Patch all critical and high-severity vulnerabilities immediately",
-                "2. Change all default and weak credentials discovered during testing",
-                "3. Enforce SMB signing and disable legacy protocols (SMBv1, TLS 1.0)",
-                "4. Implement network segmentation to limit lateral movement",
-                "5. Deploy multi-factor authentication on all administrative interfaces",
-                "6. Enable comprehensive logging and monitoring on all critical systems",
-                "",
-            ])
+            lines.extend(
+                [
+                    "### Priority Recommendations",
+                    "",
+                    "1. Patch all critical and high-severity vulnerabilities immediately",
+                    "2. Change all default and weak credentials discovered during testing",
+                    "3. Enforce SMB signing and disable legacy protocols (SMBv1, TLS 1.0)",
+                    "4. Implement network segmentation to limit lateral movement",
+                    "5. Deploy multi-factor authentication on all administrative interfaces",
+                    "6. Enable comprehensive logging and monitoring on all critical systems",
+                    "",
+                ]
+            )
         return lines
 
     def _md_findings(self, results: Dict) -> list:
@@ -173,8 +176,12 @@ class ReportGenerator:
         if not findings:
             return []
 
-        lines = ["## Vulnerability Findings", "", "| # | Severity | CVSS | Host | Title | Remediation |",
-                 "|---|----------|------|------|-------|-------------|"]
+        lines = [
+            "## Vulnerability Findings",
+            "",
+            "| # | Severity | CVSS | Host | Title | Remediation |",
+            "|---|----------|------|------|-------|-------------|",
+        ]
         for i, f in enumerate(findings[:50], 1):
             lines.append(
                 f"| {i} | **{f.get('severity', '').upper()}** "
@@ -183,7 +190,13 @@ class ReportGenerator:
                 f"| {f.get('title', '')[:60]} "
                 f"| {f.get('remediation', '')[:60]} |"
             )
-        lines.extend(["", f"*Showing top {min(50, len(findings))} of {len(findings)} findings.*", ""])
+        lines.extend(
+            [
+                "",
+                f"*Showing top {min(50, len(findings))} of {len(findings)} findings.*",
+                "",
+            ]
+        )
         return lines
 
     def _md_credentials(self, results: Dict) -> list:
@@ -194,18 +207,23 @@ class ReportGenerator:
             return []
 
         lines = [
-            "## Credential Vault", "",
+            "## Credential Vault",
+            "",
             f"**Total:** {stats.get('total', 0)} credentials "
             f"({stats.get('passwords', 0)} passwords, "
             f"{stats.get('hashes', 0)} hashes, "
-            f"{stats.get('kerberos', 0)} Kerberos tickets)", "",
+            f"{stats.get('kerberos', 0)} Kerberos tickets)",
+            "",
             f"**Verified:** {stats.get('verified', 0)} | "
-            f"**Admin access:** {stats.get('admin_access', 0)}", "",
+            f"**Admin access:** {stats.get('admin_access', 0)}",
+            "",
             "| Username | Type | Host | Service | Verified | Admin |",
             "|----------|------|------|---------|----------|-------|",
         ]
         for c in creds[:30]:
-            domain = f"{c.get('domain', '')}\\\\".lstrip("\\\\") if c.get("domain") else ""
+            domain = (
+                f"{c.get('domain', '')}\\\\".lstrip("\\\\") if c.get("domain") else ""
+            )
             lines.append(
                 f"| {domain}{c.get('username', '')} "
                 f"| {c.get('cred_type', '')} "
@@ -257,15 +275,21 @@ class ReportGenerator:
                     lines.append(f"#### {svc.upper()}")
                     if isinstance(sdata, dict):
                         if sdata.get("users"):
-                            lines.append("**Users:** " + ", ".join(
-                                f"`{u.get('username', u) if isinstance(u, dict) else u}`"
-                                for u in sdata["users"][:20]
-                            ))
+                            lines.append(
+                                "**Users:** "
+                                + ", ".join(
+                                    f"`{u.get('username', u) if isinstance(u, dict) else u}`"
+                                    for u in sdata["users"][:20]
+                                )
+                            )
                         if sdata.get("shares"):
-                            lines.append("**Shares:** " + ", ".join(
-                                f"`{s.get('name', s) if isinstance(s, dict) else s}`"
-                                for s in sdata["shares"][:10]
-                            ))
+                            lines.append(
+                                "**Shares:** "
+                                + ", ".join(
+                                    f"`{s.get('name', s) if isinstance(s, dict) else s}`"
+                                    for s in sdata["shares"][:10]
+                                )
+                            )
                     lines.append("")
         return lines
 
@@ -280,15 +304,21 @@ class ReportGenerator:
             lines.append(f"### {url}")
             headers = tdata.get("headers", {})
             if headers.get("missing_security_headers"):
-                lines.append("**Missing Security Headers:** " + ", ".join(headers["missing_security_headers"]))
+                lines.append(
+                    "**Missing Security Headers:** "
+                    + ", ".join(headers["missing_security_headers"])
+                )
             if headers.get("issues"):
                 for issue in headers["issues"][:5]:
                     lines.append(f"- {issue}")
             tech = tdata.get("technologies", {})
             if tech.get("detected_frameworks"):
-                lines.append("**Detected:** " + ", ".join(
-                    f.get("framework", "") for f in tech["detected_frameworks"]
-                ))
+                lines.append(
+                    "**Detected:** "
+                    + ", ".join(
+                        f.get("framework", "") for f in tech["detected_frameworks"]
+                    )
+                )
             vulns = tdata.get("vuln_checks", {})
             if vulns.get("git_exposed"):
                 lines.append("**⚠ .git directory exposed!**")
@@ -426,15 +456,18 @@ class ReportGenerator:
         vault_data = results.get("credential_vault", {})
 
         risk_color = {
-            "CRITICAL": "#ff1744", "HIGH": "#ff6b6b",
-            "MEDIUM": "#ffd93d", "LOW": "#69f0ae", "INFORMATIONAL": "#4fc3f7"
+            "CRITICAL": "#ff1744",
+            "HIGH": "#ff6b6b",
+            "MEDIUM": "#ffd93d",
+            "LOW": "#69f0ae",
+            "INFORMATIONAL": "#4fc3f7",
         }.get(risk.get("overall_risk", ""), "#888")
 
         html = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Perfodia Report — {html_escape(str(results.get('session_id', '')))}</title>
+<title>Perfodia Report — {html_escape(str(results.get("session_id", "")))}</title>
 <style>
 body {{ font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; background: #0a0a1a; color: #e0e0e0; }}
 .container {{ max-width: 1200px; margin: 0 auto; padding: 40px; }}
@@ -465,9 +498,9 @@ blockquote {{ border-left: 3px solid #00d4ff; padding: 10px 15px; margin: 15px 0
 <div class="container">
 <h1>Penetration Test Report</h1>
 <div class="meta">
-    <p><strong>Session:</strong> {html_escape(str(results.get('session_id', 'N/A')))} &nbsp;|&nbsp;
-    <strong>Date:</strong> {html_escape(str(results.get('start_time', 'N/A')))} &nbsp;|&nbsp;
-    <strong>Targets:</strong> {html_escape(', '.join(results.get('targets', [])))}</p>
+    <p><strong>Session:</strong> {html_escape(str(results.get("session_id", "N/A")))} &nbsp;|&nbsp;
+    <strong>Date:</strong> {html_escape(str(results.get("start_time", "N/A")))} &nbsp;|&nbsp;
+    <strong>Targets:</strong> {html_escape(", ".join(results.get("targets", [])))}</p>
 </div>
 """
 
@@ -475,34 +508,39 @@ blockquote {{ border-left: 3px solid #00d4ff; padding: 10px 15px; margin: 15px 0
         html += "<h2>Executive Summary</h2>\n"
         if risk:
             html += f'<p>Overall Risk: <span class="risk-badge">{html_escape(str(risk.get("overall_risk", "N/A")))}</span>'
-            html += f' &nbsp; Risk Score: <strong>{risk.get("risk_score", 0)}</strong></p>\n'
+            html += f" &nbsp; Risk Score: <strong>{risk.get('risk_score', 0)}</strong></p>\n"
             narrative = risk.get("attack_narrative", "")
             if narrative:
                 html += f"<blockquote>{html_escape(narrative)}</blockquote>\n"
             breakdown = risk.get("breakdown", {})
             html += '<div style="margin: 20px 0;">\n'
             for sev, label, color in [
-                ("critical", "Critical", "#ff1744"), ("high", "High", "#ff6b6b"),
-                ("medium", "Medium", "#ffd93d"), ("low", "Low", "#69f0ae"),
+                ("critical", "Critical", "#ff1744"),
+                ("high", "High", "#ff6b6b"),
+                ("medium", "Medium", "#ffd93d"),
+                ("low", "Low", "#69f0ae"),
             ]:
                 count = breakdown.get(sev, 0)
                 html += f'<div class="stat"><div class="number" style="color:{color}">{count}</div>'
                 html += f'<div class="label">{label}</div></div>\n'
-            html += '</div>\n'
+            html += "</div>\n"
 
         # ── Stats row ──
         total_hosts = len(phases.get("scan", {}).get("hosts", []))
-        total_ports = sum(len(h.get("ports", [])) for h in phases.get("scan", {}).get("hosts", []))
+        total_ports = sum(
+            len(h.get("ports", [])) for h in phases.get("scan", {}).get("hosts", [])
+        )
         vault_stats = vault_data.get("stats", {})
         html += '<div style="margin: 20px 0;">\n'
         for label, value in [
-            ("Hosts", total_hosts), ("Open Ports", total_ports),
+            ("Hosts", total_hosts),
+            ("Open Ports", total_ports),
             ("Credentials", vault_stats.get("total", 0)),
             ("Admin Access", vault_stats.get("admin_access", 0)),
         ]:
             html += f'<div class="stat"><div class="number">{value}</div>'
             html += f'<div class="label">{label}</div></div>\n'
-        html += '</div>\n'
+        html += "</div>\n"
 
         # ── Findings Table ──
         findings = scoring.get("findings", [])
@@ -512,10 +550,10 @@ blockquote {{ border-left: 3px solid #00d4ff; padding: 10px 15px; margin: 15px 0
             for i, f in enumerate(findings[:50], 1):
                 sev = f.get("severity", "info")
                 html += f'<tr class="finding-{html_escape(sev)}"><td>{i}</td><td><strong>{html_escape(sev.upper())}</strong></td>'
-                html += f'<td>{f.get("cvss_score", 0):.1f}</td>'
-                html += f'<td>{html_escape(str(f.get("host", "")))}:{html_escape(str(f.get("port", "")))}</td>'
-                html += f'<td>{html_escape(str(f.get("title", "")))}</td>'
-                html += f'<td>{html_escape(str(f.get("remediation", "")))}</td></tr>\n'
+                html += f"<td>{f.get('cvss_score', 0):.1f}</td>"
+                html += f"<td>{html_escape(str(f.get('host', '')))}:{html_escape(str(f.get('port', '')))}</td>"
+                html += f"<td>{html_escape(str(f.get('title', '')))}</td>"
+                html += f"<td>{html_escape(str(f.get('remediation', '')))}</td></tr>\n"
             html += "</table>\n"
 
         # ── Credential Vault ──
@@ -524,12 +562,12 @@ blockquote {{ border-left: 3px solid #00d4ff; padding: 10px 15px; margin: 15px 0
             html += "<h2>Credential Vault</h2>\n"
             html += "<table><tr><th>Username</th><th>Type</th><th>Host</th><th>Service</th><th>Verified</th><th>Admin</th></tr>\n"
             for c in creds[:30]:
-                html += f'<tr><td>{html_escape(str(c.get("username", "")))}</td>'
-                html += f'<td>{html_escape(str(c.get("cred_type", "")))}</td>'
-                html += f'<td>{html_escape(str(c.get("host", "")))}</td>'
-                html += f'<td>{html_escape(str(c.get("service", "")))}</td>'
-                html += f'<td>{"✓" if c.get("verified") else ""}</td>'
-                html += f'<td>{"✓" if c.get("admin_access") else ""}</td></tr>\n'
+                html += f"<tr><td>{html_escape(str(c.get('username', '')))}</td>"
+                html += f"<td>{html_escape(str(c.get('cred_type', '')))}</td>"
+                html += f"<td>{html_escape(str(c.get('host', '')))}</td>"
+                html += f"<td>{html_escape(str(c.get('service', '')))}</td>"
+                html += f"<td>{'✓' if c.get('verified') else ''}</td>"
+                html += f"<td>{'✓' if c.get('admin_access') else ''}</td></tr>\n"
             html += "</table>\n"
 
         # ── Scan Results ──
@@ -544,10 +582,10 @@ blockquote {{ border-left: 3px solid #00d4ff; padding: 10px 15px; margin: 15px 0
                     html += "<table><tr><th>Port</th><th>State</th><th>Service</th><th>Version</th></tr>\n"
                     for p in ports:
                         svc = p.get("service", {})
-                        html += f'<tr><td>{html_escape(str(p.get("port", "")))}/{html_escape(str(p.get("protocol", "")))}</td>'
-                        html += f'<td>{html_escape(str(p.get("state", "")))}</td>'
-                        html += f'<td>{html_escape(str(svc.get("name", "")))}</td>'
-                        html += f'<td>{html_escape(str(svc.get("product", "")))} {html_escape(str(svc.get("version", "")))}</td></tr>\n'
+                        html += f"<tr><td>{html_escape(str(p.get('port', '')))}/{html_escape(str(p.get('protocol', '')))}</td>"
+                        html += f"<td>{html_escape(str(p.get('state', '')))}</td>"
+                        html += f"<td>{html_escape(str(svc.get('name', '')))}</td>"
+                        html += f"<td>{html_escape(str(svc.get('product', '')))} {html_escape(str(svc.get('version', '')))}</td></tr>\n"
                     html += "</table>\n"
 
         # ── Screenshots ──
@@ -561,10 +599,10 @@ blockquote {{ border-left: 3px solid #00d4ff; padding: 10px 15px; margin: 15px 0
                 if path.endswith((".png", ".jpg", ".jpeg")):
                     html += f'<div style="max-width:400px"><p><strong>{html_escape(url)}</strong></p>'
                     html += f'<img src="file://{html_escape(path)}" style="max-width:100%;border:1px solid #333;border-radius:4px;" />'
-                    html += '</div>\n'
+                    html += "</div>\n"
                 else:
-                    html += f'<p><strong>{html_escape(url)}</strong>: <code>{html_escape(path)}</code></p>\n'
-            html += '</div>\n'
+                    html += f"<p><strong>{html_escape(url)}</strong>: <code>{html_escape(path)}</code></p>\n"
+            html += "</div>\n"
 
         html += """
 <hr>
@@ -598,6 +636,7 @@ blockquote {{ border-left: 3px solid #00d4ff; padding: 10px 15px; margin: 15px 0
         # Try WeasyPrint first (Python library)
         try:
             from weasyprint import HTML
+
             HTML(filename=str(html_path)).write_pdf(str(pdf_path))
             logger.info(f"[+] PDF report (WeasyPrint): {pdf_path}")
             return
@@ -608,13 +647,21 @@ blockquote {{ border-left: 3px solid #00d4ff; padding: 10px 15px; margin: 15px 0
 
         # Try wkhtmltopdf (command-line tool)
         import shutil
+
         if shutil.which("wkhtmltopdf"):
             import subprocess
+
             try:
                 subprocess.run(
-                    ["wkhtmltopdf", "--quiet", "--enable-local-file-access",
-                     str(html_path), str(pdf_path)],
-                    timeout=60, capture_output=True,
+                    [
+                        "wkhtmltopdf",
+                        "--quiet",
+                        "--enable-local-file-access",
+                        str(html_path),
+                        str(pdf_path),
+                    ],
+                    timeout=60,
+                    capture_output=True,
                 )
                 if pdf_path.exists():
                     logger.info(f"[+] PDF report (wkhtmltopdf): {pdf_path}")
@@ -626,11 +673,19 @@ blockquote {{ border-left: 3px solid #00d4ff; padding: 10px 15px; margin: 15px 0
         for chrome in ["chromium-browser", "google-chrome", "chromium"]:
             if shutil.which(chrome):
                 import subprocess
+
                 try:
                     subprocess.run(
-                        [chrome, "--headless", "--disable-gpu", "--no-sandbox",
-                         f"--print-to-pdf={pdf_path}", str(html_path)],
-                        timeout=60, capture_output=True,
+                        [
+                            chrome,
+                            "--headless",
+                            "--disable-gpu",
+                            "--no-sandbox",
+                            f"--print-to-pdf={pdf_path}",
+                            str(html_path),
+                        ],
+                        timeout=60,
+                        capture_output=True,
                     )
                     if pdf_path.exists():
                         logger.info(f"[+] PDF report ({chrome}): {pdf_path}")

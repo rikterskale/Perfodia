@@ -38,7 +38,10 @@ class TestSanitizeArg:
 
     def test_normal_tool_args_preserved(self):
         assert sanitize_arg("user:password@192.168.1.1") == "user:password@192.168.1.1"
-        assert sanitize_arg("/usr/share/wordlists/rockyou.txt") == "/usr/share/wordlists/rockyou.txt"
+        assert (
+            sanitize_arg("/usr/share/wordlists/rockyou.txt")
+            == "/usr/share/wordlists/rockyou.txt"
+        )
         assert sanitize_arg("-p") == "-p"
 
 

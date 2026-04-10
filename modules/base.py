@@ -97,12 +97,14 @@ class BaseModule(ABC):
             for port in host.get("ports", []):
                 svc = port.get("service", {})
                 if service_name.lower() in svc.get("name", "").lower():
-                    matches.append({
-                        "ip": host.get("ip", ""),
-                        "hostname": host.get("hostname", ""),
-                        "port": port.get("port"),
-                        "service": svc,
-                    })
+                    matches.append(
+                        {
+                            "ip": host.get("ip", ""),
+                            "hostname": host.get("hostname", ""),
+                            "port": port.get("port"),
+                            "service": svc,
+                        }
+                    )
         return matches
 
     def _store_credential(self, **kwargs):

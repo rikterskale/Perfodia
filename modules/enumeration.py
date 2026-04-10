@@ -88,8 +88,10 @@ class EnumerationModule(BaseModule):
             for svc_type, port_list in services_to_enum.items():
                 enum_func = getattr(self, f"_enum_{svc_type}", None)
                 if enum_func:
-                    logger.info(f"  [{svc_type.upper()}] Enumerating on ports: "
-                                f"{[p[0] for p in port_list]}")
+                    logger.info(
+                        f"  [{svc_type.upper()}] Enumerating on ports: "
+                        f"{[p[0] for p in port_list]}"
+                    )
                     try:
                         host_results[svc_type] = enum_func(ip, port_list)
                     except Exception as e:
@@ -123,7 +125,8 @@ class EnumerationModule(BaseModule):
                 args=[
                     ip,
                     "-A",  # All enumeration
-                    "-oJ", str(self.session_dir / f"enum/enum4linux_{ip}"),
+                    "-oJ",
+                    str(self.session_dir / f"enum/enum4linux_{ip}"),
                 ],
                 timeout=300,
                 output_file=f"enum/enum4linux_{ip}.txt",
@@ -179,9 +182,9 @@ class EnumerationModule(BaseModule):
         Enumerates: system info, interfaces, processes, installed software
         """
         snmp_results: Dict[str, Any] = {}
-        community_strings = self.config.get(
-            "enumeration", "snmp", default={}
-        ).get("community_strings", ["public"])
+        community_strings = self.config.get("enumeration", "snmp", default={}).get(
+            "community_strings", ["public"]
+        )
 
         # Community string brute force
         valid_community = None
@@ -222,8 +225,10 @@ class EnumerationModule(BaseModule):
                     tool_name="snmpwalk",
                     args=[
                         "-v2c",
-                        "-c", valid_community,
-                        ip, oid,
+                        "-c",
+                        valid_community,
+                        ip,
+                        oid,
                     ],
                     timeout=30,
                     output_file=f"enum/snmpwalk_{ip}_{name}.txt",
@@ -231,9 +236,7 @@ class EnumerationModule(BaseModule):
                 )
                 if result.success and result.stdout:
                     snmp_results[name] = parse_snmp_output(result.stdout)
-                    logger.info(
-                        f"    SNMP {name}: {len(snmp_results[name])} entries"
-                    )
+                    logger.info(f"    SNMP {name}: {len(snmp_results[name])} entries")
 
         # ── SNMPv3 enumeration ──
         snmpv3_config = self.config.get("enumeration", "snmpv3", default={})
@@ -253,14 +256,18 @@ class EnumerationModule(BaseModule):
         v3_results: Dict[str, Any] = {}
 
         # Test 1: noAuthNoPriv (just a username, no auth or encryption)
-        v3_users = v3_config.get("usernames", ["initial", "public", "admin", "snmpuser"])
+        v3_users = v3_config.get(
+            "usernames", ["initial", "public", "admin", "snmpuser"]
+        )
         for user in v3_users:
             result = self.runner.run(
                 tool_name="snmpwalk",
                 args=[
                     "-v3",
-                    "-l", "noAuthNoPriv",
-                    "-u", user,
+                    "-l",
+                    "noAuthNoPriv",
+                    "-u",
+                    user,
                     ip,
                     "1.3.6.1.2.1.1",  # System info
                 ],
@@ -284,10 +291,13 @@ class EnumerationModule(BaseModule):
                 break
 
         # Test 2: authNoPriv with common credentials
-        v3_creds = v3_config.get("credentials", [
-            {"user": "admin", "auth_pass": "admin123", "auth_proto": "SHA"},
-            {"user": "snmpuser", "auth_pass": "snmpuser", "auth_proto": "MD5"},
-        ])
+        v3_creds = v3_config.get(
+            "credentials",
+            [
+                {"user": "admin", "auth_pass": "admin123", "auth_proto": "SHA"},
+                {"user": "snmpuser", "auth_pass": "snmpuser", "auth_proto": "MD5"},
+            ],
+        )
 
         for cred in v3_creds:
             user = cred.get("user", "")
@@ -298,10 +308,14 @@ class EnumerationModule(BaseModule):
                 tool_name="snmpwalk",
                 args=[
                     "-v3",
-                    "-l", "authNoPriv",
-                    "-u", user,
-                    "-a", auth_proto,
-                    "-A", auth_pass,
+                    "-l",
+                    "authNoPriv",
+                    "-u",
+                    user,
+                    "-a",
+                    auth_proto,
+                    "-A",
+                    auth_pass,
                     ip,
                     "1.3.6.1.2.1.1",
                 ],
@@ -312,15 +326,17 @@ class EnumerationModule(BaseModule):
                 v3_results["auth_user"] = user
                 v3_results["auth_proto"] = auth_proto
                 v3_results["auth_data"] = result.stdout[:2000]
-                logger.warning(
-                    f"    [!] SNMPv3 authNoPriv access: {user}/{auth_proto}"
-                )
+                logger.warning(f"    [!] SNMPv3 authNoPriv access: {user}/{auth_proto}")
                 # Store credential
                 if self.credential_vault:
                     self.credential_vault.add_password(
-                        username=user, password=auth_pass,
-                        host=ip, port=161, service="snmpv3",
-                        source_phase="enum", source_tool="snmpwalk",
+                        username=user,
+                        password=auth_pass,
+                        host=ip,
+                        port=161,
+                        service="snmpv3",
+                        source_phase="enum",
+                        source_tool="snmpwalk",
                     )
                 break
 
@@ -351,10 +367,13 @@ class EnumerationModule(BaseModule):
             result = self.runner.run(
                 tool_name="curl",
                 args=[
-                    "-s", "-I",
+                    "-s",
+                    "-I",
                     "-k",  # Allow self-signed certs
-                    "--connect-timeout", "10",
-                    "--max-time", "15",
+                    "--connect-timeout",
+                    "10",
+                    "--max-time",
+                    "15",
                     base_url,
                 ],
                 timeout=20,
@@ -368,11 +387,16 @@ class EnumerationModule(BaseModule):
                 result = self.runner.run(
                     tool_name="nikto",
                     args=[
-                        "-h", base_url,
-                        "-Format", "txt",
-                        "-o", str(self.session_dir / f"enum/nikto_{ip}_{port_num}.txt"),
-                        "-Tuning", "123457890abc",
-                        "-timeout", "10",
+                        "-h",
+                        base_url,
+                        "-Format",
+                        "txt",
+                        "-o",
+                        str(self.session_dir / f"enum/nikto_{ip}_{port_num}.txt"),
+                        "-Tuning",
+                        "123457890abc",
+                        "-timeout",
+                        "10",
                     ],
                     timeout=300,
                     output_file=f"enum/nikto_{ip}_{port_num}_stdout.txt",
@@ -382,26 +406,31 @@ class EnumerationModule(BaseModule):
 
             # Gobuster directory brute force
             if is_tool_available("gobuster"):
-                wordlist = self.config.get(
-                    "enumeration", "http", default={}
-                ).get("wordlist", "/usr/share/wordlists/dirb/common.txt")
+                wordlist = self.config.get("enumeration", "http", default={}).get(
+                    "wordlist", "/usr/share/wordlists/dirb/common.txt"
+                )
 
-                extensions = self.config.get(
-                    "enumeration", "http", default={}
-                ).get("extensions", "php,html,txt")
+                extensions = self.config.get("enumeration", "http", default={}).get(
+                    "extensions", "php,html,txt"
+                )
 
                 result = self.runner.run(
                     tool_name="gobuster",
                     args=[
                         "dir",
-                        "-u", base_url,
-                        "-w", wordlist,
-                        "-x", extensions,
-                        "-t", "20",
+                        "-u",
+                        base_url,
+                        "-w",
+                        wordlist,
+                        "-x",
+                        extensions,
+                        "-t",
+                        "20",
                         "-k",  # Skip TLS verification
                         "--no-error",
                         "-q",
-                        "-o", str(self.session_dir / f"enum/gobuster_{ip}_{port_num}.txt"),
+                        "-o",
+                        str(self.session_dir / f"enum/gobuster_{ip}_{port_num}.txt"),
                     ],
                     timeout=300,
                     retries=0,
@@ -426,8 +455,10 @@ class EnumerationModule(BaseModule):
                 tool_name="curl",
                 args=[
                     "-s",
-                    "--connect-timeout", "10",
-                    "--max-time", "15",
+                    "--connect-timeout",
+                    "10",
+                    "--max-time",
+                    "15",
                     f"ftp://anonymous:anonymous@{ip}:{port_num}/",
                 ],
                 timeout=20,
@@ -482,8 +513,10 @@ class EnumerationModule(BaseModule):
             result = self.runner.run(
                 tool_name="nmap",
                 args=[
-                    "--script", "smtp-enum-users,smtp-commands,smtp-open-relay",
-                    "-p", str(port_num),
+                    "--script",
+                    "smtp-enum-users,smtp-commands,smtp-open-relay",
+                    "-p",
+                    str(port_num),
                     ip,
                 ],
                 timeout=60,
@@ -495,7 +528,10 @@ class EnumerationModule(BaseModule):
             if result.success and result.stdout:
                 port_results["raw"] = result.stdout[:3000]
                 # Check for open relay
-                if "open-relay" in result.stdout.lower() and "isn't" not in result.stdout.lower():
+                if (
+                    "open-relay" in result.stdout.lower()
+                    and "isn't" not in result.stdout.lower()
+                ):
                     port_results["open_relay"] = True
                     logger.warning(f"    [!] SMTP open relay on {ip}:{port_num}")
 
@@ -539,8 +575,10 @@ class EnumerationModule(BaseModule):
                 tool_name="nmap",
                 args=[
                     "-sV",
-                    "--script", "ldap-rootdse,ldap-search",
-                    "-p", str(port_num),
+                    "--script",
+                    "ldap-rootdse,ldap-search",
+                    "-p",
+                    str(port_num),
                     ip,
                 ],
                 timeout=60,
@@ -562,8 +600,10 @@ class EnumerationModule(BaseModule):
             result = self.runner.run(
                 tool_name="nmap",
                 args=[
-                    "--script", "mysql-info,mysql-enum,mysql-empty-password",
-                    "-p", str(port_num),
+                    "--script",
+                    "mysql-info,mysql-enum,mysql-empty-password",
+                    "-p",
+                    str(port_num),
                     ip,
                 ],
                 timeout=60,
@@ -580,8 +620,10 @@ class EnumerationModule(BaseModule):
             result = self.runner.run(
                 tool_name="nmap",
                 args=[
-                    "--script", "ms-sql-info,ms-sql-ntlm-info,ms-sql-empty-password",
-                    "-p", str(port_num),
+                    "--script",
+                    "ms-sql-info,ms-sql-ntlm-info,ms-sql-empty-password",
+                    "-p",
+                    str(port_num),
                     ip,
                 ],
                 timeout=60,
@@ -598,8 +640,10 @@ class EnumerationModule(BaseModule):
             result = self.runner.run(
                 tool_name="nmap",
                 args=[
-                    "--script", "pgsql-brute",
-                    "-p", str(port_num),
+                    "--script",
+                    "pgsql-brute",
+                    "-p",
+                    str(port_num),
                     ip,
                 ],
                 timeout=60,
@@ -616,8 +660,10 @@ class EnumerationModule(BaseModule):
             result = self.runner.run(
                 tool_name="nmap",
                 args=[
-                    "--script", "rdp-enum-encryption,rdp-ntlm-info",
-                    "-p", str(port_num),
+                    "--script",
+                    "rdp-enum-encryption,rdp-ntlm-info",
+                    "-p",
+                    str(port_num),
                     ip,
                 ],
                 timeout=60,

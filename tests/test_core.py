@@ -37,7 +37,12 @@ class TestSessionState:
 
     def test_get_resume_info(self, tmp_session):
         state = SessionState(tmp_session)
-        results = {"session_id": "test123", "targets": ["1.1.1.1"], "mode": "full", "phases": {}}
+        results = {
+            "session_id": "test123",
+            "targets": ["1.1.1.1"],
+            "mode": "full",
+            "phases": {},
+        }
         state.save_checkpoint(results, "scan")
         info = state.get_resume_info()
         assert info is not None
@@ -170,12 +175,19 @@ SNMPv2-MIB::sysUpTime.0 = Timeticks: (12345) 0:02:03.45
 
     def test_parse_searchsploit_json(self):
         import json
-        data = json.dumps({
-            "RESULTS_EXPLOIT": [
-                {"Title": "Apache 2.4.49 RCE", "Path": "/exploits/12345",
-                 "Type": "remote", "Platform": "linux"},
-            ]
-        })
+
+        data = json.dumps(
+            {
+                "RESULTS_EXPLOIT": [
+                    {
+                        "Title": "Apache 2.4.49 RCE",
+                        "Path": "/exploits/12345",
+                        "Type": "remote",
+                        "Platform": "linux",
+                    },
+                ]
+            }
+        )
         result = parse_searchsploit_json(data)
         assert len(result) == 1
         assert "Apache" in result[0]["title"]

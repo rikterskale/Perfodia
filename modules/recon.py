@@ -130,7 +130,9 @@ class ReconModule(BaseModule):
             for key, pattern in patterns.items():
                 matches = re.findall(pattern, result.stdout, re.IGNORECASE)
                 if matches:
-                    whois_data[key] = matches if len(matches) > 1 else matches[0].strip()
+                    whois_data[key] = (
+                        matches if len(matches) > 1 else matches[0].strip()
+                    )
 
         return whois_data
 
@@ -157,8 +159,10 @@ class ReconModule(BaseModule):
                 args=[
                     f"{scheme}://{target}",
                     "--color=never",
-                    "-a", "3",  # Aggression level
-                    "--log-json", str(self.session_dir / f"recon/whatweb_{target}_{scheme}.json"),
+                    "-a",
+                    "3",  # Aggression level
+                    "--log-json",
+                    str(self.session_dir / f"recon/whatweb_{target}_{scheme}.json"),
                 ],
                 timeout=60,
                 retries=0,
@@ -200,8 +204,6 @@ class ReconModule(BaseModule):
                 if axfr.success and "XFR size" in axfr.stdout:
                     zt_results["vulnerable"] = True
                     zt_results[f"transfer_{ns}"] = axfr.stdout
-                    logger.warning(
-                        f"  [!] Zone transfer successful from {ns}!"
-                    )
+                    logger.warning(f"  [!] Zone transfer successful from {ns}!")
 
         return zt_results

@@ -19,6 +19,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class ParallelResult:
     """Aggregated results from parallel execution."""
+
     total: int = 0
     succeeded: int = 0
     failed: int = 0
@@ -86,10 +87,7 @@ class ParallelRunner:
             # Single-threaded fast path (no overhead)
             return self._run_sequential(hosts, func, description)
 
-        logger.info(
-            f"[PARALLEL] {description}: {len(hosts)} hosts, "
-            f"{workers} threads"
-        )
+        logger.info(f"[PARALLEL] {description}: {len(hosts)} hosts, {workers} threads")
 
         start = datetime.now()
 
@@ -98,7 +96,6 @@ class ParallelRunner:
                 max_workers=workers,
                 thread_name_prefix="pentestfw",
             ) as executor:
-
                 # Submit all tasks
                 future_to_host: Dict[Future, str] = {}
                 for host in hosts:
@@ -147,17 +144,13 @@ class ParallelRunner:
 
         return result
 
-    def _safe_execute(
-        self, func: Callable, host: str
-    ) -> Tuple[Any, Optional[str]]:
+    def _safe_execute(self, func: Callable, host: str) -> Tuple[Any, Optional[str]]:
         """Execute function with error isolation per host."""
         try:
             data = func(host)
             return data, None
         except Exception as e:
-            logger.error(
-                f"[PARALLEL] Exception on {host}: {type(e).__name__}: {e}"
-            )
+            logger.error(f"[PARALLEL] Exception on {host}: {type(e).__name__}: {e}")
             return None, f"{type(e).__name__}: {e}"
 
     def _run_sequential(
@@ -180,9 +173,7 @@ class ParallelRunner:
                 result.failed += 1
                 logger.error(f"[{description}] {host} failed: {e}")
 
-            logger.info(
-                f"[{description}] {i}/{len(hosts)} — {host} done"
-            )
+            logger.info(f"[{description}] {i}/{len(hosts)} — {host} done")
 
         result.duration = (datetime.now() - start).total_seconds()
         return result

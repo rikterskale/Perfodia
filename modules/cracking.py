@@ -17,30 +17,30 @@ logger = logging.getLogger(__name__)
 
 # Hash type mappings for hashcat mode numbers
 HASHCAT_MODES: Dict[str, int] = {
-    "ntlm":       1000,
-    "ntlmv2":     5600,
+    "ntlm": 1000,
+    "ntlmv2": 5600,
     "net-ntlmv2": 5600,
-    "asrep":      18200,
-    "kerberoast":  13100,
-    "krb5tgs":    13100,
-    "md5":        0,
-    "sha1":       100,
-    "sha256":     1400,
-    "sha512":     1800,
-    "bcrypt":     3200,
-    "descrypt":   1500,
-    "mscache2":   2100,
-    "lm":         3000,
+    "asrep": 18200,
+    "kerberoast": 13100,
+    "krb5tgs": 13100,
+    "md5": 0,
+    "sha1": 100,
+    "sha256": 1400,
+    "sha512": 1800,
+    "bcrypt": 3200,
+    "descrypt": 1500,
+    "mscache2": 2100,
+    "lm": 3000,
 }
 
 # Map credential vault CredType enum values to HASHCAT_MODES keys.
 # CredType.value strings (e.g. "ntlm_hash") don't always match the
 # short names used in HASHCAT_MODES (e.g. "ntlm").
 _CREDTYPE_TO_HASHCAT: Dict[str, str] = {
-    "ntlm_hash":   "ntlm",
-    "net_ntlmv2":  "ntlmv2",
-    "asrep_hash":  "asrep",
-    "krb_tgs":     "kerberoast",
+    "ntlm_hash": "ntlm",
+    "net_ntlmv2": "ntlmv2",
+    "asrep_hash": "asrep",
+    "krb_tgs": "kerberoast",
 }
 
 
@@ -71,7 +71,9 @@ class CrackingModule(BaseModule):
             return results
 
         results["total_hashes"] = sum(len(h["hashes"]) for h in hash_sets)
-        logger.info(f"[CRACK] Collected {results['total_hashes']} hashes across {len(hash_sets)} type(s)")
+        logger.info(
+            f"[CRACK] Collected {results['total_hashes']} hashes across {len(hash_sets)} type(s)"
+        )
 
         cracking_config = self.config.get("cracking", default={})
         wordlist = cracking_config.get("wordlist", "/usr/share/wordlists/rockyou.txt")
@@ -84,7 +86,9 @@ class CrackingModule(BaseModule):
             hashes = hash_set["hashes"]
             source = hash_set.get("source", "unknown")
 
-            logger.info(f"[CRACK] Cracking {len(hashes)} {hash_type} hashes from {source}")
+            logger.info(
+                f"[CRACK] Cracking {len(hashes)} {hash_type} hashes from {source}"
+            )
 
             # Write hashes to temp file
             hash_file = self.session_dir / "loot" / f"crack_{hash_type}_{source}.txt"
@@ -94,7 +98,9 @@ class CrackingModule(BaseModule):
             # Try hashcat first, then john
             cracked = []
             if is_tool_available("hashcat"):
-                cracked = self._run_hashcat(hash_file, hash_type, wordlist, max_runtime, use_rules)
+                cracked = self._run_hashcat(
+                    hash_file, hash_type, wordlist, max_runtime, use_rules
+                )
             elif is_tool_available("john"):
                 cracked = self._run_john(hash_file, hash_type, wordlist, max_runtime)
 
@@ -126,7 +132,9 @@ class CrackingModule(BaseModule):
                 by_type.setdefault(t, []).append(cred.secret)
             for hash_type, hashes in by_type.items():
                 if hashes:
-                    hash_sets.append({"type": hash_type, "hashes": hashes, "source": "vault"})
+                    hash_sets.append(
+                        {"type": hash_type, "hashes": hashes, "source": "vault"}
+                    )
 
         # From loot directory files
         loot_dir = self.session_dir / "loot"
@@ -139,17 +147,24 @@ class CrackingModule(BaseModule):
             for pattern, hash_type in patterns.items():
                 for f in loot_dir.glob(pattern):
                     hashes = [
-                        line.strip() for line in f.read_text().split("\n")
+                        line.strip()
+                        for line in f.read_text().split("\n")
                         if line.strip() and not line.startswith("#")
                     ]
                     if hashes:
-                        hash_sets.append({"type": hash_type, "hashes": hashes, "source": f.stem})
+                        hash_sets.append(
+                            {"type": hash_type, "hashes": hashes, "source": f.stem}
+                        )
 
         return hash_sets
 
     def _run_hashcat(
-        self, hash_file: Path, hash_type: str, wordlist: str,
-        max_runtime: int, use_rules: bool,
+        self,
+        hash_file: Path,
+        hash_type: str,
+        wordlist: str,
+        max_runtime: int,
+        use_rules: bool,
     ) -> List[Dict[str, str]]:
         """Run hashcat against a hash file."""
         mode = HASHCAT_MODES.get(hash_type)
@@ -167,10 +182,14 @@ class CrackingModule(BaseModule):
             *mode_arg,
             str(hash_file),
             wordlist,
-            "--potfile-path", str(pot_file),
-            "--outfile", str(out_file),
-            "--outfile-format", "2",  # hash:plain
-            "--runtime", str(max_runtime),
+            "--potfile-path",
+            str(pot_file),
+            "--outfile",
+            str(out_file),
+            "--outfile-format",
+            "2",  # hash:plain
+            "--runtime",
+            str(max_runtime),
             "--quiet",
             "--force",  # Required in VMs without GPU
         ]
@@ -206,7 +225,11 @@ class CrackingModule(BaseModule):
         return cracked
 
     def _run_john(
-        self, hash_file: Path, hash_type: str, wordlist: str, max_runtime: int,
+        self,
+        hash_file: Path,
+        hash_type: str,
+        wordlist: str,
+        max_runtime: int,
     ) -> List[Dict[str, str]]:
         """Run john the ripper against a hash file."""
         john_format_map = {
@@ -255,7 +278,10 @@ class CrackingModule(BaseModule):
         return cracked
 
     def _store_cracked(
-        self, cracked: List[Dict[str, str]], hash_type: str, source: str,
+        self,
+        cracked: List[Dict[str, str]],
+        hash_type: str,
+        source: str,
     ) -> None:
         """Store cracked passwords back into the credential vault."""
         if not self.credential_vault:
@@ -283,7 +309,7 @@ class CrackingModule(BaseModule):
         if hash_type in ("ntlm",) and ":" in hash_val:
             return hash_val.split(":")[0]
         # Kerberos: $krb5asrep$23$user@DOMAIN or $krb5tgs$23$*user$DOMAIN...
-        krb_match = re.match(r'\$krb5(?:asrep|tgs)\$\d+\$\*?([^@$*]+)', hash_val)
+        krb_match = re.match(r"\$krb5(?:asrep|tgs)\$\d+\$\*?([^@$*]+)", hash_val)
         if krb_match:
             return krb_match.group(1)
         # Net-NTLMv2: user::domain:...
