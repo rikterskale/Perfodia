@@ -27,7 +27,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-tui = ["rich>=13.7.0"]
+tui = ["textual>=0.85.0"]
 pdf = ["weasyprint>=61.0"]
 dev = [
     "ruff>=0.4",
