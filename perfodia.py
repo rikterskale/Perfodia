@@ -23,7 +23,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 from utils.logger import setup_logging, get_logger
 
-# The following imports are kept for your full workflow (they will be used once you restore the real main_workflow code)
+# All imports kept for your real workflow (marked noqa so ruff doesn't complain)
 from utils.validators import (  # noqa: F401
     validate_target,
     validate_tool_dependencies,
@@ -80,14 +80,8 @@ def parse_arguments():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  # Full pentest workflow with beautiful TUI
-  %(prog)s --target 192.168.1.100 --mode full --interactive
-
-  # Reconnaissance only
-  %(prog)s --target 192.168.1.0/24 --mode recon
-
-  # Resume previous session
-  %(prog)s --resume --session 20250410_133000
+  # Full pentest with beautiful TUI
+  %(prog)s --target 127.0.0.1 --mode full --interactive
         """,
     )
 
@@ -100,29 +94,13 @@ Examples:
     mode_group.add_argument(
         "-m",
         "--mode",
-        choices=[
-            "recon",
-            "scan",
-            "enum",
-            "exploit",
-            "post",
-            "webapp",
-            "ad",
-            "crack",
-            "full",
-        ],
+        choices=["recon", "scan", "enum", "exploit", "post", "webapp", "ad", "crack", "full"],
         default="full",
         help="Execution mode (default: full)",
     )
-    mode_group.add_argument("--modules", help="Comma-separated list of specific modules")
     mode_group.add_argument("--resume", action="store_true", help="Resume interrupted session")
 
     ux_group = parser.add_argument_group("User Experience")
-    ux_group.add_argument(
-        "--init",
-        action="store_true",
-        help="Launch interactive configuration wizard",
-    )
     ux_group.add_argument(
         "--interactive",
         action="store_true",
@@ -142,23 +120,23 @@ Examples:
         default=str(PROJECT_ROOT / "reports"),
         help="Output directory",
     )
-    config_group.add_argument("--session", help="Session name/ID (default: timestamp)")
 
     return parser.parse_args()
 
 
 def main_workflow(args, state=None):
-    """Improved demo workflow that runs longer and clearly shows completion."""
+    """Demo workflow that shows open ports in the Live Tool Output pane."""
     logger.info("Starting demo workflow...")
 
-    if not state:
+    if not state or not state.tui_app:
+        logger.warning("TUI not available")
         return
 
     import time
     import random
 
-    tools = ["nmap", "gobuster", "hydra", "enum4linux", "crackmapexec"]
-    phases = ["Recon", "Scanning", "Enumeration", "Exploitation", "Post-Exploitation"]
+    tools = ["nmap", "masscan"]
+    phases = ["Recon", "Port Scanning", "Enumeration", "Exploitation", "Post-Exploitation"]
 
     for phase_idx, phase in enumerate(phases, 1):
         state.update(
@@ -169,25 +147,30 @@ def main_workflow(args, state=None):
         )
         state.add_event(f"▶ Starting phase: {phase}")
 
-        # Simulate real tool output for ~8 seconds per phase
-        for i in range(12):
-            if not state.running:
-                break
-            line = f"[{tools[phase_idx % len(tools)]}] {i+1}/12 → discovered {random.randint(3, 25)} items on {args.target or '127.0.0.1'}"
-            state.add_event(line)
-            time.sleep(0.65)
+        # Simulate port scanning with clear live output
+        if "Scanning" in phase or "Port" in phase:
+            open_ports = [22, 80, 443, 445, 3389, 8080, 3306]
+            for port in open_ports:
+                if not state.running:
+                    break
+                service = random.choice(["ssh", "http", "https", "smb", "rdp", "mysql"])
+                line = f"✅ OPEN PORT → {port}/tcp   (service: {service})"
+                state.tui_app.append_tool_output(line)
+                state.add_event(f"Discovered open port {port}/tcp")
+                state.ports_found += 1
+                time.sleep(0.7)
+        else:
+            for i in range(6):
+                if not state.running:
+                    break
+                state.add_event(f"Processing {i + 1}/6")
+                time.sleep(0.5)
 
-        state.add_finding(
-            random.choice(["low", "medium", "high"]),
-            f"Interesting finding in {phase}",
-            args.target or "127.0.0.1",
-        )
-
-    # Final completion state
     state.update(current_phase="Completed", phase_progress=100, current_tool="—")
     state.add_event("✅ Full scan completed successfully!")
     state.add_event("Press 'q' to exit the TUI")
     logger.info("Demo workflow finished")
+
 
 def main():
     """Main entry point."""
@@ -203,11 +186,11 @@ def main():
 
         state = DashboardState()
 
-        # Attach TUI log handler so logs appear in the UI
+        # Attach TUI log handler
         tui_handler = TUILogHandler(state)
         logging.getLogger().addHandler(tui_handler)
 
-        # Run the scan workflow in a background thread
+        # Run workflow in background thread
         import threading
 
         scan_thread = threading.Thread(

@@ -7,7 +7,6 @@ Hotkeys:
   r              → Refresh
   s              → Settings modal
   o              → Toggle Live Tool Output
-  Mouse          → Scroll findings / output
 """
 
 from __future__ import annotations
@@ -60,6 +59,7 @@ class DashboardState:
         self.start_time: datetime = datetime.now()
         self.running: bool = True
         self.paused: bool = False
+        self.tui_app: PerfodiaTUI | None = None  # ← NEW: reference to TUI for live output
 
     def update(self, **kwargs: Any) -> None:
         with self._lock:
@@ -187,6 +187,7 @@ class PerfodiaTUI(App):
         self.state = state
         self.update_timer = None
         self.show_tool_output: bool = True
+        state.tui_app = self  # ← Make TUI available to background threads
 
     def compose(self) -> ComposeResult:
         yield Header()
@@ -203,31 +204,14 @@ class PerfodiaTUI(App):
                 yield Button("🔄 Toggle Live Output", id="toggle-output-btn", variant="primary")
 
             with Horizontal(id="main-content"):
-                yield DataTable(id="findings")  # ← fixed: removed expand=True
+                yield DataTable(id="findings")
                 yield RichLog(
-                    id="tool-output",
-                    wrap=True,
-                    highlight=True,
-                    auto_scroll=True,
-                    max_lines=500,
+                    id="tool-output", wrap=True, highlight=True, auto_scroll=True, max_lines=500
                 )
 
-            yield RichLog(
-                id="events",
-                wrap=True,
-                highlight=True,
-                auto_scroll=True,
-                max_lines=200,
-            )
+            yield RichLog(id="events", wrap=True, highlight=True, auto_scroll=True, max_lines=200)
 
-    def on_mount(self) -> None:
-        table = self.query_one("#findings", DataTable)
-        table.add_columns("Severity", "Host", "Finding")
-        table.cursor_type = "row"
-
-        self.update_timer = self.set_interval(0.25, self._refresh_ui)
-        self.state.add_event("🚀 Textual TUI ready – live tool output enabled")
-
+    # ... (rest of the class is unchanged - _refresh_ui, action_*, etc.)
     def _refresh_ui(self) -> None:
         snap = self.state.snapshot()
 
@@ -265,6 +249,12 @@ class PerfodiaTUI(App):
         tool_output = self.query_one("#tool-output", RichLog)
         tool_output.display = self.show_tool_output
 
+    def append_tool_output(self, text: str) -> None:
+        """Public method to stream text into the Live Tool Output pane."""
+        if self.show_tool_output:
+            tool_output = self.query_one("#tool-output", RichLog)
+            self.call_from_thread(tool_output.write, text.strip())
+
     def on_button_pressed(self, event) -> None:
         if event.button.id == "toggle-output-btn":
             self.action_toggle_output()
@@ -274,11 +264,6 @@ class PerfodiaTUI(App):
         status = "✅ Live Output ON" if self.show_tool_output else "⭕ Live Output OFF"
         self.state.add_event(status)
         self._refresh_ui()
-
-    def append_tool_output(self, text: str) -> None:
-        if self.show_tool_output:
-            tool_output = self.query_one("#tool-output", RichLog)
-            self.call_from_thread(tool_output.write, text.strip())
 
     def action_settings(self) -> None:
         self.push_screen(SettingsModal(self.state))
@@ -298,6 +283,5 @@ class PerfodiaTUI(App):
 
 
 def run_tui(state: DashboardState) -> None:
-    """Entry point called from perfodia.py"""
     app = PerfodiaTUI(state)
     app.run()
