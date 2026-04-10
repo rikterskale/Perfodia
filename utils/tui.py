@@ -1,5 +1,5 @@
 """
-Perfodia TUI — Textual (Enhanced Error Logging)
+Perfodia TUI — Textual (Enhanced Error Logging + Stable Layout)
 """
 
 from __future__ import annotations
@@ -16,7 +16,7 @@ from typing import Any, Dict
 
 from textual.app import App, ComposeResult
 from textual.binding import Binding
-from textual.containers import Container, Horizontal, Vertical
+from textual.containers import Container, Horizontal
 from textual.screen import ModalScreen
 from textual.widgets import Button, DataTable, Footer, Header, RichLog, Static
 
@@ -106,8 +106,6 @@ class DashboardState:
 
 
 class TUILogHandler(logging.Handler):
-    """Enhanced log handler with colored errors."""
-
     def __init__(self, state: DashboardState) -> None:
         super().__init__(logging.INFO)
         self.state = state
@@ -131,24 +129,7 @@ class TUILogHandler(logging.Handler):
             if finding:
                 self.state.add_finding(**finding)
         except Exception:
-            pass  # Never let logging break the TUI
-
-    @staticmethod
-    def _extract_finding(msg: str) -> Dict[str, str] | None:
-        msg_lower = msg.lower()
-        if "[!]" not in msg:
-            return None
-        host_match = re.search(r"\b(?:\d{1,3}\.){3}\d{1,3}\b", msg)
-        host = host_match.group(0) if host_match else ""
-        severity = "medium"
-        if "critical" in msg_lower or "cve-" in msg_lower:
-            severity = "critical"
-        elif "credential" in msg_lower or "password" in msg_lower:
-            severity = "high"
-        elif "vuln" in msg_lower:
-            severity = "medium"
-        title = re.sub(r"\s+", " ", msg).strip()[:90]
-        return {"severity": severity, "title": title, "host": host}
+            pass
 
 
 class SettingsModal(ModalScreen):
@@ -192,10 +173,6 @@ class PerfodiaTUI(App):
         self.state = state
         self.show_tool_output: bool = True
         state.tui_app = self
-
-        # Global exception handler so the TUI never crashes
-        self._original_excepthook = sys.excepthook
-        sys.excepthook = self._handle_exception
 
     def compose(self) -> ComposeResult:
         yield Header()
@@ -244,17 +221,6 @@ class PerfodiaTUI(App):
         self.query_one("#stat-creds", Static).update(f"Creds: {snap['credentials_found']}")
         self.query_one("#stat-admin", Static).update(f"Admin: {snap['admin_access']}")
 
-        # Error count in red
-        errors_widget = (
-            self.query_one("#stat-errors", Static) if self.query_one("#stat-errors") else None
-        )
-        if errors_widget:
-            errors_widget.update(
-                f"[red]Errors: {snap['errors']}[/red]"
-                if snap["errors"] > 0
-                else f"Errors: {snap['errors']}"
-            )
-
         table = self.query_one("#findings", DataTable)
         table.clear()
         for f in snap["findings"]:
@@ -281,7 +247,7 @@ class PerfodiaTUI(App):
             self.call_from_thread(tool_output.write, text.strip())
 
     def report_error(self, title: str, exc: Exception | None = None) -> None:
-        """Call this from anywhere to log a visible error with traceback."""
+        """Call this from anywhere to show a visible error with traceback."""
         self.state.errors += 1
         self.state.add_event(f"ERROR: {title}", level="error")
         if exc:
@@ -289,18 +255,6 @@ class PerfodiaTUI(App):
             for line in tb.splitlines():
                 self.state.add_event(line, level="error")
         self._refresh_ui()
-
-    def _handle_exception(self, exc_type, exc_value, exc_traceback):
-        """Global exception handler so the TUI never crashes."""
-        if exc_type is KeyboardInterrupt:
-            self.action_quit()
-            return
-        self.report_error(f"Unhandled exception: {exc_type.__name__}", exc_value)
-        logger.error("Unhandled exception in TUI", exc_info=(exc_type, exc_value, exc_traceback))
-
-    def on_button_pressed(self, event) -> None:
-        if event.button.id == "toggle-output-btn":
-            self.action_toggle_output()
 
     def action_toggle_output(self) -> None:
         self.show_tool_output = not self.show_tool_output

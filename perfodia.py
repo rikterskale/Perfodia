@@ -30,7 +30,7 @@ from utils.vuln_scorer import VulnScorer  # noqa: F401
 from utils.session_state import SessionState  # noqa: F401
 from utils.screenshot import ScreenshotCapture  # noqa: F401
 from utils.scope_guard import ScopeGuard  # noqa: F401
-from configs.settings import FrameworkConfig
+from configs.settings import FrameworkConfig  # noqa: F401
 from modules.recon import ReconModule  # noqa: F401
 from modules.scanning import ScanningModule  # noqa: F401
 from modules.enumeration import EnumerationModule  # noqa: F401
