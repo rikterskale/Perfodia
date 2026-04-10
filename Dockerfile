@@ -125,14 +125,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN git clone --depth 1 https://github.com/danielmiessler/SecLists.git /usr/share/wordlists/SecLists && \
     ln -s /usr/share/wordlists/SecLists /usr/share/seclists
 
-# Exploit-DB / searchsploit (updated to active GitLab repo + correct chmod order)
+# Exploit-DB / searchsploit (active GitLab repo)
 RUN git clone --depth 1 https://gitlab.com/exploit-database/exploitdb.git /opt/exploitdb && \
     chmod +x /opt/exploitdb/searchsploit && \
     ln -sf /opt/exploitdb/searchsploit /usr/local/bin/searchsploit
 
+# Python tools (enum4linux-ng installed from GitHub because it's not on PyPI)
 RUN pip3 install --no-cache-dir \
         impacket \
-        enum4linux-ng \
+        git+https://github.com/cddmp/enum4linux-ng.git \
         bloodhound \
         rich \
     && rm -rf /root/.cache
