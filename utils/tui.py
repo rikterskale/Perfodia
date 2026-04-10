@@ -262,7 +262,7 @@ class PerfodiaTUI(App):
         self.state.add_event("🔄 Manual refresh")
         self._refresh_ui()
 
-    def action_quit(self) -> None:
+    async def action_quit(self) -> None:
         self.state.running = False
         self.exit()
 

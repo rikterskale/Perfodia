@@ -1,244 +1,60 @@
 # Perfodia — Docker Guide
 
-Run Perfodia in Docker so you can use the framework without installing tools directly on your host.
+Run Perfodia in a container for lab testing workflows.
 
-> **⚠️ FOR AUTHORIZED LAB USE ONLY.** Only test systems you own or have written permission to test.
+> Authorized lab use only.
 
----
-
-## Table of Contents
-
-- [Quick Start](#quick-start)
-- [Building the Image](#building-the-image)
-- [Running the Framework](#running-the-framework)
-- [Saving Reports to Your Host](#saving-reports-to-your-host)
-- [Using Custom Configs](#using-custom-configs)
-- [Custom Nmap Options](#custom-nmap-options)
-- [Interactive Shell](#interactive-shell)
-- [Running Tools Directly](#running-tools-directly)
-- [Docker Compose](#docker-compose)
-- [Networking Notes](#networking-notes)
-- [Image Variants](#image-variants)
-- [Security Considerations](#security-considerations)
-- [Troubleshooting](#troubleshooting)
-
----
-
-## Quick Start
+## Build
 
 ```bash
 docker build -t perfodia .
-docker run --rm perfodia --check-tools
-docker run --rm --net=host perfodia -t 192.168.1.100 -m scan -v
-docker run --rm --net=host   -v "$(pwd)/reports:/opt/perfodia/reports"   perfodia -t 192.168.1.100 -m full -v
-```
-
-For rootless/non-privileged container runs, prefer a full-connect scan:
-
-```bash
-docker run --rm perfodia -t 192.168.1.100 -m scan --nmap-scan-type sT -v
-```
-
----
-
-## Building the Image
-
-### Full image (default)
-
-Includes the framework plus the broader toolset used for enumeration, exploitation, and reporting.
-
-```bash
-docker build -t perfodia .
-# or explicitly
-docker build -t perfodia:full --target full .
-```
-
-### Minimal image
-
-Includes the framework plus a smaller recon/scanning-oriented package set.
-
-```bash
 docker build -t perfodia:minimal --target minimal .
 ```
 
-### Useful build options
+## Basic Usage
 
 ```bash
-# No cache
-docker build --no-cache -t perfodia .
+# Show framework CLI help
+docker run --rm perfodia --help
 
-# Plain progress output
-docker build --progress=plain -t perfodia .
+# Validate tool dependencies
+docker run --rm perfodia --check-tools
 
-# Build x86_64 image from Apple Silicon
-docker build --platform linux/amd64 -t perfodia .
+# Recon workflow
+docker run --rm --net=host perfodia -t 192.168.1.100 -m recon -v
+
+# Full workflow (dry run)
+docker run --rm --net=host perfodia -t 192.168.1.100 -m full --dry-run -v
 ```
 
-Optional verified bootstrap arguments for remote components:
+## Persist Reports
 
 ```bash
-docker build -t perfodia   --build-arg RESPONDER_REF=<pinned-commit>   --build-arg MSFINSTALL_URL=<verified-bootstrap-url>   --build-arg MSFINSTALL_SHA256=<sha256>   .
+docker run --rm --net=host \
+  -v "$(pwd)/reports:/opt/perfodia/reports" \
+  perfodia -t 192.168.1.100 -m full -v
 ```
 
----
-
-## Running the Framework
-
-### Basic scans
+## Custom Configs
 
 ```bash
-# Recon only
-docker run --rm --net=host perfodia -t target.lab.local -m recon -v
-
-# Network scanning
-docker run --rm --net=host perfodia -t 192.168.1.0/24 -m scan -v
-
-# Scan + enumeration
-docker run --rm --net=host perfodia -t 192.168.1.100 -m scan --enum -v
-
-# Full pentest (all 8 phases)
-docker run --rm --net=host perfodia -t 192.168.1.100 -m full -v
-
-# Dry run
-docker run --rm --net=host perfodia -t 192.168.1.100 -m full --dry-run -vv
+docker run --rm --net=host \
+  -v "$(pwd)/configs:/opt/perfodia/configs:ro" \
+  -v "$(pwd)/reports:/opt/perfodia/reports" \
+  perfodia -t 192.168.1.100 -m full -c /opt/perfodia/configs/default.yaml -v
 ```
 
-Perfodia runs as a non-root user inside the image. That is intentional. When you cannot grant the container the privileges needed for SYN scanning, use `--nmap-scan-type sT`.
-
----
-
-## Saving Reports to Your Host
-
-By default, reports remain inside the container filesystem. Mount `/opt/perfodia/reports` to keep them.
-
-```bash
-docker run --rm --net=host   -v "$(pwd)/reports:/opt/perfodia/reports"   perfodia -t 192.168.1.100 -m full -v
-```
-
-Expected output layout:
-
-```text
-reports/
-└── 20250322_143000/
-    ├── report.html
-    ├── report.json
-    ├── report.md
-    ├── nmap/
-    ├── enum/
-    ├── logs/
-    └── ...
-```
-
----
-
-## Using Custom Configs
-
-```bash
-docker run --rm --net=host   -v "$(pwd)/configs:/opt/perfodia/configs:ro"   -v "$(pwd)/reports:/opt/perfodia/reports"   perfodia -t 192.168.1.100 -m full -c /opt/perfodia/configs/default.yaml -v
-```
-
----
-
-## Custom Nmap Options
-
-All `--nmap-*` flags behave the same inside Docker.
-
-```bash
-# Add UDP scanning
-docker run --rm --net=host perfodia   -t 192.168.1.100 -m scan --nmap-extra '-sU -Pn' -v
-
-# Replace default nmap flags entirely
-docker run --rm --net=host perfodia   -t 192.168.1.100 -m scan --nmap-raw '-sT -sV -p 22,80,443' -v
-
-# Rootless-safe connect scan
-docker run --rm perfodia   -t 192.168.1.100 -m scan --nmap-scan-type sT -v
-
-# Custom NSE scripts
-docker run --rm --net=host perfodia   -t 192.168.1.100 -m scan --nmap-scripts 'smb-vuln*' -v
-```
-
----
-
-## Interactive Shell
-
-```bash
-docker run --rm -it --net=host   -v "$(pwd)/reports:/opt/perfodia/reports"   perfodia shell
-```
-
-Examples from inside the container:
-
-```bash
-nmap -sV 192.168.1.100
-python3 perfodia.py -t 192.168.1.100 -m scan --nmap-scan-type sT -v
-enum4linux-ng 192.168.1.100
-searchsploit apache 2.4
-```
-
----
-
-## Running Tools Directly
-
-```bash
-docker run --rm --net=host perfodia nmap -sV -p 80,443 192.168.1.100
-docker run --rm perfodia searchsploit vsftpd 2.3
-docker run --rm --net=host perfodia hydra -l admin -P /usr/share/wordlists/quick_passwords.txt ssh://192.168.1.100
-docker run --rm --net=host perfodia enum4linux-ng 192.168.1.100
-docker run --rm --net=host perfodia impacket-secretsdump user:password@192.168.1.100
-```
-
----
-
-## Docker Compose
+## Compose
 
 ```bash
 docker compose build
-docker compose run --rm perfodia -t 192.168.1.100 -m full -v
-docker compose run --rm perfodia-minimal -t 192.168.1.100 -m scan -v
-docker compose run --rm perfodia shell
-docker compose run --rm perfodia check-tools
+docker compose run --rm perfodia --check-tools
+docker compose run --rm perfodia -t 192.168.1.100 -m recon -v
 docker compose down
 ```
 
----
+## Notes
 
-## Networking Notes
-
-### Host networking (recommended)
-
-```bash
-docker run --rm --net=host perfodia ...
-```
-
-This gives the container direct access to the host network stack and is the most reliable way to run scanning and enumeration modules.
-
-### Bridge networking
-
-Use bridge mode only when host networking is not available. In that case, prefer `--nmap-scan-type sT` and expect some scan techniques to be limited.
-
-### Scanning Docker networks
-
-To scan containers on the same Docker network, run against the container IP or service-resolvable hostname on that network.
-
----
-
-## Image Variants
-
-- `perfodia:latest` / `perfodia:full` — broader toolset
-- `perfodia:minimal` — lighter recon/scanning image
-
----
-
-## Security Considerations
-
-- Use `--net=host` only in isolated lab environments.
-- Never run against production systems without explicit authorization.
-- Some optional tooling is intentionally skipped unless you provide a pinned reference or verified checksum.
-
----
-
-## Troubleshooting
-
-- `command not found` — rebuild the image or run `docker run --rm perfodia --check-tools`
-- `Permission denied` — add your user to the `docker` group or use `sudo`
-- No reports after run — make sure you mounted the reports volume correctly
-- SYN scans behave oddly in rootless Docker — use `--nmap-scan-type sT`
+- Use `--net=host` for best scanner behavior.
+- For rootless patterns, pass `--nmap-scan-type sT`.
+- You can still pass compatibility flags like `--nmap-extra` and `--nmap-raw`.

@@ -1,0 +1,37 @@
+diff --git a/requirements.txt b/requirements.txt
+index 2f17c8437f01c158367551ec7fdd4e0121ad0e14..039a55e0f99dd4c4f3bfbecebcfd82593dba83b2 100644
+--- a/requirements.txt
++++ b/requirements.txt
+@@ -1,30 +1,31 @@
+ # =============================================================================
+ # Perfodia - Python Dependencies
+ # =============================================================================
+ # Install with: pip install -r requirements.txt
+ # For system tools (nmap, hydra, etc.), run: sudo bash install_deps.sh --full
+ # =============================================================================
+ 
+ # ── Core (required) ──
+ PyYAML>=6.0.1
+ 
+ # ── Enhanced enumeration (recommended — install after system deps) ──
+ # These require system libraries (libkrb5-dev, libssl-dev, etc.).
+ # Run install_deps.sh first, or install system deps manually before
+ # uncommenting these lines.
+ # impacket>=0.11.0
+ # enum4linux-ng>=1.1.0
+ 
+ # ── Interactive TUI dashboard (recommended) ──
+ rich>=13.0.0
++textual>=0.85.0
+ 
+ # ── PDF report generation (optional — any ONE of these) ──
+ # weasyprint>=60.0             # pip install weasyprint
+ # Or install wkhtmltopdf:       apt install wkhtmltopdf
+ # Or use chromium headless:     apt install chromium-browser
+ 
+ # ── Active Directory (optional) ──
+ # bloodhound>=1.7.0            # pip install bloodhound
+ 
+ # ── Testing ──
+ # pytest>=7.0                  # pip install pytest (for running unit tests)
+

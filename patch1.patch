@@ -1,0 +1,41 @@
+diff --git a/utils/tui.py b/utils/tui.py
+index b405c317a29357012e6b050d3d9e8b542ab84990..843924a4347e67774789779eec532513631e550a 100644
+--- a/utils/tui.py
++++ b/utils/tui.py
+@@ -240,34 +240,34 @@ class PerfodiaTUI(App):
+             tool_output = self.query_one("#tool-output", RichLog)
+             self.call_from_thread(tool_output.write, text.strip())
+ 
+     def on_button_pressed(self, event) -> None:
+         if event.button.id == "toggle-output-btn":
+             self.action_toggle_output()
+ 
+     def action_toggle_output(self) -> None:
+         self.show_tool_output = not self.show_tool_output
+         status = "✅ Live Output ON" if self.show_tool_output else "⭕ Live Output OFF"
+         self.state.add_event(status)
+         self._refresh_ui()
+ 
+     def action_settings(self) -> None:
+         self.push_screen(SettingsModal(self.state))
+ 
+     def action_toggle_pause(self) -> None:
+         self.state.toggle_pause()
+         status = "⏸️ PAUSED" if self.state.paused else "▶️ RESUMED"
+         self.state.add_event(status)
+ 
+     def action_refresh(self) -> None:
+         self.state.add_event("🔄 Manual refresh")
+         self._refresh_ui()
+ 
+-    def action_quit(self) -> None:
++    async def action_quit(self) -> None:
+         self.state.running = False
+         self.exit()
+ 
+ 
+ def run_tui(state: DashboardState) -> None:
+     """Entry point called from perfodia.py"""
+     app = PerfodiaTUI(state)
+     app.run()
+
