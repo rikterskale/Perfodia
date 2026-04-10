@@ -15,7 +15,7 @@ import re
 import threading
 import time
 from collections import deque
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional
 from datetime import datetime
 
 logger = logging.getLogger(__name__)
