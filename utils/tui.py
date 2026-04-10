@@ -1,5 +1,5 @@
 """
-Perfodia TUI — Textual (Fixed layout + no expand=True on DataTable)
+Perfodia TUI — Textual (Minimal layout - no expand=True arguments)
 """
 
 from __future__ import annotations
@@ -195,8 +195,8 @@ class PerfodiaTUI(App):
                 yield Static("Admin: 0", id="stat-admin")
                 yield Button("🔄 Toggle Live Output", id="toggle-output-btn", variant="primary")
 
-            with Horizontal(id="main-content", expand=True):
-                yield DataTable(id="findings")  # ← no expand=True here
+            with Horizontal(id="main-content"):
+                yield DataTable(id="findings")
                 yield RichLog(
                     id="tool-output",
                     wrap=True,
