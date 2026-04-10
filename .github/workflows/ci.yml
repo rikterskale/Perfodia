@@ -121,7 +121,7 @@ jobs:
           docker build \
             --build-arg NETEXEC_REF=67d90e0227dab0e1ba57d3a027fc821ee7c20bd3 \
             --build-arg SECLISTS_REF=f78adb9bf6cdc1ee8d50a8ce54215bc6fb83bd95 \
-            --build-arg EXPLOITDB_REF=f36dd3d4d512ecd7197e079d87eb69ee7cd9d6b0 \
+            --build-arg EXPLOITDB_REF=a55ab4c4822f68afab72d929593fd04c860f5d97 \
             --build-arg ENUM4LINUX_REF=288826fd9ee89b61d846e59f17b77bae4fb671ee \
             -t perfodia:test .
 
