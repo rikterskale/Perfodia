@@ -1,15 +1,20 @@
 """
-Perfodia TUI — Textual (Enhanced Error Logging + Stable Layout)
+Perfodia TUI — Textual (Live Tool Output + Toggle Button + Settings Modal)
+
+Hotkeys:
+  q / Ctrl+C     → Quit
+  p              → Pause / Resume
+  r              → Refresh
+  s              → Settings modal
+  o              → Toggle Live Tool Output
+  Mouse          → Scroll findings / output
 """
 
 from __future__ import annotations
 
 import logging
-import re
-import sys
 import threading
 import time
-import traceback
 from collections import deque
 from datetime import datetime
 from typing import Any, Dict
@@ -54,7 +59,7 @@ class DashboardState:
         self.start_time: datetime = datetime.now()
         self.running: bool = True
         self.paused: bool = False
-        self.tui_app: PerfodiaTUI | None = None
+        self.tui_app: PerfodiaTUI | None = None  # reference to TUI for live output
 
     def update(self, **kwargs: Any) -> None:
         with self._lock:
@@ -62,13 +67,10 @@ class DashboardState:
                 if hasattr(self, key):
                     setattr(self, key, val)
 
-    def add_event(self, msg: str, level: str = "info") -> None:
+    def add_event(self, msg: str) -> None:
         with self._lock:
             timestamp = datetime.now().strftime("%H:%M:%S")
-            prefix = {"error": "[red]ERROR[/red] ", "warning": "[yellow]WARN[/yellow] "}.get(
-                level, ""
-            )
-            self.recent_events.append(f"[{timestamp}] {prefix}{msg}")
+            self.recent_events.append(f"[{timestamp}] {msg}")
 
     def add_finding(self, severity: str, title: str, host: str = "") -> None:
         with self._lock:
@@ -113,21 +115,12 @@ class TUILogHandler(logging.Handler):
     def emit(self, record: logging.LogRecord) -> None:
         try:
             msg = self.format(record)
-            if len(msg) > 120:
-                msg = msg[:117] + "..."
+            self.state.add_event(msg[:120] + "..." if len(msg) > 120 else msg)
 
             if record.levelno >= logging.ERROR:
                 self.state.errors += 1
-                self.state.add_event(msg, level="error")
             elif record.levelno >= logging.WARNING:
                 self.state.warnings += 1
-                self.state.add_event(msg, level="warning")
-            else:
-                self.state.add_event(msg)
-
-            finding = self._extract_finding(msg)
-            if finding:
-                self.state.add_finding(**finding)
         except Exception:
             pass
 
@@ -171,6 +164,7 @@ class PerfodiaTUI(App):
     def __init__(self, state: DashboardState) -> None:
         super().__init__()
         self.state = state
+        self.update_timer = None
         self.show_tool_output: bool = True
         state.tui_app = self
 
@@ -178,7 +172,7 @@ class PerfodiaTUI(App):
         yield Header()
         yield Footer()
 
-        with Vertical():
+        with Container():
             yield Static(id="status", classes="status-bar")
 
             with Horizontal(classes="stats-row"):
@@ -201,8 +195,8 @@ class PerfodiaTUI(App):
         table.add_columns("Severity", "Host", "Finding")
         table.cursor_type = "row"
 
-        self.set_interval(0.3, self._refresh_ui)
-        self.state.add_event("🚀 TUI ready — enhanced error logging active")
+        self.update_timer = self.set_interval(0.25, self._refresh_ui)
+        self.state.add_event("🚀 Textual TUI ready – live tool output enabled")
 
     def _refresh_ui(self) -> None:
         snap = self.state.snapshot()
@@ -246,15 +240,9 @@ class PerfodiaTUI(App):
             tool_output = self.query_one("#tool-output", RichLog)
             self.call_from_thread(tool_output.write, text.strip())
 
-    def report_error(self, title: str, exc: Exception | None = None) -> None:
-        """Call this from anywhere to show a visible error with traceback."""
-        self.state.errors += 1
-        self.state.add_event(f"ERROR: {title}", level="error")
-        if exc:
-            tb = "".join(traceback.format_exception(type(exc), exc, exc.__traceback__))
-            for line in tb.splitlines():
-                self.state.add_event(line, level="error")
-        self._refresh_ui()
+    def on_button_pressed(self, event) -> None:
+        if event.button.id == "toggle-output-btn":
+            self.action_toggle_output()
 
     def action_toggle_output(self) -> None:
         self.show_tool_output = not self.show_tool_output
@@ -280,5 +268,6 @@ class PerfodiaTUI(App):
 
 
 def run_tui(state: DashboardState) -> None:
+    """Entry point called from perfodia.py"""
     app = PerfodiaTUI(state)
     app.run()
