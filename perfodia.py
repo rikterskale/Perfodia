@@ -173,8 +173,8 @@ def main_workflow(args, state=None):
         for i in range(8):
             if not state.running:
                 break
-            line = f"[{tools[phase_idx % len(tools)]}] Processing {i+1}/8 → found {random.randint(1, 15)} items"
-            if hasattr(state, '_tui_app') and state._tui_app:   # future-proof
+            line = f"[{tools[phase_idx % len(tools)]}] Processing {i + 1}/8 → found {random.randint(1, 15)} items"
+            if hasattr(state, "_tui_app") and state._tui_app:  # future-proof
                 pass
             else:
                 # Direct call to TUI (works because we have the instance in the thread)
@@ -185,6 +185,7 @@ def main_workflow(args, state=None):
             try:
                 # This will be replaced with proper integration later
                 from utils.tui import PerfodiaTUI
+
                 # For now we just log so it appears in the events pane
                 state.add_event(line)
                 time.sleep(0.6)
