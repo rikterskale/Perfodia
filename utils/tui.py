@@ -1,13 +1,15 @@
 """
-Perfodia TUI — Textual (Minimal layout - no expand=True arguments)
+Perfodia TUI — Textual (Enhanced Error Logging)
 """
 
 from __future__ import annotations
 
 import logging
 import re
+import sys
 import threading
 import time
+import traceback
 from collections import deque
 from datetime import datetime
 from typing import Any, Dict
@@ -60,10 +62,13 @@ class DashboardState:
                 if hasattr(self, key):
                     setattr(self, key, val)
 
-    def add_event(self, msg: str) -> None:
+    def add_event(self, msg: str, level: str = "info") -> None:
         with self._lock:
             timestamp = datetime.now().strftime("%H:%M:%S")
-            self.recent_events.append(f"[{timestamp}] {msg}")
+            prefix = {"error": "[red]ERROR[/red] ", "warning": "[yellow]WARN[/yellow] "}.get(
+                level, ""
+            )
+            self.recent_events.append(f"[{timestamp}] {prefix}{msg}")
 
     def add_finding(self, severity: str, title: str, host: str = "") -> None:
         with self._lock:
@@ -101,6 +106,8 @@ class DashboardState:
 
 
 class TUILogHandler(logging.Handler):
+    """Enhanced log handler with colored errors."""
+
     def __init__(self, state: DashboardState) -> None:
         super().__init__(logging.INFO)
         self.state = state
@@ -108,18 +115,23 @@ class TUILogHandler(logging.Handler):
     def emit(self, record: logging.LogRecord) -> None:
         try:
             msg = self.format(record)
-            self.state.add_event(msg[:120] + "..." if len(msg) > 120 else msg)
+            if len(msg) > 120:
+                msg = msg[:117] + "..."
 
             if record.levelno >= logging.ERROR:
                 self.state.errors += 1
+                self.state.add_event(msg, level="error")
             elif record.levelno >= logging.WARNING:
                 self.state.warnings += 1
+                self.state.add_event(msg, level="warning")
+            else:
+                self.state.add_event(msg)
 
             finding = self._extract_finding(msg)
             if finding:
                 self.state.add_finding(**finding)
         except Exception:
-            pass
+            pass  # Never let logging break the TUI
 
     @staticmethod
     def _extract_finding(msg: str) -> Dict[str, str] | None:
@@ -181,6 +193,10 @@ class PerfodiaTUI(App):
         self.show_tool_output: bool = True
         state.tui_app = self
 
+        # Global exception handler so the TUI never crashes
+        self._original_excepthook = sys.excepthook
+        sys.excepthook = self._handle_exception
+
     def compose(self) -> ComposeResult:
         yield Header()
         yield Footer()
@@ -198,20 +214,10 @@ class PerfodiaTUI(App):
             with Horizontal(id="main-content"):
                 yield DataTable(id="findings")
                 yield RichLog(
-                    id="tool-output",
-                    wrap=True,
-                    highlight=True,
-                    auto_scroll=True,
-                    max_lines=500,
+                    id="tool-output", wrap=True, highlight=True, auto_scroll=True, max_lines=500
                 )
 
-            yield RichLog(
-                id="events",
-                wrap=True,
-                highlight=True,
-                auto_scroll=True,
-                max_lines=200,
-            )
+            yield RichLog(id="events", wrap=True, highlight=True, auto_scroll=True, max_lines=200)
 
     def on_mount(self) -> None:
         table = self.query_one("#findings", DataTable)
@@ -219,7 +225,7 @@ class PerfodiaTUI(App):
         table.cursor_type = "row"
 
         self.set_interval(0.3, self._refresh_ui)
-        self.state.add_event("🚀 TUI ready — live output enabled")
+        self.state.add_event("🚀 TUI ready — enhanced error logging active")
 
     def _refresh_ui(self) -> None:
         snap = self.state.snapshot()
@@ -237,6 +243,17 @@ class PerfodiaTUI(App):
         self.query_one("#stat-ports", Static).update(f"Ports: {snap['ports_found']}")
         self.query_one("#stat-creds", Static).update(f"Creds: {snap['credentials_found']}")
         self.query_one("#stat-admin", Static).update(f"Admin: {snap['admin_access']}")
+
+        # Error count in red
+        errors_widget = (
+            self.query_one("#stat-errors", Static) if self.query_one("#stat-errors") else None
+        )
+        if errors_widget:
+            errors_widget.update(
+                f"[red]Errors: {snap['errors']}[/red]"
+                if snap["errors"] > 0
+                else f"Errors: {snap['errors']}"
+            )
 
         table = self.query_one("#findings", DataTable)
         table.clear()
@@ -262,6 +279,24 @@ class PerfodiaTUI(App):
         if self.show_tool_output:
             tool_output = self.query_one("#tool-output", RichLog)
             self.call_from_thread(tool_output.write, text.strip())
+
+    def report_error(self, title: str, exc: Exception | None = None) -> None:
+        """Call this from anywhere to log a visible error with traceback."""
+        self.state.errors += 1
+        self.state.add_event(f"ERROR: {title}", level="error")
+        if exc:
+            tb = "".join(traceback.format_exception(type(exc), exc, exc.__traceback__))
+            for line in tb.splitlines():
+                self.state.add_event(line, level="error")
+        self._refresh_ui()
+
+    def _handle_exception(self, exc_type, exc_value, exc_traceback):
+        """Global exception handler so the TUI never crashes."""
+        if exc_type is KeyboardInterrupt:
+            self.action_quit()
+            return
+        self.report_error(f"Unhandled exception: {exc_type.__name__}", exc_value)
+        logger.error("Unhandled exception in TUI", exc_info=(exc_type, exc_value, exc_traceback))
 
     def on_button_pressed(self, event) -> None:
         if event.button.id == "toggle-output-btn":
