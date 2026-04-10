@@ -22,9 +22,7 @@ class TestCredentialVault:
     def test_different_types_not_deduped(self, tmp_session):
         vault = CredentialVault(tmp_session)
         vault.add_password(username="admin", password="pass123")
-        vault.add_hash(
-            username="admin", hash_value="aad3b:31d6c", hash_type=CredType.NTLM_HASH
-        )
+        vault.add_hash(username="admin", hash_value="aad3b:31d6c", hash_type=CredType.NTLM_HASH)
         assert vault.stats()["total"] == 2
 
     def test_add_hash(self, tmp_session):
@@ -39,12 +37,8 @@ class TestCredentialVault:
 
     def test_get_for_host(self, tmp_session):
         vault = CredentialVault(tmp_session)
-        vault.add_password(
-            username="admin", password="pass", host="1.1.1.1", service="ssh"
-        )
-        vault.add_password(
-            username="root", password="toor", host="2.2.2.2", service="ssh"
-        )
+        vault.add_password(username="admin", password="pass", host="1.1.1.1", service="ssh")
+        vault.add_password(username="root", password="toor", host="2.2.2.2", service="ssh")
         creds = vault.get_for_host("1.1.1.1", service="ssh")
         assert len(creds) >= 1
         assert any(c.username == "admin" for c in creds)

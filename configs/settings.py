@@ -175,9 +175,7 @@ class FrameworkConfig:
                 for key, val in values.items():
                     if key not in self._data[section]:
                         self._data[section][key] = val
-                    elif isinstance(val, dict) and isinstance(
-                        self._data[section][key], dict
-                    ):
+                    elif isinstance(val, dict) and isinstance(self._data[section][key], dict):
                         # Recurse one more level for nested dicts like
                         # enumeration.smb, enumeration.snmp, etc.
                         for subkey, subval in val.items():

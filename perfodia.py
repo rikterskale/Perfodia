@@ -64,9 +64,7 @@ BANNER = r"""
 def signal_handler(sig, frame):
     """Handle interrupt signals gracefully."""
     logger.warning("\n[!] Interrupt received. Cleaning up...")
-    print(
-        "\n[!] Framework interrupted. Partial results may be in the reports directory."
-    )
+    print("\n[!] Framework interrupted. Partial results may be in the reports directory.")
     sys.exit(130)
 
 
@@ -539,17 +537,13 @@ def run_workflow(
             logger.warning(f"[!] {phase_name} phase interrupted by user")
             results["phases"][module_key] = {"status": "interrupted"}
             if session_state:
-                session_state.save_checkpoint(
-                    results, completed_phase=f"{module_key}_partial"
-                )
+                session_state.save_checkpoint(results, completed_phase=f"{module_key}_partial")
             raise
         except Exception as e:
             logger.error(f"[!] {phase_name} phase failed: {e}", exc_info=True)
             results["phases"][module_key] = {"status": "error", "error": str(e)}
             if session_state:
-                session_state.save_checkpoint(
-                    results, completed_phase=f"{module_key}_error"
-                )
+                session_state.save_checkpoint(results, completed_phase=f"{module_key}_error")
             if args.verbose >= 2:
                 import traceback
 
@@ -658,9 +652,7 @@ def main():
             if response != "y":
                 sys.exit(0)
         else:
-            logger.warning(
-                "[!] Non-interactive session detected; continuing without prompt."
-            )
+            logger.warning("[!] Non-interactive session detected; continuing without prompt.")
 
     # Create session directory
     session_name = args.session or datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -700,12 +692,8 @@ def main():
         else:
             logger.warning("[RESUME] No checkpoint found — starting fresh")
 
-    logger.info(
-        f"[INIT] Credential vault: {credential_vault.stats().get('total', 0)} existing"
-    )
-    logger.info(
-        f"[INIT] Scope guard: {len(targets)} targets, {len(exclusions)} exclusions"
-    )
+    logger.info(f"[INIT] Credential vault: {credential_vault.stats().get('total', 0)} existing")
+    logger.info(f"[INIT] Scope guard: {len(targets)} targets, {len(exclusions)} exclusions")
 
     # ── Interactive TUI ──
     tui_state = None
@@ -728,9 +716,7 @@ def main():
             tui_dashboard.start()
             logger.info("[TUI] Interactive dashboard started")
         else:
-            logger.warning(
-                "[TUI] Install 'rich' for interactive mode: pip install rich"
-            )
+            logger.warning("[TUI] Install 'rich' for interactive mode: pip install rich")
 
     # ── Run the workflow ──
     try:
@@ -793,9 +779,7 @@ def main():
     # ── Scope violation report ──
     if scope_guard.violation_count > 0:
         scope_guard.save_violations(session_dir)
-        logger.warning(
-            f"\n[SCOPE] {scope_guard.violation_count} scope violations detected!"
-        )
+        logger.warning(f"\n[SCOPE] {scope_guard.violation_count} scope violations detected!")
 
     # ── Risk rating summary ──
     if vuln_scorer:

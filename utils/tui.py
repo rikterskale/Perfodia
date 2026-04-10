@@ -64,7 +64,11 @@ class DashboardState:
         self.admin_access: int = 0
         self.findings = deque(maxlen=MAX_FINDINGS)
         self.severity_counts: Dict[str, int] = {
-            "critical": 0, "high": 0, "medium": 0, "low": 0, "info": 0
+            "critical": 0,
+            "high": 0,
+            "medium": 0,
+            "low": 0,
+            "info": 0,
         }
         self.recent_events = deque(maxlen=MAX_EVENTS)
         self.errors: int = 0
@@ -308,9 +312,13 @@ class TUIDashboard:
         table.add_column("Finding")
 
         for f in snap["findings"]:
-            color = {"critical": "red", "high": "bright_red", "medium": "yellow", "low": "green", "info": "blue"}.get(
-                f["severity"].lower(), "white"
-            )
+            color = {
+                "critical": "red",
+                "high": "bright_red",
+                "medium": "yellow",
+                "low": "green",
+                "info": "blue",
+            }.get(f["severity"].lower(), "white")
             table.add_row(f"[{color}]{f['severity'].upper()}[/]", f["host"], f["title"])
 
         if not snap["findings"]:

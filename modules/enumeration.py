@@ -55,8 +55,7 @@ class EnumerationModule(BaseModule):
 
         if not hosts:
             logger.warning(
-                "[ENUM] No scan data available. Run scan phase first "
-                "or provide scan results."
+                "[ENUM] No scan data available. Run scan phase first or provide scan results."
             )
             results["status"] = "skipped"
             return results
@@ -80,17 +79,14 @@ class EnumerationModule(BaseModule):
                 svc_name = port_data.get("service", {}).get("name", "").lower()
                 handler = SERVICE_ENUM_MAP.get(svc_name)
                 if handler:
-                    services_to_enum.setdefault(handler, []).append(
-                        (port_num, port_data)
-                    )
+                    services_to_enum.setdefault(handler, []).append((port_num, port_data))
 
             # Run enumeration for each service type
             for svc_type, port_list in services_to_enum.items():
                 enum_func = getattr(self, f"_enum_{svc_type}", None)
                 if enum_func:
                     logger.info(
-                        f"  [{svc_type.upper()}] Enumerating on ports: "
-                        f"{[p[0] for p in port_list]}"
+                        f"  [{svc_type.upper()}] Enumerating on ports: {[p[0] for p in port_list]}"
                     )
                     try:
                         host_results[svc_type] = enum_func(ip, port_list)
@@ -256,9 +252,7 @@ class EnumerationModule(BaseModule):
         v3_results: Dict[str, Any] = {}
 
         # Test 1: noAuthNoPriv (just a username, no auth or encryption)
-        v3_users = v3_config.get(
-            "usernames", ["initial", "public", "admin", "snmpuser"]
-        )
+        v3_users = v3_config.get("usernames", ["initial", "public", "admin", "snmpuser"])
         for user in v3_users:
             result = self.runner.run(
                 tool_name="snmpwalk",
@@ -528,10 +522,7 @@ class EnumerationModule(BaseModule):
             if result.success and result.stdout:
                 port_results["raw"] = result.stdout[:3000]
                 # Check for open relay
-                if (
-                    "open-relay" in result.stdout.lower()
-                    and "isn't" not in result.stdout.lower()
-                ):
+                if "open-relay" in result.stdout.lower() and "isn't" not in result.stdout.lower():
                     port_results["open_relay"] = True
                     logger.warning(f"    [!] SMTP open relay on {ip}:{port_num}")
 

@@ -189,9 +189,7 @@ def run_config_wizard(output_dir: str = "configs") -> str:
     safe_mode = _ask_bool("Enable safe mode (skip brute-force/destructive attacks)?")
     auto_exploit = False
     if not safe_mode:
-        auto_exploit = _ask_bool(
-            "Enable automated exploitation? (ONLY for isolated labs)", False
-        )
+        auto_exploit = _ask_bool("Enable automated exploitation? (ONLY for isolated labs)", False)
 
     config["exploitation"] = {
         "auto_exploit": auto_exploit,
@@ -203,9 +201,7 @@ def run_config_wizard(output_dir: str = "configs") -> str:
     print(f"\n{GREEN}  ── Credential Settings ──{NC}\n")
 
     wordlist_path = _ask("Password wordlist path", "/usr/share/wordlists/rockyou.txt")
-    lockout_threshold = _ask_int(
-        "Account lockout threshold (max attempts per account)", 3, 1, 10
-    )
+    lockout_threshold = _ask_int("Account lockout threshold (max attempts per account)", 3, 1, 10)
 
     config["credentials"] = {
         "usernames": ["admin", "root", "administrator", "user", "test"],
@@ -271,9 +267,7 @@ def run_config_wizard(output_dir: str = "configs") -> str:
         print(f"  {GREEN}✓{NC} Configuration saved to: {BOLD}{out_path}{NC}")
         print()
         print("  Use it with:")
-        print(
-            f"    {CYAN}sudo python3 perfodia.py -t <target> -m full -c {out_path} -v{NC}"
-        )
+        print(f"    {CYAN}sudo python3 perfodia.py -t <target> -m full -c {out_path} -v{NC}")
         print()
         return str(out_path)
 

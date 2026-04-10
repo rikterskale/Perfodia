@@ -221,9 +221,7 @@ class ReportGenerator:
             "|----------|------|------|---------|----------|-------|",
         ]
         for c in creds[:30]:
-            domain = (
-                f"{c.get('domain', '')}\\\\".lstrip("\\\\") if c.get("domain") else ""
-            )
+            domain = f"{c.get('domain', '')}\\\\".lstrip("\\\\") if c.get("domain") else ""
             lines.append(
                 f"| {domain}{c.get('username', '')} "
                 f"| {c.get('cred_type', '')} "
@@ -315,9 +313,7 @@ class ReportGenerator:
             if tech.get("detected_frameworks"):
                 lines.append(
                     "**Detected:** "
-                    + ", ".join(
-                        f.get("framework", "") for f in tech["detected_frameworks"]
-                    )
+                    + ", ".join(f.get("framework", "") for f in tech["detected_frameworks"])
                 )
             vulns = tdata.get("vuln_checks", {})
             if vulns.get("git_exposed"):
@@ -388,9 +384,7 @@ class ReportGenerator:
             lines.append("|------|---------|----------|")
             for c in creds:
                 lines.append(
-                    f"| {c.get('host', '')} "
-                    f"| {c.get('service', '')} "
-                    f"| {c.get('username', '')} |"
+                    f"| {c.get('host', '')} | {c.get('service', '')} | {c.get('username', '')} |"
                 )
             lines.append("")
         return lines
@@ -527,9 +521,7 @@ blockquote {{ border-left: 3px solid #00d4ff; padding: 10px 15px; margin: 15px 0
 
         # ── Stats row ──
         total_hosts = len(phases.get("scan", {}).get("hosts", []))
-        total_ports = sum(
-            len(h.get("ports", [])) for h in phases.get("scan", {}).get("hosts", [])
-        )
+        total_ports = sum(len(h.get("ports", [])) for h in phases.get("scan", {}).get("hosts", []))
         vault_stats = vault_data.get("stats", {})
         html += '<div style="margin: 20px 0;">\n'
         for label, value in [
@@ -597,7 +589,9 @@ blockquote {{ border-left: 3px solid #00d4ff; padding: 10px 15px; margin: 15px 0
                 if url.startswith("_"):
                     continue
                 if path.endswith((".png", ".jpg", ".jpeg")):
-                    html += f'<div style="max-width:400px"><p><strong>{html_escape(url)}</strong></p>'
+                    html += (
+                        f'<div style="max-width:400px"><p><strong>{html_escape(url)}</strong></p>'
+                    )
                     html += f'<img src="file://{html_escape(path)}" style="max-width:100%;border:1px solid #333;border-radius:4px;" />'
                     html += "</div>\n"
                 else:

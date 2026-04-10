@@ -70,8 +70,7 @@ class ScanningModule(BaseModule):
         results["status"] = "completed"
         results["total_hosts"] = len(all_hosts_data)
         results["total_open_ports"] = sum(
-            len([p for p in h.get("ports", []) if p.get("state") == "open"])
-            for h in all_hosts_data
+            len([p for p in h.get("ports", []) if p.get("state") == "open"]) for h in all_hosts_data
         )
 
         logger.info(
@@ -102,10 +101,7 @@ class ScanningModule(BaseModule):
                 "--min-rate",
                 "300",
                 "-oG",
-                str(
-                    self.session_dir
-                    / f"nmap/discovery_{target.replace('/', '_')}.gnmap"
-                ),
+                str(self.session_dir / f"nmap/discovery_{target.replace('/', '_')}.gnmap"),
                 target,
             ],
             timeout=120,
@@ -154,9 +150,7 @@ class ScanningModule(BaseModule):
                 str(rate),
                 "--open-only",
                 "-oG",
-                str(
-                    self.session_dir / f"nmap/masscan_{target.replace('/', '_')}.gnmap"
-                ),
+                str(self.session_dir / f"nmap/masscan_{target.replace('/', '_')}.gnmap"),
             ],
             timeout=600,
             output_file=f"nmap/masscan_{target.replace('/', '_')}.txt",
@@ -183,9 +177,7 @@ class ScanningModule(BaseModule):
 
         return host_ports if host_ports else None
 
-    def _detailed_scan(
-        self, host_ip: str, quick_ports: Optional[Dict] = None
-    ) -> Optional[Dict]:
+    def _detailed_scan(self, host_ip: str, quick_ports: Optional[Dict] = None) -> Optional[Dict]:
         """
         Full nmap scan with service detection and OS fingerprinting.
 
@@ -231,8 +223,7 @@ class ScanningModule(BaseModule):
             )
 
             logger.info(
-                f"[NMAP RAW] Using user-supplied flags for {host_ip}: "
-                f"{' '.join(raw_flags)}"
+                f"[NMAP RAW] Using user-supplied flags for {host_ip}: {' '.join(raw_flags)}"
             )
         else:
             # ── Normal mode: framework defaults ──
@@ -281,8 +272,7 @@ class ScanningModule(BaseModule):
             if extra_flags:
                 nmap_args.extend(extra_flags)
                 logger.info(
-                    f"[NMAP EXTRA] Appending user flags for {host_ip}: "
-                    f"{' '.join(extra_flags)}"
+                    f"[NMAP EXTRA] Appending user flags for {host_ip}: {' '.join(extra_flags)}"
                 )
 
         # Log the full nmap command for transparency
@@ -296,17 +286,12 @@ class ScanningModule(BaseModule):
         )
 
         if not result.success:
-            logger.error(
-                f"Nmap scan failed for {host_ip} (exit code {result.return_code})"
-            )
+            logger.error(f"Nmap scan failed for {host_ip} (exit code {result.return_code})")
             if result.stderr:
                 # Log first 5 stderr lines for quick diagnosis
                 for line in result.stderr.strip().split("\n")[:5]:
                     logger.error(f"  nmap stderr: {line}")
-            if (
-                result.return_code == 1
-                and "requires root" in (result.stderr or "").lower()
-            ):
+            if result.return_code == 1 and "requires root" in (result.stderr or "").lower():
                 logger.error(
                     "  HINT: This scan type requires root privileges. "
                     "Run with sudo or use --nmap-scan-type sT for a "
@@ -386,8 +371,7 @@ class ScanningModule(BaseModule):
                 return None
         else:
             logger.error(
-                f"Vulnerability scan failed for {host_ip} "
-                f"(exit code {result.return_code})"
+                f"Vulnerability scan failed for {host_ip} (exit code {result.return_code})"
             )
             if result.stderr:
                 for line in result.stderr.strip().split("\n")[:3]:

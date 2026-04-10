@@ -20,9 +20,7 @@ class TestSeverity:
         assert Severity.from_cvss(0) == Severity.INFO
 
     def test_numeric_ordering(self):
-        assert (
-            Severity.CRITICAL.numeric > Severity.HIGH.numeric > Severity.MEDIUM.numeric
-        )
+        assert Severity.CRITICAL.numeric > Severity.HIGH.numeric > Severity.MEDIUM.numeric
 
 
 class TestVulnScorer:
@@ -31,9 +29,7 @@ class TestVulnScorer:
         findings = scorer.score_nmap_scripts(sample_nmap_hosts)
         assert len(findings) >= 1
         eternalblue = [
-            f
-            for f in findings
-            if "eternalblue" in f.title.lower() or "ms17-010" in f.title.lower()
+            f for f in findings if "eternalblue" in f.title.lower() or "ms17-010" in f.title.lower()
         ]
         assert len(eternalblue) >= 1
         assert eternalblue[0].severity == Severity.CRITICAL
@@ -42,9 +38,7 @@ class TestVulnScorer:
         scorer = VulnScorer()
         findings = scorer.score_nmap_scripts(sample_nmap_hosts)
         ssl_findings = [
-            f
-            for f in findings
-            if "ssl" in f.title.lower() or "expired" in f.title.lower()
+            f for f in findings if "ssl" in f.title.lower() or "expired" in f.title.lower()
         ]
         assert len(ssl_findings) >= 1
 
@@ -85,9 +79,7 @@ class TestVulnScorer:
     def test_findings_sorted_by_severity(self):
         scorer = VulnScorer()
         scorer.score_misconfiguration("Low thing", "1.1.1.1", Severity.LOW, 2.0)
-        scorer.score_misconfiguration(
-            "Critical thing", "1.1.1.1", Severity.CRITICAL, 9.8
-        )
+        scorer.score_misconfiguration("Critical thing", "1.1.1.1", Severity.CRITICAL, 9.8)
         scorer.score_misconfiguration("Medium thing", "1.1.1.1", Severity.MEDIUM, 5.0)
         findings = scorer.get_findings()
         assert findings[0].severity == Severity.CRITICAL

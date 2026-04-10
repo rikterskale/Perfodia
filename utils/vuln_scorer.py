@@ -435,9 +435,7 @@ class VulnScorer:
         critical = [f for f in self._findings if f.severity == Severity.CRITICAL]
         high = [f for f in self._findings if f.severity == Severity.HIGH]
         creds = [f for f in self._findings if "credential" in f.title.lower()]
-        admin = [
-            f for f in self._findings if f.mitre_attack or "admin" in f.title.lower()
-        ]
+        admin = [f for f in self._findings if f.mitre_attack or "admin" in f.title.lower()]
 
         parts = []
         if not self._findings:

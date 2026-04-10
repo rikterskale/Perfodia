@@ -78,9 +78,7 @@ class ScreenshotCapture:
         if not web_targets:
             return {}
 
-        logger.info(
-            f"[SCREENSHOT] Capturing {len(web_targets)} web service screenshots"
-        )
+        logger.info(f"[SCREENSHOT] Capturing {len(web_targets)} web service screenshots")
 
         # Use gowitness batch mode if available (much faster)
         if self._backend == "gowitness" and len(web_targets) > 1:
@@ -108,9 +106,7 @@ class ScreenshotCapture:
                 except Exception as e:
                     logger.warning(f"[SCREENSHOT] Failed for {url}: {e}")
 
-        logger.info(
-            f"[SCREENSHOT] Captured {len(results)}/{len(web_targets)} screenshots"
-        )
+        logger.info(f"[SCREENSHOT] Captured {len(results)}/{len(web_targets)} screenshots")
         return results
 
     def _gowitness_batch(self, targets: List[Dict], timeout: int) -> Dict[str, str]:
@@ -220,9 +216,7 @@ class ScreenshotCapture:
 
     def _capture_chrome(self, url: str, output: Path, timeout: int) -> Optional[str]:
         """Screenshot using headless Chrome/Chromium."""
-        chrome_bin = (
-            "chromium-browser" if self._backend == "chromium" else "google-chrome"
-        )
+        chrome_bin = "chromium-browser" if self._backend == "chromium" else "google-chrome"
         self.runner.run(
             tool_name=chrome_bin,
             args=[
@@ -241,9 +235,7 @@ class ScreenshotCapture:
         )
         return str(output) if output.exists() else None
 
-    def _capture_curl_fallback(
-        self, url: str, output: Path, timeout: int
-    ) -> Optional[str]:
+    def _capture_curl_fallback(self, url: str, output: Path, timeout: int) -> Optional[str]:
         """
         Fallback: save raw HTML with curl (no visual screenshot,
         but preserves the response for evidence).
@@ -269,8 +261,7 @@ class ScreenshotCapture:
         )
         if result.success and html_output.exists():
             logger.info(
-                f"[SCREENSHOT] Saved HTML snapshot for {url} "
-                f"(no visual screenshot tool available)"
+                f"[SCREENSHOT] Saved HTML snapshot for {url} (no visual screenshot tool available)"
             )
             return str(html_output)
         return None
@@ -312,11 +303,7 @@ class ScreenshotCapture:
                     8000,
                     8888,
                 ):
-                    scheme = (
-                        "https"
-                        if (tunnel == "ssl" or port_num in (443, 8443))
-                        else "http"
-                    )
+                    scheme = "https" if (tunnel == "ssl" or port_num in (443, 8443)) else "http"
                     url = f"{scheme}://{ip}:{port_num}"
                     targets.append(
                         {

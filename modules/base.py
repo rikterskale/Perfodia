@@ -61,9 +61,7 @@ class BaseModule(ABC):
         )
 
         # Parallel runner — uses thread count from config
-        self.parallel = ParallelRunner(
-            max_workers=config.get("general", "threads", default=10)
-        )
+        self.parallel = ParallelRunner(max_workers=config.get("general", "threads", default=10))
 
         self.results: Dict[str, Any] = {"status": "pending"}
 
@@ -88,9 +86,7 @@ class BaseModule(ABC):
                 ports[p["port"]] = p
         return ports
 
-    def _get_hosts_with_service(
-        self, scan_results: Dict, service_name: str
-    ) -> List[Dict]:
+    def _get_hosts_with_service(self, scan_results: Dict, service_name: str) -> List[Dict]:
         """Find hosts running a specific service from scan results."""
         matches = []
         for host in scan_results.get("hosts", []):

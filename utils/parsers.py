@@ -318,9 +318,7 @@ def parse_snmp_output(output: str) -> List[Dict]:
 def parse_hydra_output(output: str) -> List[Dict]:
     """Parse hydra output for successful credentials."""
     creds = []
-    pattern = re.compile(
-        r"\[(\d+)\]\[(\S+)\]\s+host:\s+(\S+)\s+login:\s+(\S+)\s+password:\s+(\S+)"
-    )
+    pattern = re.compile(r"\[(\d+)\]\[(\S+)\]\s+host:\s+(\S+)\s+login:\s+(\S+)\s+password:\s+(\S+)")
     for match in pattern.finditer(output):
         creds.append(
             {

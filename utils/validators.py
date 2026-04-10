@@ -111,8 +111,7 @@ def validate_target(target: str) -> Tuple[bool, Optional[str]]:
         prefix = network.prefixlen
         if prefix < 16:
             logger.error(
-                f"CIDR range /{prefix} is too broad. "
-                f"Minimum /{16} for safety. Target: {target}"
+                f"CIDR range /{prefix} is too broad. Minimum /{16} for safety. Target: {target}"
             )
             return False, None
         logger.debug(f"Target validated as CIDR: {network}")
@@ -121,9 +120,7 @@ def validate_target(target: str) -> Tuple[bool, Optional[str]]:
         pass
 
     # Try as hostname
-    hostname_pattern = re.compile(
-        r"^(?!-)[A-Za-z0-9-]{1,63}(?<!-)(\.[A-Za-z0-9-]{1,63})*$"
-    )
+    hostname_pattern = re.compile(r"^(?!-)[A-Za-z0-9-]{1,63}(?<!-)(\.[A-Za-z0-9-]{1,63})*$")
     if hostname_pattern.match(target):
         try:
             resolved = socket.gethostbyname(target)
@@ -131,8 +128,7 @@ def validate_target(target: str) -> Tuple[bool, Optional[str]]:
             return True, target
         except socket.gaierror:
             logger.warning(
-                f"Hostname {target} could not be resolved. "
-                f"Accepting anyway (may resolve later)."
+                f"Hostname {target} could not be resolved. Accepting anyway (may resolve later)."
             )
             return True, target
 
@@ -170,15 +166,11 @@ def validate_tool_dependencies(verbose: bool = False) -> bool:
             if required:
                 all_required_ok = False
                 if verbose:
-                    print(
-                        f"  [✗] {name:<28} MISSING (REQUIRED) — install: {package_hint}"
-                    )
+                    print(f"  [✗] {name:<28} MISSING (REQUIRED) — install: {package_hint}")
             else:
                 missing_optional.append(name)
                 if verbose:
-                    print(
-                        f"  [—] {name:<28} not found (optional) — install: {package_hint}"
-                    )
+                    print(f"  [—] {name:<28} not found (optional) — install: {package_hint}")
 
     total = len(TOOL_REGISTRY)
     print(f"\n  Tools found: {available_count}/{total}")

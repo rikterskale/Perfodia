@@ -71,9 +71,7 @@ class ReconModule(BaseModule):
             )
             if result.success and result.stdout.strip():
                 records = [
-                    line.strip()
-                    for line in result.stdout.strip().split("\n")
-                    if line.strip()
+                    line.strip() for line in result.stdout.strip().split("\n") if line.strip()
                 ]
                 if records:
                     dns_results["records"][rtype] = records
@@ -130,9 +128,7 @@ class ReconModule(BaseModule):
             for key, pattern in patterns.items():
                 matches = re.findall(pattern, result.stdout, re.IGNORECASE)
                 if matches:
-                    whois_data[key] = (
-                        matches if len(matches) > 1 else matches[0].strip()
-                    )
+                    whois_data[key] = matches if len(matches) > 1 else matches[0].strip()
 
         return whois_data
 
@@ -185,9 +181,7 @@ class ReconModule(BaseModule):
 
         if ns_result.success and ns_result.stdout.strip():
             nameservers = [
-                ns.strip().rstrip(".")
-                for ns in ns_result.stdout.strip().split("\n")
-                if ns.strip()
+                ns.strip().rstrip(".") for ns in ns_result.stdout.strip().split("\n") if ns.strip()
             ]
 
             zt_results["attempted"] = True

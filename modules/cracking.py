@@ -86,9 +86,7 @@ class CrackingModule(BaseModule):
             hashes = hash_set["hashes"]
             source = hash_set.get("source", "unknown")
 
-            logger.info(
-                f"[CRACK] Cracking {len(hashes)} {hash_type} hashes from {source}"
-            )
+            logger.info(f"[CRACK] Cracking {len(hashes)} {hash_type} hashes from {source}")
 
             # Write hashes to temp file
             hash_file = self.session_dir / "loot" / f"crack_{hash_type}_{source}.txt"
@@ -98,9 +96,7 @@ class CrackingModule(BaseModule):
             # Try hashcat first, then john
             cracked = []
             if is_tool_available("hashcat"):
-                cracked = self._run_hashcat(
-                    hash_file, hash_type, wordlist, max_runtime, use_rules
-                )
+                cracked = self._run_hashcat(hash_file, hash_type, wordlist, max_runtime, use_rules)
             elif is_tool_available("john"):
                 cracked = self._run_john(hash_file, hash_type, wordlist, max_runtime)
 
@@ -132,9 +128,7 @@ class CrackingModule(BaseModule):
                 by_type.setdefault(t, []).append(cred.secret)
             for hash_type, hashes in by_type.items():
                 if hashes:
-                    hash_sets.append(
-                        {"type": hash_type, "hashes": hashes, "source": "vault"}
-                    )
+                    hash_sets.append({"type": hash_type, "hashes": hashes, "source": "vault"})
 
         # From loot directory files
         loot_dir = self.session_dir / "loot"
@@ -152,9 +146,7 @@ class CrackingModule(BaseModule):
                         if line.strip() and not line.startswith("#")
                     ]
                     if hashes:
-                        hash_sets.append(
-                            {"type": hash_type, "hashes": hashes, "source": f.stem}
-                        )
+                        hash_sets.append({"type": hash_type, "hashes": hashes, "source": f.stem})
 
         return hash_sets
 

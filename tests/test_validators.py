@@ -99,9 +99,7 @@ class TestValidateNmapOptions:
         assert tokens == []
 
     def test_complex_valid(self):
-        ok, tokens, warnings = validate_nmap_options(
-            "-Pn --max-rate 200 -sU --script smb-vuln*"
-        )
+        ok, tokens, warnings = validate_nmap_options("-Pn --max-rate 200 -sU --script smb-vuln*")
         assert ok is True
         assert "--script" in tokens
 

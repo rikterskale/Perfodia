@@ -64,9 +64,7 @@ class Credential:
         domain_prefix = f"{self.domain}\\" if self.domain else ""
         # Use a hash of the full secret to avoid false deduplication of
         # long hashes that share a common prefix.
-        secret_hash = hashlib.sha256(self.secret.encode(errors="replace")).hexdigest()[
-            :16
-        ]
+        secret_hash = hashlib.sha256(self.secret.encode(errors="replace")).hexdigest()[:16]
         return f"{domain_prefix}{self.username}:{self.cred_type.value}:{secret_hash}"
 
     @property
@@ -284,11 +282,7 @@ class CredentialVault:
             "total": len(creds),
             "passwords": len([c for c in creds if c.cred_type == CredType.PASSWORD]),
             "hashes": len(
-                [
-                    c
-                    for c in creds
-                    if c.cred_type in (CredType.NTLM_HASH, CredType.NET_NTLMV2)
-                ]
+                [c for c in creds if c.cred_type in (CredType.NTLM_HASH, CredType.NET_NTLMV2)]
             ),
             "kerberos": len(
                 [
@@ -329,9 +323,7 @@ class CredentialVault:
                 entry["cred_type"] = CredType(entry.get("cred_type", "password"))
                 cred = Credential(**entry)
                 self._creds[cred.identity] = cred
-            logger.info(
-                f"[VAULT] Loaded {len(self._creds)} credentials from previous session"
-            )
+            logger.info(f"[VAULT] Loaded {len(self._creds)} credentials from previous session")
         except Exception as e:
             logger.warning(f"[VAULT] Could not load existing vault: {e}")
 
@@ -345,9 +337,7 @@ class CredentialVault:
                 if cred.cred_type == CredType.PASSWORD:
                     if len(cred.secret) > 3:
                         masked["secret"] = (
-                            cred.secret[:2]
-                            + "*" * (len(cred.secret) - 3)
-                            + cred.secret[-1]
+                            cred.secret[:2] + "*" * (len(cred.secret) - 3) + cred.secret[-1]
                         )
                 elif len(cred.secret) > 10:
                     masked["secret"] = cred.secret[:6] + "..." + cred.secret[-4:]

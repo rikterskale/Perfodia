@@ -71,9 +71,7 @@ class WebAppModule(BaseModule):
 
             # ── SQL injection testing with sqlmap ──
             webapp_config = self.config.get("webapp", default={})
-            if webapp_config.get("sqlmap_enabled", True) and is_tool_available(
-                "sqlmap"
-            ):
+            if webapp_config.get("sqlmap_enabled", True) and is_tool_available("sqlmap"):
                 target_results["sqlmap"] = self._sqlmap_scan(url, ip, port)
 
             # ── Common vulnerability checks ──
@@ -111,11 +109,7 @@ class WebAppModule(BaseModule):
                     8000,
                     8888,
                 ):
-                    scheme = (
-                        "https"
-                        if (tunnel == "ssl" or port_num in (443, 8443))
-                        else "http"
-                    )
+                    scheme = "https" if (tunnel == "ssl" or port_num in (443, 8443)) else "http"
                     targets.append(
                         {
                             "url": f"{scheme}://{ip}:{port_num}",
@@ -188,8 +182,7 @@ class WebAppModule(BaseModule):
                 logger.warning(f"  Failed to parse ffuf output: {e}")
 
         logger.info(
-            f"  ffuf: {len(ffuf_results['directories'])} dirs, "
-            f"{len(ffuf_results['files'])} files"
+            f"  ffuf: {len(ffuf_results['directories'])} dirs, {len(ffuf_results['files'])} files"
         )
         return ffuf_results
 
@@ -268,15 +261,11 @@ class WebAppModule(BaseModule):
             headers_data["server"] = server
             if any(v in server.lower() for v in ["apache", "nginx", "iis"]):
                 if re.search(r"\d+\.\d+", server):
-                    headers_data["issues"].append(
-                        f"Server header discloses version: {server}"
-                    )
+                    headers_data["issues"].append(f"Server header discloses version: {server}")
 
         x_powered = headers.get("x-powered-by", "")
         if x_powered:
-            headers_data["issues"].append(
-                f"X-Powered-By discloses technology: {x_powered}"
-            )
+            headers_data["issues"].append(f"X-Powered-By discloses technology: {x_powered}")
 
         return headers_data
 

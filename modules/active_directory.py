@@ -77,22 +77,16 @@ class ActiveDirectoryModule(BaseModule):
 
             # ── 4. BloodHound Collection (needs creds) ──
             if has_creds and domain and is_tool_available("bloodhound-python"):
-                dc_results["bloodhound"] = self._bloodhound_collect(
-                    dc_ip, domain, credentials
-                )
+                dc_results["bloodhound"] = self._bloodhound_collect(dc_ip, domain, credentials)
 
             # ── 5. Password Spraying ──
             users = dc_results.get("ldap", {}).get("users", [])
             if users and not self.config.get("exploitation", "safe_mode", default=True):
-                dc_results["password_spray"] = self._password_spray(
-                    dc_ip, domain, users
-                )
+                dc_results["password_spray"] = self._password_spray(dc_ip, domain, users)
 
             # ── 6. Domain Trust Mapping ──
             if has_creds:
-                dc_results["trusts"] = self._enumerate_trusts(
-                    dc_ip, domain, credentials
-                )
+                dc_results["trusts"] = self._enumerate_trusts(dc_ip, domain, credentials)
 
             # ── 7. GPO Enumeration ──
             if has_creds:
@@ -113,9 +107,7 @@ class ActiveDirectoryModule(BaseModule):
         dc_ports = {53, 88, 135, 139, 389, 445, 464, 636, 3268, 3269}
 
         for host in hosts:
-            open_ports = {
-                p["port"] for p in host.get("ports", []) if p.get("state") == "open"
-            }
+            open_ports = {p["port"] for p in host.get("ports", []) if p.get("state") == "open"}
             # DC heuristic: has LDAP (389) + Kerberos (88) + SMB (445)
             dc_score = len(open_ports & dc_ports)
             if 389 in open_ports and 88 in open_ports:
@@ -357,9 +349,7 @@ class ActiveDirectoryModule(BaseModule):
         if result.success:
             hash_file = self.session_dir / f"loot/asrep_hashes_{dc_ip}.txt"
             if hash_file.exists():
-                hashes = [
-                    line for line in hash_file.read_text().split("\n") if line.strip()
-                ]
+                hashes = [line for line in hash_file.read_text().split("\n") if line.strip()]
                 asrep_data["hashes_found"] = len(hashes)
                 if hashes:
                     logger.warning(f"  [!] AS-REP hashes found: {len(hashes)}")
@@ -414,9 +404,7 @@ class ActiveDirectoryModule(BaseModule):
                     hash_file = self.session_dir / f"loot/kerberoast_{dc_ip}.txt"
                     if hash_file.exists():
                         hashes = [
-                            line
-                            for line in hash_file.read_text().split("\n")
-                            if line.strip()
+                            line for line in hash_file.read_text().split("\n") if line.strip()
                         ]
                         kerb_data["hashes_found"] = len(hashes)
                         if hashes:
@@ -426,9 +414,7 @@ class ActiveDirectoryModule(BaseModule):
 
         return {"no_creds": True}
 
-    def _bloodhound_collect(
-        self, dc_ip: str, domain: str, credentials: List[Dict]
-    ) -> Dict:
+    def _bloodhound_collect(self, dc_ip: str, domain: str, credentials: List[Dict]) -> Dict:
         """BloodHound data collection using bloodhound-python."""
         self.log_phase_start(f"BloodHound collection from {dc_ip}")
 
@@ -489,9 +475,7 @@ class ActiveDirectoryModule(BaseModule):
             "spray_passwords",
             ["Password1", "Welcome1", "Company123", "Spring2025", "Summer2025"],
         )
-        lockout_threshold = self.config.get(
-            "credentials", "spray_lockout_threshold", default=3
-        )
+        lockout_threshold = self.config.get("credentials", "spray_lockout_threshold", default=3)
         spray_delay = self.config.get("credentials", "spray_delay", default=30)
 
         spray_results: Dict[str, Any] = {"attempts": 0, "successes": []}
@@ -545,9 +529,7 @@ class ActiveDirectoryModule(BaseModule):
 
         return spray_results
 
-    def _enumerate_trusts(
-        self, dc_ip: str, domain: str, credentials: List[Dict]
-    ) -> Dict:
+    def _enumerate_trusts(self, dc_ip: str, domain: str, credentials: List[Dict]) -> Dict:
         """Enumerate domain trusts using LDAP or nmap NSE."""
         result = self.runner.run(
             tool_name="nmap",

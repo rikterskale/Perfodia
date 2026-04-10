@@ -29,9 +29,7 @@ class ToolResult:
     output_files: List[str] = field(default_factory=list)
     parsed_data: Optional[Any] = None
     error_message: Optional[str] = None
-    error_category: Optional[str] = (
-        None  # timeout, permission, not_found, usage, runtime, os_error
-    )
+    error_category: Optional[str] = None  # timeout, permission, not_found, usage, runtime, os_error
 
     def to_dict(self) -> Dict:
         return {
@@ -131,8 +129,7 @@ class ToolRunner:
         tool_path = self._resolve_tool(tool_name)
         if tool_path is None:
             msg = (
-                f"Tool '{tool_name}' not found in PATH. "
-                f"Install it or update tool_paths in config."
+                f"Tool '{tool_name}' not found in PATH. Install it or update tool_paths in config."
             )
             logger.error(f"[PRE-FLIGHT FAIL] {msg}")
             return ToolResult(
@@ -328,10 +325,7 @@ class ToolRunner:
                         f"{process.returncode}).  Check that the flags you "
                         f"passed are valid for this tool version."
                     )
-                elif (
-                    "permission denied" in stderr_lower
-                    or "requires root" in stderr_lower
-                ):
+                elif "permission denied" in stderr_lower or "requires root" in stderr_lower:
                     error_category = "permission"
                     error_message = (
                         f"{tool_name} needs higher privileges.  Run the "
@@ -340,9 +334,7 @@ class ToolRunner:
                     )
                 else:
                     error_category = "runtime"
-                    error_message = (
-                        f"{tool_name} exited with code {process.returncode}."
-                    )
+                    error_message = f"{tool_name} exited with code {process.returncode}."
 
             # ── Log results ──
             if success:
@@ -369,8 +361,7 @@ class ToolRunner:
                             logger.warning(f"  stderr: {line}")
                     if len(stderr_lines) > 10:
                         logger.warning(
-                            f"  ... ({len(stderr_lines) - 10} more stderr "
-                            f"lines in all.log)"
+                            f"  ... ({len(stderr_lines) - 10} more stderr lines in all.log)"
                         )
 
                 # Save full stderr to a dedicated file for post-mortem

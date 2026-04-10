@@ -68,8 +68,7 @@ class SessionState:
                 f"{', '.join(completed) if completed else 'none'}"
             )
             logger.info(
-                f"[RESUME] Checkpoint saved at: "
-                f"{self._state.get('_checkpoint_time', 'unknown')}"
+                f"[RESUME] Checkpoint saved at: {self._state.get('_checkpoint_time', 'unknown')}"
             )
 
             return self._state

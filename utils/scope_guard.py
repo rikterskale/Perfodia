@@ -168,9 +168,7 @@ class ScopeGuard:
         Checks for patterns like bare IPs, user@host, smb://host, etc.
         """
         ips: List[str] = []
-        ip_pattern = re.compile(
-            r"(?:^|[@/=\s])(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})(?:[:/\s]|$)"
-        )
+        ip_pattern = re.compile(r"(?:^|[@/=\s])(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})(?:[:/\s]|$)")
         for arg in args:
             for match in ip_pattern.finditer(arg):
                 ips.append(match.group(1))
@@ -184,9 +182,7 @@ class ScopeGuard:
         """
         ips = self.extract_ips_from_args(args)
         for ip in ips:
-            if not self.check(
-                ip, tool_name=tool_name, action=f"args: {' '.join(args[:5])}"
-            ):
+            if not self.check(ip, tool_name=tool_name, action=f"args: {' '.join(args[:5])}"):
                 return False
         return True
 
@@ -213,8 +209,6 @@ class ScopeGuard:
         try:
             with open(path, "w") as f:
                 json.dump(self._violations, f, indent=2)
-            logger.warning(
-                f"[SCOPE] {len(self._violations)} violations saved to {path}"
-            )
+            logger.warning(f"[SCOPE] {len(self._violations)} violations saved to {path}")
         except Exception as e:
             logger.error(f"[SCOPE] Failed to save violations: {e}")
