@@ -65,9 +65,7 @@ BANNER = r"""
 def signal_handler(sig, frame):
     """Handle interrupt signals gracefully."""
     logger.warning("\n[!] Interrupt received. Cleaning up...")
-    print(
-        "\n[!] Framework interrupted. Partial results may be in the reports directory."
-    )
+    print("\n[!] Framework interrupted. Partial results may be in the reports directory.")
     sys.exit(130)
 
 
@@ -94,15 +92,9 @@ Examples:
     )
 
     target_group = parser.add_argument_group("Target Specification")
-    target_group.add_argument(
-        "-t", "--target", help="Target IP, hostname, or CIDR range"
-    )
-    target_group.add_argument(
-        "-tL", "--target-list", help="Path to file containing target list"
-    )
-    target_group.add_argument(
-        "--exclude", help="Comma-separated IPs/ranges to exclude"
-    )
+    target_group.add_argument("-t", "--target", help="Target IP, hostname, or CIDR range")
+    target_group.add_argument("-tL", "--target-list", help="Path to file containing target list")
+    target_group.add_argument("--exclude", help="Comma-separated IPs/ranges to exclude")
 
     mode_group = parser.add_argument_group("Execution Mode")
     mode_group.add_argument(
@@ -122,12 +114,8 @@ Examples:
         default="full",
         help="Execution mode (default: full)",
     )
-    mode_group.add_argument(
-        "--modules", help="Comma-separated list of specific modules"
-    )
-    mode_group.add_argument(
-        "--resume", action="store_true", help="Resume interrupted session"
-    )
+    mode_group.add_argument("--modules", help="Comma-separated list of specific modules")
+    mode_group.add_argument("--resume", action="store_true", help="Resume interrupted session")
 
     ux_group = parser.add_argument_group("User Experience")
     ux_group.add_argument(
@@ -154,9 +142,7 @@ Examples:
         default=str(PROJECT_ROOT / "reports"),
         help="Output directory",
     )
-    config_group.add_argument(
-        "--session", help="Session name/ID (default: timestamp)"
-    )
+    config_group.add_argument("--session", help="Session name/ID (default: timestamp)")
 
     return parser.parse_args()
 
@@ -191,6 +177,7 @@ def main():
 
         # Run the scan workflow in a background thread
         import threading
+
         scan_thread = threading.Thread(
             target=main_workflow,
             args=(args, state),
@@ -199,7 +186,7 @@ def main():
         scan_thread.start()
 
         logger.info("Launching Textual TUI dashboard...")
-        run_tui(state)          # Blocks until user presses q
+        run_tui(state)  # Blocks until user presses q
         return
 
     # Normal (non-interactive) execution
