@@ -4,8 +4,6 @@
 # Multi-target build:
 #   docker build -t perfodia .                          # full (default)
 #   docker build -t perfodia:minimal --target minimal . # scanning only
-#
-# See Docker Guide.md for complete usage instructions.
 ###############################################################################
 
 FROM debian:bookworm-slim AS base
@@ -53,7 +51,6 @@ RUN pip3 install --no-cache-dir PyYAML && \
 FROM base AS minimal
 LABEL variant="minimal"
 
-# Enable non-free for snmp-mibs-downloader
 RUN sed -i 's/Components: main/Components: main contrib non-free non-free-firmware/' /etc/apt/sources.list.d/debian.sources && \
     apt-get update
 
@@ -80,7 +77,7 @@ CMD ["--help"]
 FROM base AS full
 LABEL variant="full"
 
-# Enable contrib + non-free repositories (required for nikto, snmp-mibs-downloader, etc.)
+# Enable contrib + non-free repositories
 RUN sed -i 's/Components: main/Components: main contrib non-free non-free-firmware/' /etc/apt/sources.list.d/debian.sources && \
     apt-get update
 
@@ -106,8 +103,22 @@ RUN apt-get install -y --no-install-recommends \
         chromium \
     && rm -rf /var/lib/apt/lists/*
 
-# Tools not available via apt (Kali-only)
-RUN pip3 install --no-cache-dir netexec
+# === NetExec (official install from GitHub - requires build deps + Rust) ===
+RUN apt-get install -y --no-install-recommends \
+        git \
+        python3-dev \
+        build-essential \
+        libffi-dev \
+        libxml2-dev \
+        libxslt-dev \
+        libssl-dev \
+    && curl -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable \
+    && . "$HOME/.cargo/env" \
+    && pip3 install --no-cache-dir git+https://github.com/Pennyw0rth/NetExec.git \
+    && rm -rf /root/.cargo /root/.rustup /root/.cache/pip \
+    && apt-get purge -y git python3-dev build-essential libffi-dev libxml2-dev libxslt-dev libssl-dev \
+    && apt-get autoremove -y \
+    && rm -rf /var/lib/apt/lists/*
 
 # SecLists
 RUN git clone --depth 1 https://github.com/danielmiessler/SecLists.git /usr/share/wordlists/SecLists && \
