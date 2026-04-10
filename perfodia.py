@@ -18,8 +18,11 @@ from utils.logger import setup_logging, get_logger
 
 # Imports kept for future real workflow (ruff-safe)
 from utils.validators import (  # noqa: F401
-    validate_target, validate_tool_dependencies, check_root_privileges,
-    validate_config, validate_nmap_options,
+    validate_target,
+    validate_tool_dependencies,
+    check_root_privileges,
+    validate_config,
+    validate_nmap_options,
 )
 from utils.report_generator import ReportGenerator  # noqa: F401
 from utils.credential_vault import CredentialVault  # noqa: F401
@@ -69,8 +72,7 @@ def parse_arguments():
     )
     parser.add_argument("-t", "--target", default="127.0.0.1", help="Target IP")
     parser.add_argument("-m", "--mode", default="full", help="Execution mode")
-    parser.add_argument("--interactive", action="store_true",
-                        help="Launch Textual TUI")
+    parser.add_argument("--interactive", action="store_true", help="Launch Textual TUI")
     return parser.parse_args()
 
 
@@ -102,7 +104,7 @@ def main_workflow(state, target):
                     break
                 service = random.choice(["ssh", "http", "https", "smb", "rdp", "mysql"])
                 line = f"✅ OPEN PORT → {port}/tcp   (service: {service})"
-                state.tui_app.append_tool_output(line)      # ← Live Tool Output
+                state.tui_app.append_tool_output(line)  # ← Live Tool Output
                 state.add_event(f"Discovered open port {port}/tcp")
                 state.ports_found += 1
                 time.sleep(0.7)
@@ -110,7 +112,7 @@ def main_workflow(state, target):
             for i in range(6):
                 if not state.running:
                     break
-                state.add_event(f"Processing {i+1}/6")
+                state.add_event(f"Processing {i + 1}/6")
                 time.sleep(0.5)
 
     state.update(current_phase="Completed", phase_progress=100, current_tool="—")
@@ -135,7 +137,7 @@ def main():
         logging.getLogger().addHandler(tui_handler)
 
         logger.info("Launching Textual TUI dashboard...")
-        run_tui(state)          # This now starts the workflow inside on_mount
+        run_tui(state)  # This now starts the workflow inside on_mount
         return
 
     # Non-interactive mode (placeholder)

@@ -1,12 +1,5 @@
 """
-Perfodia TUI — Textual (Live Tool Output + Toggle Button + Settings Modal)
-
-Hotkeys:
-  q / Ctrl+C     → Quit
-  p              → Pause / Resume
-  r              → Refresh
-  s              → Settings modal
-  o              → Toggle Live Tool Output
+Perfodia TUI — Textual (Fixed layout - now renders correctly)
 """
 
 from __future__ import annotations
@@ -21,7 +14,7 @@ from typing import Any, Dict
 
 from textual.app import App, ComposeResult
 from textual.binding import Binding
-from textual.containers import Container, Horizontal
+from textual.containers import Container, Horizontal, Vertical
 from textual.screen import ModalScreen
 from textual.widgets import Button, DataTable, Footer, Header, RichLog, Static
 
@@ -59,7 +52,7 @@ class DashboardState:
         self.start_time: datetime = datetime.now()
         self.running: bool = True
         self.paused: bool = False
-        self.tui_app: PerfodiaTUI | None = None  # ← NEW: reference to TUI for live output
+        self.tui_app: PerfodiaTUI | None = None
 
     def update(self, **kwargs: Any) -> None:
         with self._lock:
@@ -185,15 +178,15 @@ class PerfodiaTUI(App):
     def __init__(self, state: DashboardState) -> None:
         super().__init__()
         self.state = state
-        self.update_timer = None
         self.show_tool_output: bool = True
-        state.tui_app = self  # ← Make TUI available to background threads
+        state.tui_app = self
 
     def compose(self) -> ComposeResult:
         yield Header()
         yield Footer()
 
-        with Container():
+        # Main vertical layout
+        with Vertical():
             yield Static(id="status", classes="status-bar")
 
             with Horizontal(classes="stats-row"):
@@ -204,14 +197,32 @@ class PerfodiaTUI(App):
                 yield Button("🔄 Toggle Live Output", id="toggle-output-btn", variant="primary")
 
             with Horizontal(id="main-content"):
-                yield DataTable(id="findings")
+                yield DataTable(id="findings", expand=True)
                 yield RichLog(
-                    id="tool-output", wrap=True, highlight=True, auto_scroll=True, max_lines=500
+                    id="tool-output",
+                    wrap=True,
+                    highlight=True,
+                    auto_scroll=True,
+                    max_lines=500,
                 )
 
-            yield RichLog(id="events", wrap=True, highlight=True, auto_scroll=True, max_lines=200)
+            yield RichLog(
+                id="events",
+                wrap=True,
+                highlight=True,
+                auto_scroll=True,
+                max_lines=200,
+                classes="events-log",
+            )
 
-    # ... (rest of the class is unchanged - _refresh_ui, action_*, etc.)
+    def on_mount(self) -> None:
+        table = self.query_one("#findings", DataTable)
+        table.add_columns("Severity", "Host", "Finding")
+        table.cursor_type = "row"
+
+        self.set_interval(0.3, self._refresh_ui)
+        self.state.add_event("🚀 TUI ready — live output enabled")
+
     def _refresh_ui(self) -> None:
         snap = self.state.snapshot()
 
@@ -250,7 +261,6 @@ class PerfodiaTUI(App):
         tool_output.display = self.show_tool_output
 
     def append_tool_output(self, text: str) -> None:
-        """Public method to stream text into the Live Tool Output pane."""
         if self.show_tool_output:
             tool_output = self.query_one("#tool-output", RichLog)
             self.call_from_thread(tool_output.write, text.strip())
