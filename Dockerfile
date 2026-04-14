@@ -1,3 +1,4 @@
+### `Dockerfile`
 ###############################################################################
 # Perfodia Docker Image
 ###############################################################################
@@ -110,18 +111,44 @@ ARG SECLISTS_REF=""
 ARG EXPLOITDB_REF=""
 ARG ENUM4LINUX_REF=""
 
-RUN if [ -z "$NETEXEC_REF" ] || [ -z "$SECLISTS_REF" ] || [ -z "$EXPLOITDB_REF" ] || [ -z "$ENUM4LINUX_REF" ]; then         echo "ERROR: set NETEXEC_REF, SECLISTS_REF, EXPLOITDB_REF, and ENUM4LINUX_REF to immutable commit SHAs.";         exit 1;     fi
-
-RUN apt-get update && apt-get install -y --no-install-recommends         git         python3-dev         build-essential         libffi-dev         libxml2-dev         libxslt1-dev         libssl-dev     && curl -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable     && . "$HOME/.cargo/env"     && git clone https://github.com/Pennyw0rth/NetExec.git /tmp/NetExec     && cd /tmp/NetExec     && git checkout --detach "$NETEXEC_REF"     && pip3 install --no-cache-dir /tmp/NetExec     && rm -rf /tmp/NetExec /root/.cargo /root/.rustup /root/.cache/pip     && apt-get purge -y python3-dev build-essential libffi-dev libxml2-dev libxslt1-dev libssl-dev     && apt-get autoremove -y     && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        git \
+        python3-dev \
+        build-essential \
+        libffi-dev \
+        libxml2-dev \
+        libxslt1-dev \
+        libssl-dev \
+        cargo \
+        rustc \
+    && git clone https://github.com/Pennyw0rth/NetExec.git /tmp/NetExec \
+    && cd /tmp/NetExec \
+    && if [ -n "$NETEXEC_REF" ]; then git checkout --detach "$NETEXEC_REF"; fi \
+    && pip3 install --no-cache-dir /tmp/NetExec \
+    && rm -rf /tmp/NetExec /root/.cache/pip \
+    && apt-get purge -y python3-dev build-essential libffi-dev libxml2-dev libxslt1-dev libssl-dev cargo rustc \
+    && apt-get autoremove -y \
+    && rm -rf /var/lib/apt/lists/*
 
 # SecLists (pinned)
-RUN git clone https://github.com/danielmiessler/SecLists.git /usr/share/wordlists/SecLists &&     cd /usr/share/wordlists/SecLists &&     git checkout --detach "$SECLISTS_REF" &&     ln -s /usr/share/wordlists/SecLists /usr/share/seclists
+RUN git clone https://github.com/danielmiessler/SecLists.git /usr/share/wordlists/SecLists \
+    && cd /usr/share/wordlists/SecLists \
+    && if [ -n "$SECLISTS_REF" ]; then git checkout --detach "$SECLISTS_REF"; fi \
+    && ln -s /usr/share/wordlists/SecLists /usr/share/seclists
 
 # Exploit-DB / searchsploit (pinned)
-RUN git clone https://gitlab.com/exploit-database/exploitdb.git /opt/exploitdb &&     cd /opt/exploitdb &&     git checkout --detach "$EXPLOITDB_REF" &&     chmod +x /opt/exploitdb/searchsploit &&     ln -sf /opt/exploitdb/searchsploit /usr/local/bin/searchsploit
+RUN git clone https://gitlab.com/exploit-database/exploitdb.git /opt/exploitdb \
+    && cd /opt/exploitdb \
+    && if [ -n "$EXPLOITDB_REF" ]; then git checkout --detach "$EXPLOITDB_REF"; fi \
+    && chmod +x /opt/exploitdb/searchsploit \
+    && ln -sf /opt/exploitdb/searchsploit /usr/local/bin/searchsploit
 
 # Python tools (enum4linux-ng pinned)
-RUN git clone https://github.com/cddmp/enum4linux-ng.git /tmp/enum4linux-ng &&     cd /tmp/enum4linux-ng &&     git checkout --detach "$ENUM4LINUX_REF" &&     pip3 install --no-cache-dir impacket /tmp/enum4linux-ng bloodhound rich &&     rm -rf /tmp/enum4linux-ng /root/.cache
+RUN git clone https://github.com/cddmp/enum4linux-ng.git /tmp/enum4linux-ng \
+    && cd /tmp/enum4linux-ng \
+    && if [ -n "$ENUM4LINUX_REF" ]; then git checkout --detach "$ENUM4LINUX_REF"; fi \
+    && pip3 install --no-cache-dir impacket /tmp/enum4linux-ng bloodhound rich \
+    && rm -rf /tmp/enum4linux-ng /root/.cache
 
 ARG RESPONDER_REF=""
 RUN if [ -n "$RESPONDER_REF" ]; then \

@@ -27,7 +27,7 @@ from modules.scanning import ScanningModule
 from modules.web_app import WebAppModule
 from utils.config_wizard import run_config_wizard
 from utils.credential_vault import CredentialVault
-from utils.logger import get_logger, setup_logging
+from utils.logger import add_session_file_logging, get_logger, setup_logging
 from utils.report_generator import ReportGenerator
 from utils.scope_guard import ScopeGuard
 from utils.session_state import SessionState
@@ -213,6 +213,7 @@ def run_workflow(args) -> int:
     session_name = args.session or datetime.utcnow().strftime("%Y%m%d_%H%M%S")
     session_dir = Path("reports") / session_name
     session_dir.mkdir(parents=True, exist_ok=True)
+    add_session_file_logging(session_dir / "logs")
 
     scope_guard = ScopeGuard(targets=targets, exclusions=args.exclude)
     credential_vault = CredentialVault(session_dir=session_dir)

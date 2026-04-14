@@ -656,6 +656,7 @@ blockquote {{ border-left: 3px solid #00d4ff; padding: 10px 15px; margin: 15px 0
                     ],
                     timeout=60,
                     capture_output=True,
+                    check=True,
                 )
                 if pdf_path.exists():
                     logger.info(f"[+] PDF report (wkhtmltopdf): {pdf_path}")
@@ -680,6 +681,7 @@ blockquote {{ border-left: 3px solid #00d4ff; padding: 10px 15px; margin: 15px 0
                         ],
                         timeout=60,
                         capture_output=True,
+                        check=True,
                     )
                     if pdf_path.exists():
                         logger.info(f"[+] PDF report ({chrome}): {pdf_path}")

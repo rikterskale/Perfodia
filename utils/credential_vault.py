@@ -9,6 +9,7 @@ reuse suggestions for subsequent attacks.
 import json
 import logging
 import threading
+import os
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Any, Set
@@ -106,6 +107,10 @@ class CredentialVault:
         self._lock = threading.Lock()
         self._save_path = session_dir / "loot" / "credential_vault.json"
         self._save_path.parent.mkdir(parents=True, exist_ok=True)
+        try:
+            os.chmod(self._save_path.parent, 0o700)
+        except OSError:
+            pass
 
         # Load existing vault if resuming
         self._load()
@@ -307,8 +312,16 @@ class CredentialVault:
         """Save vault to JSON file."""
         try:
             data = [c.to_dict() for c in self._creds.values()]
-            with open(self._save_path, "w") as f:
+            tmp_path = self._save_path.with_suffix(".json.tmp")
+            with open(tmp_path, "w") as f:
                 json.dump(data, f, indent=2, default=str)
+                f.flush()
+                os.fsync(f.fileno())
+            os.replace(tmp_path, self._save_path)
+            try:
+                os.chmod(self._save_path, 0o600)
+            except OSError:
+                pass
         except Exception as e:
             logger.error(f"[VAULT] Failed to save vault: {e}")
 

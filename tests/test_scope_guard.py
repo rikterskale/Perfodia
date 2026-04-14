@@ -68,6 +68,17 @@ class TestScopeGuard:
         assert "192.168.1.100" in ips
         assert "10.0.0.1" in ips
 
+    def test_extract_ipv6_from_args(self):
+        guard = ScopeGuard(targets=["2001:db8::/32"])
+        ips = guard.extract_ips_from_args(
+            [
+                "http://[2001:db8::1]/admin",
+                "2001:db8::2",
+            ]
+        )
+        assert "2001:db8::1" in ips
+        assert "2001:db8::2" in ips
+
     def test_check_tool_args_in_scope(self):
         guard = ScopeGuard(targets=["192.168.1.0/24"])
         assert guard.check_tool_args("nmap", ["-sV", "192.168.1.100"]) is True

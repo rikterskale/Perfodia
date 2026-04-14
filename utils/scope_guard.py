@@ -168,11 +168,43 @@ class ScopeGuard:
         Checks for patterns like bare IPs, user@host, smb://host, etc.
         """
         ips: List[str] = []
-        ip_pattern = re.compile(r"(?:^|[@/=\s])(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})(?:[:/\s]|$)")
+
+        # IPv4 in common CLI patterns
+        ipv4_pattern = re.compile(
+            r"(?:^|[@/=\s])(\d{1,3}(?:\.\d{1,3}){3})(?:[:/\s]|$)"
+        )
+        # Bracketed IPv6 (URLs and URI-like args)
+        ipv6_bracket_pattern = re.compile(r"\[([0-9a-fA-F:]+)\]")
         for arg in args:
-            for match in ip_pattern.finditer(arg):
-                ips.append(match.group(1))
-        return ips
+            for match in ipv4_pattern.finditer(arg):
+                candidate = match.group(1)
+                try:
+                    ipaddress.ip_address(candidate)
+                    ips.append(candidate)
+                except ValueError:
+                    continue
+
+            for match in ipv6_bracket_pattern.finditer(arg):
+                candidate = match.group(1)
+                try:
+                    ipaddress.ip_address(candidate)
+                    ips.append(candidate)
+                except ValueError:
+                    continue
+
+            if ":" in arg:
+                for token in re.split(r"[\s/@=,]+", arg):
+                    if ":" not in token:
+                        continue
+                    candidate = token.strip("[]")
+                    try:
+                        parsed = ipaddress.ip_address(candidate)
+                        if parsed.version == 6:
+                            ips.append(candidate)
+                    except ValueError:
+                        continue
+
+        return list(dict.fromkeys(ips))
 
     def check_tool_args(self, tool_name: str, args: List[str]) -> bool:
         """

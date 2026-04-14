@@ -125,7 +125,7 @@ class FrameworkConfig:
             },
             "credentials": {
                 "usernames": ["admin", "root", "administrator", "user"],
-                "passwords_file": "/usr/share/wordlists/rockyou.txt",
+                "passwords_file": "/usr/share/wordlists/quick_passwords.txt",
                 "spray_lockout_threshold": 3,
                 "spray_delay": 30,
             },
