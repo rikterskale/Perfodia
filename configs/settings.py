@@ -74,8 +74,8 @@ class FrameworkConfig:
         except PermissionError:
             logger.error(f"Permission denied reading config: {path}")
             self._data = {}
-        except Exception as e:
-            logger.error(f"Unexpected error loading config {path}: {e}")
+        except OSError as e:
+            logger.error(f"I/O error loading config {path}: {e}")
             self._data = {}
 
         self._apply_defaults()

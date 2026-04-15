@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "generated_by": "tools/generate_audit_manifest.py",
-  "file_count": 54,
+  "file_count": 56,
   "files": [
     {
       "path": ".gitattributes",
@@ -33,9 +33,9 @@
     },
     {
       "path": "AUDIT_REPORT.md",
-      "size_bytes": 45119,
-      "line_count": 491,
-      "sha256": "9757ef5de215273f8451d2a2c818b29f0d7b680c26cf7b64ab56d95f14cd0db2",
+      "size_bytes": 33568,
+      "line_count": 603,
+      "sha256": "06f1f45b5095c40af93ab07f23a1c8fbc1d2777f79983db4d3dad459b282b2cf",
       "status": "pending_review"
     },
     {
@@ -54,9 +54,9 @@
     },
     {
       "path": "LICENSE",
-      "size_bytes": 1068,
+      "size_bytes": 1057,
       "line_count": 21,
-      "sha256": "5e179b22cbed6ea085f00416da0338a3b46c9be3d6d9379b15e2500e486f0671",
+      "sha256": "3ec558dc6e9c9355ab4b28c942caa92bf90b0b82c12d7838d2ef92467ad135c1",
       "status": "pending_review"
     },
     {
@@ -89,9 +89,9 @@
     },
     {
       "path": "configs/settings.py",
-      "size_bytes": 7590,
+      "size_bytes": 7581,
       "line_count": 221,
-      "sha256": "4316e41a51804ca55f38a958336928a7d29fbf60d74b6f5eeab7f708de077b9f",
+      "sha256": "5805e4277061b483f555ba2350c23eb8e21cf42696d047e6e92cd49c8398af1a",
       "status": "pending_review"
     },
     {
@@ -145,9 +145,9 @@
     },
     {
       "path": "modules/enumeration.py",
-      "size_bytes": 26288,
+      "size_bytes": 26325,
       "line_count": 665,
-      "sha256": "b93a9b0c058413ad235de3dca7b9e2b2c8e79d804ab9bf93f83c3f068c616dcd",
+      "sha256": "3513335f1fed1d320d0e58516505f5ce35ced82fbdbce3f8fc8e8c425bfbfeec",
       "status": "pending_review"
     },
     {
@@ -159,9 +159,9 @@
     },
     {
       "path": "modules/post_exploitation.py",
-      "size_bytes": 14647,
+      "size_bytes": 14645,
       "line_count": 414,
-      "sha256": "78fbc26de26ceb84f2279cef62c970355202832994c113fdae3d9489d9f92eb9",
+      "sha256": "96aa98466cd17c691a0ad81abb7d5a5e3b9f7d29c0b76d4e96d322a0a26f97b3",
       "status": "pending_review"
     },
     {
@@ -180,16 +180,16 @@
     },
     {
       "path": "modules/web_app.py",
-      "size_bytes": 18725,
-      "line_count": 527,
-      "sha256": "f9c15d190eefb4cee3b2d6c4331d463bdf9797855f3d65eaccbdb8742a6b1b25",
+      "size_bytes": 18742,
+      "line_count": 526,
+      "sha256": "c200ebb13e34d8ed2fc7a39772dfe1e4f78c1364bf06f704778a697e3c18f0ac",
       "status": "pending_review"
     },
     {
       "path": "mypy.ini",
-      "size_bytes": 277,
+      "size_bytes": 264,
       "line_count": 9,
-      "sha256": "a29eb651745173801f510326953c51feb8aaba71eb334e4ac3edc2615039c01e",
+      "sha256": "5cf0298e9ba8ae176019201280ae286a2df1ef05f6ff6eecd1ada835adbf7386",
       "status": "pending_review"
     },
     {
@@ -277,6 +277,20 @@
       "status": "pending_review"
     },
     {
+      "path": "tools/generate_audit_manifest.py",
+      "size_bytes": 2782,
+      "line_count": 99,
+      "sha256": "b57c379ef224959b1cd4fe65668c3c79e53ff3ad073022e64dde53a74087b94e",
+      "status": "pending_review"
+    },
+    {
+      "path": "tools/verify_readme_testing_tools.py",
+      "size_bytes": 2261,
+      "line_count": 87,
+      "sha256": "5731e7eb47ad407556eb52a094a78ee113dced9e75c57d4b6e3c5f6a2f97b4fa",
+      "status": "pending_review"
+    },
+    {
       "path": "utils/__init__.py",
       "size_bytes": 0,
       "line_count": 0,
@@ -306,9 +320,9 @@
     },
     {
       "path": "utils/parallel.py",
-      "size_bytes": 6924,
-      "line_count": 205,
-      "sha256": "a9d47194746f4eb1bdc275df4b37fa91f37784567bffe5529e561a822893e55d",
+      "size_bytes": 7133,
+      "line_count": 206,
+      "sha256": "0b541d815d0457598dfdc0b19b4df3297f08032e1e038e7a60d4c6f5ddc67080",
       "status": "pending_review"
     },
     {
@@ -320,9 +334,9 @@
     },
     {
       "path": "utils/report_generator.py",
-      "size_bytes": 30178,
+      "size_bytes": 30384,
       "line_count": 696,
-      "sha256": "f8917f351b968507e20539d7b55f83def80a591fdf570b281a1d31545ca35302",
+      "sha256": "ec68c3fa8a83f22631d1631ec8f0164c392681638dd25f39e516820f01554102",
       "status": "pending_review"
     },
     {
@@ -334,9 +348,9 @@
     },
     {
       "path": "utils/scope_guard.py",
-      "size_bytes": 9592,
-      "line_count": 270,
-      "sha256": "a6e3db8a14002cee72a881a136b5292b8b21842fc0b9a863765e6c78b60ad1a2",
+      "size_bytes": 9712,
+      "line_count": 274,
+      "sha256": "6eb83e16862bd05d27ae56936e86b5a535faeb7b0c46934a49b4ada183e74a17",
       "status": "pending_review"
     },
     {
@@ -369,9 +383,9 @@
     },
     {
       "path": "utils/validators.py",
-      "size_bytes": 12039,
-      "line_count": 367,
-      "sha256": "b85085c0f5633355bb1b3d2ccd33486006a9bcf515232033a24dccd41b9c8f9a",
+      "size_bytes": 12617,
+      "line_count": 380,
+      "sha256": "3b2aef4850b093b1f5a801fd491908e6defd3b1a9856f86e7fde84cf4f5b5ce7",
       "status": "pending_review"
     },
     {

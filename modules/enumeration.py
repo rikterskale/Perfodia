@@ -90,7 +90,7 @@ class EnumerationModule(BaseModule):
                     )
                     try:
                         host_results[svc_type] = enum_func(ip, port_list)
-                    except Exception as e:
+                    except (RuntimeError, ValueError, TypeError, OSError) as e:
                         logger.error(f"  [{svc_type.upper()}] Error: {e}")
                         host_results[svc_type] = {"error": str(e)}
                 else:

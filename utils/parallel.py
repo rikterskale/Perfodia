@@ -9,6 +9,7 @@ the others continue unaffected.
 import logging
 import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed, Future
+from concurrent.futures import CancelledError, TimeoutError as FutureTimeoutError
 from typing import Callable, Dict, List, Any, Optional, Tuple
 from dataclasses import dataclass, field
 from datetime import datetime
@@ -116,7 +117,7 @@ class ParallelRunner:
                         else:
                             result.results[host] = host_result
                             result.succeeded += 1
-                    except Exception as e:
+                    except (CancelledError, FutureTimeoutError, RuntimeError, ValueError) as e:
                         result.errors[host] = str(e)
                         result.failed += 1
                         logger.error(f"[PARALLEL] {host} failed: {e}")
@@ -149,7 +150,7 @@ class ParallelRunner:
         try:
             data = func(host)
             return data, None
-        except Exception as e:
+        except (RuntimeError, ValueError, TypeError, OSError) as e:
             logger.error(f"[PARALLEL] Exception on {host}: {type(e).__name__}: {e}")
             return None, f"{type(e).__name__}: {e}"
 
@@ -168,7 +169,7 @@ class ParallelRunner:
                 host_result = func(host)
                 result.results[host] = host_result
                 result.succeeded += 1
-            except Exception as e:
+            except (RuntimeError, ValueError, TypeError, OSError) as e:
                 result.errors[host] = str(e)
                 result.failed += 1
                 logger.error(f"[{description}] {host} failed: {e}")

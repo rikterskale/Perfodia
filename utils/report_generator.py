@@ -47,7 +47,7 @@ class ReportGenerator:
         try:
             with open(path, "r") as f:
                 return json.load(f)
-        except Exception as e:
+        except (OSError, json.JSONDecodeError, ValueError, TypeError) as e:
             logger.error(f"Failed to load {path.name}: {e}")
             raise
 
@@ -57,7 +57,7 @@ class ReportGenerator:
             with open(out_path, "w") as f:
                 json.dump(results, f, indent=2, default=str)
             logger.info(f"[+] JSON report: {out_path}")
-        except Exception as e:
+        except (OSError, ValueError, TypeError) as e:
             logger.error(f"JSON report failed: {e}")
 
     # ─────────────────────────────────────────────────────────────
@@ -111,7 +111,7 @@ class ReportGenerator:
             with open(out_path, "w") as f:
                 f.write("\n".join(lines))
             logger.info(f"[+] Markdown report: {out_path}")
-        except Exception as e:
+        except OSError as e:
             logger.error(f"Markdown report failed: {e}")
 
     def _md_executive_summary(self, results: Dict) -> list:
@@ -610,7 +610,7 @@ blockquote {{ border-left: 3px solid #00d4ff; padding: 10px 15px; margin: 15px 0
             with open(out_path, "w") as f:
                 f.write(html)
             logger.info(f"[+] HTML report: {out_path}")
-        except Exception as e:
+        except OSError as e:
             logger.error(f"HTML report failed: {e}")
 
     def _generate_pdf(self, results: Dict):
@@ -636,7 +636,7 @@ blockquote {{ border-left: 3px solid #00d4ff; padding: 10px 15px; margin: 15px 0
             return
         except ImportError:
             logger.debug("[PDF] WeasyPrint not installed, trying wkhtmltopdf")
-        except Exception as e:
+        except (OSError, RuntimeError, ValueError) as e:
             logger.warning(f"[PDF] WeasyPrint failed: {e}")
 
         # Try wkhtmltopdf (command-line tool)
@@ -661,7 +661,7 @@ blockquote {{ border-left: 3px solid #00d4ff; padding: 10px 15px; margin: 15px 0
                 if pdf_path.exists():
                     logger.info(f"[+] PDF report (wkhtmltopdf): {pdf_path}")
                     return
-            except Exception as e:
+            except (subprocess.CalledProcessError, subprocess.TimeoutExpired, OSError) as e:
                 logger.warning(f"[PDF] wkhtmltopdf failed: {e}")
 
         # Try Chrome headless
@@ -685,7 +685,7 @@ blockquote {{ border-left: 3px solid #00d4ff; padding: 10px 15px; margin: 15px 0
                     if pdf_path.exists():
                         logger.info(f"[+] PDF report ({chrome}): {pdf_path}")
                         return
-                except Exception as e:
+                except (subprocess.CalledProcessError, subprocess.TimeoutExpired, OSError) as e:
                     logger.debug(f"[PDF] {chrome} failed: {e}")
 
         logger.warning(

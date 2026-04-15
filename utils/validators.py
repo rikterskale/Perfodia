@@ -184,7 +184,13 @@ def validate_tool_dependencies(verbose: bool = False) -> bool:
 
 def _get_tool_version(binary: str) -> Optional[str]:
     """Attempt to extract version string from a tool."""
-    version_flags = ["--version", "-V", "-v", "version"]
+    tool_specific_flags = {
+        "dig": ["-v"],
+        "nmap": ["--version"],
+        "curl": ["--version"],
+        "whois": ["--version"],
+    }
+    version_flags = tool_specific_flags.get(binary, ["--version", "-V", "-v", "version"])
     for flag in version_flags:
         try:
             result = subprocess.run(
@@ -197,7 +203,14 @@ def _get_tool_version(binary: str) -> Optional[str]:
             if output:
                 # Grab first line, truncate
                 first_line = output.split("\n")[0][:80]
-                return first_line
+                lowered = first_line.lower()
+                if "invalid option" in lowered or "unknown option" in lowered:
+                    continue
+                if any(ch.isdigit() for ch in first_line):
+                    return first_line
+                # Fall back if output is non-empty and non-error-like.
+                if "usage" not in lowered and "help" not in lowered:
+                    return first_line
         except (subprocess.TimeoutExpired, FileNotFoundError, PermissionError):
             continue
         except Exception:

@@ -5,6 +5,7 @@ beyond basic nikto/gobuster enumeration.
 Uses: sqlmap, ffuf, wfuzz, ZAP CLI, curl
 """
 
+import json
 import re
 import logging
 from typing import Dict, List, Any
@@ -163,8 +164,6 @@ class WebAppModule(BaseModule):
         ffuf_results: Dict[str, Any] = {"directories": [], "files": []}
         if result.success and output_file.exists():
             try:
-                import json
-
                 with open(output_file) as f:
                     data = json.load(f)
                 for entry in data.get("results", []):
@@ -178,7 +177,7 @@ class WebAppModule(BaseModule):
                         ffuf_results["files"].append(item)
                     else:
                         ffuf_results["directories"].append(item)
-            except Exception as e:
+            except (OSError, ValueError, json.JSONDecodeError) as e:
                 logger.warning(f"  Failed to parse ffuf output: {e}")
 
         logger.info(

@@ -43,6 +43,9 @@ def _line_count(path: Path) -> int:
 def build_manifest() -> dict:
     files = []
     for rel in _git_tracked_files():
+        if rel == "AUDIT_MANIFEST.json":
+            # Exclude manifest itself to keep output deterministic across writes.
+            continue
         abs_path = ROOT / rel
         files.append(
             {

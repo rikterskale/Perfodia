@@ -215,19 +215,13 @@ class ScopeGuard:
         for ip in ips:
             if not self.check(ip, tool_name=tool_name, action=f"args: {' '.join(args[:5])}"):
                 return False
-        codex/conduct-a-comprehensive-technical-audit
+
         # Also validate hostname-only targets (including URL hostnames),
         # not just literal IPv4/IPv6 tokens.
         hostname_pattern = re.compile(
             r"^(?!-)[A-Za-z0-9-]{1,63}(?<!-)(?:\.[A-Za-z0-9-]{1,63})+$"
         )
 
-        codex / conduct - a - comprehensive - technical - audit
-        hostname_pattern = re.compile(r"^(?!-)[A-Za-z0-9-]{1,63}(?<!-)(?:\.[A-Za-z0-9-]{1,63})+$")
-
-        hostname_pattern = re.compile(r"^(?!-)[A-Za-z0-9-]{1,63}(?<!-)(?:\.[A-Za-z0-9-]{1,63})+$")
-        main
-        main
         hostnames: List[str] = []
         for arg in args:
             if not arg:
