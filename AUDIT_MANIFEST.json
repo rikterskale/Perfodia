@@ -1,0 +1,385 @@
+{
+  "schema_version": 1,
+  "generated_by": "tools/generate_audit_manifest.py",
+  "file_count": 54,
+  "files": [
+    {
+      "path": ".gitattributes",
+      "size_bytes": 66,
+      "line_count": 2,
+      "sha256": "1a1dbe176bc233b499d35a57db7513f2941c99ab9759f177830c9149be99005b",
+      "status": "pending_review"
+    },
+    {
+      "path": ".github/workflows/ci.yml",
+      "size_bytes": 3786,
+      "line_count": 151,
+      "sha256": "f3b4ab53851d4f056a7c274d2ab3e2a54e695665d6ae24231a7b4a78002e0d51",
+      "status": "pending_review"
+    },
+    {
+      "path": ".gitignore",
+      "size_bytes": 552,
+      "line_count": 42,
+      "sha256": "0202073d0088f4519ac72f8b96b8e5d49f70c6338bfcb15c478527bea4be8a85",
+      "status": "pending_review"
+    },
+    {
+      "path": "AUDIT_LOG.md",
+      "size_bytes": 716,
+      "line_count": 25,
+      "sha256": "4240ba7468413f4f675cc4af3b7f67f52b0cd7b8c943bb78c9af4494eca50658",
+      "status": "pending_review"
+    },
+    {
+      "path": "AUDIT_REPORT.md",
+      "size_bytes": 45119,
+      "line_count": 491,
+      "sha256": "9757ef5de215273f8451d2a2c818b29f0d7b680c26cf7b64ab56d95f14cd0db2",
+      "status": "pending_review"
+    },
+    {
+      "path": "Docker Guide.md",
+      "size_bytes": 1940,
+      "line_count": 88,
+      "sha256": "7c4e1627fb649cfe7044e3af21d96e90bb946227cb52d3f91fb80e0290e2d29c",
+      "status": "pending_review"
+    },
+    {
+      "path": "Dockerfile",
+      "size_bytes": 6821,
+      "line_count": 195,
+      "sha256": "8a2ebbcc3a981d5a9ecde83004c14a061f73817545c615ca4af6270c4749a682",
+      "status": "pending_review"
+    },
+    {
+      "path": "LICENSE",
+      "size_bytes": 1068,
+      "line_count": 21,
+      "sha256": "5e179b22cbed6ea085f00416da0338a3b46c9be3d6d9379b15e2500e486f0671",
+      "status": "pending_review"
+    },
+    {
+      "path": "Perfodia_Advanced_Module_Users_Guide.md",
+      "size_bytes": 86427,
+      "line_count": 1886,
+      "sha256": "288fc85c5e943dca4585d9bbfcdf62e035be974ce1b5bb74f3588785d967bde9",
+      "status": "pending_review"
+    },
+    {
+      "path": "README.md",
+      "size_bytes": 3150,
+      "line_count": 139,
+      "sha256": "cd279638e2693a9bfb14741e9efc07f1f2d0b4c1bea8989038a3fd071d21b930",
+      "status": "pending_review"
+    },
+    {
+      "path": "configs/__init__.py",
+      "size_bytes": 0,
+      "line_count": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": "pending_review"
+    },
+    {
+      "path": "configs/default.yaml",
+      "size_bytes": 4016,
+      "line_count": 120,
+      "sha256": "2d4f73e23485d1dbfc0fe9017d82d146d799a18d6016ea57fbd6bca498801295",
+      "status": "pending_review"
+    },
+    {
+      "path": "configs/settings.py",
+      "size_bytes": 7590,
+      "line_count": 221,
+      "sha256": "4316e41a51804ca55f38a958336928a7d29fbf60d74b6f5eeab7f708de077b9f",
+      "status": "pending_review"
+    },
+    {
+      "path": "docker-compose.yml",
+      "size_bytes": 1556,
+      "line_count": 48,
+      "sha256": "95cc0732cfc61b89dcf06a0b504ee6eb2b8ff88c5b86aa536ea058048bb969fd",
+      "status": "pending_review"
+    },
+    {
+      "path": "docker/docker-entrypoint.sh",
+      "size_bytes": 3837,
+      "line_count": 87,
+      "sha256": "b1c99c461fc6f9cbc9464f11cf5ce0f4750e121dc40a27280be0e7f5bc6e99ab",
+      "status": "pending_review"
+    },
+    {
+      "path": "install_deps.sh",
+      "size_bytes": 13088,
+      "line_count": 479,
+      "sha256": "04191a8d8075d24eea4684f0f042eb92d08be51544be7a4b03ace88d5c03591d",
+      "status": "pending_review"
+    },
+    {
+      "path": "modules/__init__.py",
+      "size_bytes": 0,
+      "line_count": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": "pending_review"
+    },
+    {
+      "path": "modules/active_directory.py",
+      "size_bytes": 23970,
+      "line_count": 635,
+      "sha256": "cb10294b063136d8131fb56916e27761977e155f7036d1017c86b01fdac15f6b",
+      "status": "pending_review"
+    },
+    {
+      "path": "modules/base.py",
+      "size_bytes": 4454,
+      "line_count": 132,
+      "sha256": "079a79cd5879b46de05ab09abb9316f2fecca6944a800c246019e472e318e1b3",
+      "status": "pending_review"
+    },
+    {
+      "path": "modules/cracking.py",
+      "size_bytes": 11024,
+      "line_count": 310,
+      "sha256": "7f5501068b9f69cfbcd91d9ebfcfd7603e572841c8428b3208075942b9fde6c4",
+      "status": "pending_review"
+    },
+    {
+      "path": "modules/enumeration.py",
+      "size_bytes": 26288,
+      "line_count": 665,
+      "sha256": "b93a9b0c058413ad235de3dca7b9e2b2c8e79d804ab9bf93f83c3f068c616dcd",
+      "status": "pending_review"
+    },
+    {
+      "path": "modules/exploitation.py",
+      "size_bytes": 10816,
+      "line_count": 314,
+      "sha256": "7e273e61f8c6d98e3015347df8dc66e0175f609d0b25889a0f93b68594a370bf",
+      "status": "pending_review"
+    },
+    {
+      "path": "modules/post_exploitation.py",
+      "size_bytes": 14647,
+      "line_count": 414,
+      "sha256": "78fbc26de26ceb84f2279cef62c970355202832994c113fdae3d9489d9f92eb9",
+      "status": "pending_review"
+    },
+    {
+      "path": "modules/recon.py",
+      "size_bytes": 7247,
+      "line_count": 203,
+      "sha256": "7225a1147b04bdf57250ab0b1797007fd6053a67eaeabdec410bac5c239a4598",
+      "status": "pending_review"
+    },
+    {
+      "path": "modules/scanning.py",
+      "size_bytes": 15632,
+      "line_count": 409,
+      "sha256": "49fb41dde4f14909ef218b6592f7857494f7df7d8ec733a1600936a0f172acb7",
+      "status": "pending_review"
+    },
+    {
+      "path": "modules/web_app.py",
+      "size_bytes": 18725,
+      "line_count": 527,
+      "sha256": "f9c15d190eefb4cee3b2d6c4331d463bdf9797855f3d65eaccbdb8742a6b1b25",
+      "status": "pending_review"
+    },
+    {
+      "path": "mypy.ini",
+      "size_bytes": 277,
+      "line_count": 9,
+      "sha256": "a29eb651745173801f510326953c51feb8aaba71eb334e4ac3edc2615039c01e",
+      "status": "pending_review"
+    },
+    {
+      "path": "perfodia.py",
+      "size_bytes": 10974,
+      "line_count": 313,
+      "sha256": "749ca5c0b2f3e21170578bf17e76ae5129b133bff81311f3d1843fb4ce54b4d3",
+      "status": "pending_review"
+    },
+    {
+      "path": "pyproject.toml",
+      "size_bytes": 1410,
+      "line_count": 59,
+      "sha256": "76da6feb8c5f55d47eba907c2da72f195eee3a9bb3fbee825a685eb92bf7c0ab",
+      "status": "pending_review"
+    },
+    {
+      "path": "requirements.txt",
+      "size_bytes": 1221,
+      "line_count": 33,
+      "sha256": "5efd2f7401773db994eade56aa9cc8f414689e5062d35ac87dc9ca5f02e5ed60",
+      "status": "pending_review"
+    },
+    {
+      "path": "tests/__init__.py",
+      "size_bytes": 0,
+      "line_count": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": "pending_review"
+    },
+    {
+      "path": "tests/conftest.py",
+      "size_bytes": 3131,
+      "line_count": 99,
+      "sha256": "4a9a8329a6153bff86d34f169f8a909fd5612d385852d6efc94bfa6fa31316ef",
+      "status": "pending_review"
+    },
+    {
+      "path": "tests/test_core.py",
+      "size_bytes": 6900,
+      "line_count": 196,
+      "sha256": "434c9e307079ebf61bdb373ebad41d9980a6e0898713771aaff5939f8083e5d0",
+      "status": "pending_review"
+    },
+    {
+      "path": "tests/test_credential_vault.py",
+      "size_bytes": 4322,
+      "line_count": 100,
+      "sha256": "6e0dad16b50e3b2cc644ed94e973070cb853a788d8661fa584224ab52cae91d5",
+      "status": "pending_review"
+    },
+    {
+      "path": "tests/test_sanitizer.py",
+      "size_bytes": 2774,
+      "line_count": 87,
+      "sha256": "0715048456dc9878e01bbb18292599959f680d27c0c70b8901ac541d95f1ccf0",
+      "status": "pending_review"
+    },
+    {
+      "path": "tests/test_scope_guard.py",
+      "size_bytes": 3062,
+      "line_count": 88,
+      "sha256": "53a603a31434a9a0923ea0bc5c5c8bc090edb15a154d90582e3c648debee93a0",
+      "status": "pending_review"
+    },
+    {
+      "path": "tests/test_tui.py",
+      "size_bytes": 1520,
+      "line_count": 53,
+      "sha256": "a6524aa6625e8efa33d0ffc9596c1f59a8efc1a9ee08bb98efb127147c959164",
+      "status": "pending_review"
+    },
+    {
+      "path": "tests/test_validators.py",
+      "size_bytes": 3707,
+      "line_count": 111,
+      "sha256": "4325a302df4a6da8844ba66fb5601ed6e57b6329aaa30b70b1cbd1f637f920ec",
+      "status": "pending_review"
+    },
+    {
+      "path": "tests/test_vuln_scorer.py",
+      "size_bytes": 4075,
+      "line_count": 108,
+      "sha256": "ee6154611d06e9e67787827075307694ab71cadef7a59063c33d0f95a7867ffd",
+      "status": "pending_review"
+    },
+    {
+      "path": "utils/__init__.py",
+      "size_bytes": 0,
+      "line_count": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": "pending_review"
+    },
+    {
+      "path": "utils/config_wizard.py",
+      "size_bytes": 9029,
+      "line_count": 276,
+      "sha256": "bb6b4601fff35a3345620af9114237236bc45b56c15d91da09c15d04527caf2b",
+      "status": "pending_review"
+    },
+    {
+      "path": "utils/credential_vault.py",
+      "size_bytes": 13031,
+      "line_count": 358,
+      "sha256": "7512211c3e62252603fc7bb9e7ef001243e11fdd7c23a6e4236a7749f438f410",
+      "status": "pending_review"
+    },
+    {
+      "path": "utils/logger.py",
+      "size_bytes": 4645,
+      "line_count": 147,
+      "sha256": "46b058791aadb85d87a64fdff37585deaaf8ca602e80c71d1c830798117450d7",
+      "status": "pending_review"
+    },
+    {
+      "path": "utils/parallel.py",
+      "size_bytes": 6924,
+      "line_count": 205,
+      "sha256": "a9d47194746f4eb1bdc275df4b37fa91f37784567bffe5529e561a822893e55d",
+      "status": "pending_review"
+    },
+    {
+      "path": "utils/parsers.py",
+      "size_bytes": 10497,
+      "line_count": 352,
+      "sha256": "0006d8805f217b10522d9e16eb39637a4a4b682019976329719ce2717324e861",
+      "status": "pending_review"
+    },
+    {
+      "path": "utils/report_generator.py",
+      "size_bytes": 30178,
+      "line_count": 696,
+      "sha256": "f8917f351b968507e20539d7b55f83def80a591fdf570b281a1d31545ca35302",
+      "status": "pending_review"
+    },
+    {
+      "path": "utils/sanitizer.py",
+      "size_bytes": 3319,
+      "line_count": 113,
+      "sha256": "318daa23a0528b1f390f2d09dab213f6af4b41f183407e210635f9cb03a6080f",
+      "status": "pending_review"
+    },
+    {
+      "path": "utils/scope_guard.py",
+      "size_bytes": 9592,
+      "line_count": 270,
+      "sha256": "a6e3db8a14002cee72a881a136b5292b8b21842fc0b9a863765e6c78b60ad1a2",
+      "status": "pending_review"
+    },
+    {
+      "path": "utils/screenshot.py",
+      "size_bytes": 10796,
+      "line_count": 318,
+      "sha256": "daf08245528e3b4d946920ad8c442f4a862521f284dbb07912fb5b6048e278bb",
+      "status": "pending_review"
+    },
+    {
+      "path": "utils/session_state.py",
+      "size_bytes": 5394,
+      "line_count": 152,
+      "sha256": "3e20f0efa44b80b91a12cec5584fd64b71ad1d70de831f3f197845e4a71b16e8",
+      "status": "pending_review"
+    },
+    {
+      "path": "utils/tool_runner.py",
+      "size_bytes": 16086,
+      "line_count": 445,
+      "sha256": "730af4ec9c895b68577fcbab04b5b091af9155f44243136db9bb4bf0db8c25e4",
+      "status": "pending_review"
+    },
+    {
+      "path": "utils/tui.py",
+      "size_bytes": 9941,
+      "line_count": 273,
+      "sha256": "0fe8ca95a849db1baeda827e57d86b233628278743912b486e46bdf177d92cb5",
+      "status": "pending_review"
+    },
+    {
+      "path": "utils/validators.py",
+      "size_bytes": 12039,
+      "line_count": 367,
+      "sha256": "b85085c0f5633355bb1b3d2ccd33486006a9bcf515232033a24dccd41b9c8f9a",
+      "status": "pending_review"
+    },
+    {
+      "path": "utils/vuln_scorer.py",
+      "size_bytes": 15584,
+      "line_count": 471,
+      "sha256": "1fd34e6b1541115155078ad6d01ee66ef699a0a3d1d2d66f212f00ebf0e9da35",
+      "status": "pending_review"
+    }
+  ]
+}

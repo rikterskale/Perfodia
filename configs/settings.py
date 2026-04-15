@@ -148,7 +148,7 @@ class FrameworkConfig:
             "ad": {
                 "enabled": True,
                 "bloodhound_collect": True,
-                "spray_passwords": ["Password1", "Welcome1", "Company123"],
+                "spray_passwords": [],
                 "max_spray_users": 200,
                 "check_smb_signing": True,
             },
