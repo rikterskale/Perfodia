@@ -215,9 +215,7 @@ class ScopeGuard:
         for ip in ips:
             if not self.check(ip, tool_name=tool_name, action=f"args: {' '.join(args[:5])}"):
                 return False
-        hostname_pattern = re.compile(
-            r"^(?!-)[A-Za-z0-9-]{1,63}(?<!-)(?:\.[A-Za-z0-9-]{1,63})+$"
-        )
+        hostname_pattern = re.compile(r"^(?!-)[A-Za-z0-9-]{1,63}(?<!-)(?:\.[A-Za-z0-9-]{1,63})+$")
         hostnames: List[str] = []
         for arg in args:
             if not arg:
