@@ -10,6 +10,7 @@ import ipaddress
 import logging
 import re
 import threading
+from urllib.parse import urlparse
 from pathlib import Path
 from typing import List, Set, Optional
 
@@ -213,6 +214,31 @@ class ScopeGuard:
         ips = self.extract_ips_from_args(args)
         for ip in ips:
             if not self.check(ip, tool_name=tool_name, action=f"args: {' '.join(args[:5])}"):
+                return False
+        hostname_pattern = re.compile(
+            r"^(?!-)[A-Za-z0-9-]{1,63}(?<!-)(?:\.[A-Za-z0-9-]{1,63})+$"
+        )
+        hostnames: List[str] = []
+        for arg in args:
+            if not arg:
+                continue
+            if "://" in arg:
+                parsed = urlparse(arg)
+                if parsed.hostname:
+                    hostnames.append(parsed.hostname)
+            for token in re.split(r"[\s/@=,]+", arg):
+                candidate = token.strip("[]")
+                if not candidate or candidate.startswith("-"):
+                    continue
+                try:
+                    ipaddress.ip_address(candidate)
+                    continue
+                except ValueError:
+                    pass
+                if hostname_pattern.match(candidate):
+                    hostnames.append(candidate)
+        for host in list(dict.fromkeys(hostnames)):
+            if not self.check(host, tool_name=tool_name, action=f"args: {' '.join(args[:5])}"):
                 return False
         return True
 
