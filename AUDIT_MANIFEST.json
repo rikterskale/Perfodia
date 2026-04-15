@@ -33,9 +33,15 @@
     },
     {
       "path": "AUDIT_REPORT.md",
+<<<<<<< HEAD
       "size_bytes": 34171,
       "line_count": 603,
       "sha256": "298e29ec66dbd4d0eb00a7d78594cd82ddbb065e709cd409c2573a164ddf9947",
+=======
+      "size_bytes": 33568,
+      "line_count": 603,
+      "sha256": "06f1f45b5095c40af93ab07f23a1c8fbc1d2777f79983db4d3dad459b282b2cf",
+>>>>>>> 7787ff1 (Apply audit fixes patch)
       "status": "pending_review"
     },
     {
@@ -54,9 +60,15 @@
     },
     {
       "path": "LICENSE",
+<<<<<<< HEAD
       "size_bytes": 1079,
       "line_count": 21,
       "sha256": "92cd149954235067707c3203e69b1c30fa3501271b6c93319ef7c8d736bef5e4",
+=======
+      "size_bytes": 1057,
+      "line_count": 21,
+      "sha256": "3ec558dc6e9c9355ab4b28c942caa92bf90b0b82c12d7838d2ef92467ad135c1",
+>>>>>>> 7787ff1 (Apply audit fixes patch)
       "status": "pending_review"
     },
     {
@@ -89,9 +101,15 @@
     },
     {
       "path": "configs/settings.py",
+<<<<<<< HEAD
       "size_bytes": 7802,
       "line_count": 221,
       "sha256": "f4888960012ea7656fe4cf594360ef4ba417debddb5d6a196e0aeeaefee3214e",
+=======
+      "size_bytes": 7581,
+      "line_count": 221,
+      "sha256": "5805e4277061b483f555ba2350c23eb8e21cf42696d047e6e92cd49c8398af1a",
+>>>>>>> 7787ff1 (Apply audit fixes patch)
       "status": "pending_review"
     },
     {
@@ -145,9 +163,15 @@
     },
     {
       "path": "modules/enumeration.py",
+<<<<<<< HEAD
       "size_bytes": 26990,
       "line_count": 665,
       "sha256": "838c65daed1ff4129c511015585e2aebb1266727a28fec1345b9f1060c271814",
+=======
+      "size_bytes": 26325,
+      "line_count": 665,
+      "sha256": "3513335f1fed1d320d0e58516505f5ce35ced82fbdbce3f8fc8e8c425bfbfeec",
+>>>>>>> 7787ff1 (Apply audit fixes patch)
       "status": "pending_review"
     },
     {
@@ -159,9 +183,15 @@
     },
     {
       "path": "modules/post_exploitation.py",
+<<<<<<< HEAD
       "size_bytes": 15059,
       "line_count": 414,
       "sha256": "7de4850f804b2398d1c091376c1e73966d728faf31b3556395c28d7ae0058615",
+=======
+      "size_bytes": 14645,
+      "line_count": 414,
+      "sha256": "96aa98466cd17c691a0ad81abb7d5a5e3b9f7d29c0b76d4e96d322a0a26f97b3",
+>>>>>>> 7787ff1 (Apply audit fixes patch)
       "status": "pending_review"
     },
     {
@@ -180,16 +210,28 @@
     },
     {
       "path": "modules/web_app.py",
+<<<<<<< HEAD
       "size_bytes": 19268,
       "line_count": 526,
       "sha256": "cfcc0e7236d8d03018d866d71be197339701b92f5bd46cb13dd26decb2295457",
+=======
+      "size_bytes": 18742,
+      "line_count": 526,
+      "sha256": "c200ebb13e34d8ed2fc7a39772dfe1e4f78c1364bf06f704778a697e3c18f0ac",
+>>>>>>> 7787ff1 (Apply audit fixes patch)
       "status": "pending_review"
     },
     {
       "path": "mypy.ini",
+<<<<<<< HEAD
       "size_bytes": 273,
       "line_count": 9,
       "sha256": "76df3b6694fd1bddf9a6b2df6d863144a7c90539800ea74a56fe1f9037955a6e",
+=======
+      "size_bytes": 264,
+      "line_count": 9,
+      "sha256": "5cf0298e9ba8ae176019201280ae286a2df1ef05f6ff6eecd1ada835adbf7386",
+>>>>>>> 7787ff1 (Apply audit fixes patch)
       "status": "pending_review"
     },
     {
@@ -291,6 +333,20 @@
       "status": "pending_review"
     },
     {
+      "path": "tools/generate_audit_manifest.py",
+      "size_bytes": 2782,
+      "line_count": 99,
+      "sha256": "b57c379ef224959b1cd4fe65668c3c79e53ff3ad073022e64dde53a74087b94e",
+      "status": "pending_review"
+    },
+    {
+      "path": "tools/verify_readme_testing_tools.py",
+      "size_bytes": 2261,
+      "line_count": 87,
+      "sha256": "5731e7eb47ad407556eb52a094a78ee113dced9e75c57d4b6e3c5f6a2f97b4fa",
+      "status": "pending_review"
+    },
+    {
       "path": "utils/__init__.py",
       "size_bytes": 0,
       "line_count": 0,
@@ -320,9 +376,15 @@
     },
     {
       "path": "utils/parallel.py",
+<<<<<<< HEAD
       "size_bytes": 7339,
       "line_count": 206,
       "sha256": "14c3be0a63c8a1c7c1d8d4d5992d2ad5dce2f134ac97e079a04a1a5340651ecc",
+=======
+      "size_bytes": 7133,
+      "line_count": 206,
+      "sha256": "0b541d815d0457598dfdc0b19b4df3297f08032e1e038e7a60d4c6f5ddc67080",
+>>>>>>> 7787ff1 (Apply audit fixes patch)
       "status": "pending_review"
     },
     {
@@ -334,9 +396,15 @@
     },
     {
       "path": "utils/report_generator.py",
+<<<<<<< HEAD
       "size_bytes": 31080,
       "line_count": 696,
       "sha256": "acbb82086945d153f3dbb5435be000b35f779c9bee563e643ee32fbbf556869e",
+=======
+      "size_bytes": 30384,
+      "line_count": 696,
+      "sha256": "ec68c3fa8a83f22631d1631ec8f0164c392681638dd25f39e516820f01554102",
+>>>>>>> 7787ff1 (Apply audit fixes patch)
       "status": "pending_review"
     },
     {
@@ -348,9 +416,15 @@
     },
     {
       "path": "utils/scope_guard.py",
+<<<<<<< HEAD
       "size_bytes": 9962,
       "line_count": 272,
       "sha256": "89ac43043ce4f49695fa01c5681c9a777e18c357ff8694fd2654c0148c0bbab7",
+=======
+      "size_bytes": 9712,
+      "line_count": 274,
+      "sha256": "6eb83e16862bd05d27ae56936e86b5a535faeb7b0c46934a49b4ada183e74a17",
+>>>>>>> 7787ff1 (Apply audit fixes patch)
       "status": "pending_review"
     },
     {
@@ -383,9 +457,15 @@
     },
     {
       "path": "utils/validators.py",
+<<<<<<< HEAD
       "size_bytes": 12997,
       "line_count": 380,
       "sha256": "4c17399d538bad8862aebdb4638b79be524608b483b6a6595fa7d4a54ce0fb54",
+=======
+      "size_bytes": 12617,
+      "line_count": 380,
+      "sha256": "3b2aef4850b093b1f5a801fd491908e6defd3b1a9856f86e7fde84cf4f5b5ce7",
+>>>>>>> 7787ff1 (Apply audit fixes patch)
       "status": "pending_review"
     },
     {

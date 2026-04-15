@@ -218,7 +218,13 @@ class ScopeGuard:
 
         # Also validate hostname-only targets (including URL hostnames),
         # not just literal IPv4/IPv6 tokens.
+<<<<<<< HEAD
         hostname_pattern = re.compile(r"^(?!-)[A-Za-z0-9-]{1,63}(?<!-)(?:\.[A-Za-z0-9-]{1,63})+$")
+=======
+        hostname_pattern = re.compile(
+            r"^(?!-)[A-Za-z0-9-]{1,63}(?<!-)(?:\.[A-Za-z0-9-]{1,63})+$"
+        )
+>>>>>>> 7787ff1 (Apply audit fixes patch)
 
         hostnames: List[str] = []
         for arg in args:
