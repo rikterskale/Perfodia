@@ -5,58 +5,58 @@
   "files": [
     {
       "path": ".gitattributes",
-      "size_bytes": 66,
+      "size_bytes": 68,
       "line_count": 2,
-      "sha256": "1a1dbe176bc233b499d35a57db7513f2941c99ab9759f177830c9149be99005b",
+      "sha256": "d8fb0de4792538f93822b2c0d235604921299d5e54a3d6ec7a6cb34536e8bf1e",
       "status": "pending_review"
     },
     {
       "path": ".github/workflows/ci.yml",
-      "size_bytes": 3786,
+      "size_bytes": 3937,
       "line_count": 151,
-      "sha256": "f3b4ab53851d4f056a7c274d2ab3e2a54e695665d6ae24231a7b4a78002e0d51",
+      "sha256": "293a960f4d38eaa70bc5024c1256527ccb4b6798b93a20119260f4c50fdbd157",
       "status": "pending_review"
     },
     {
       "path": ".gitignore",
-      "size_bytes": 552,
+      "size_bytes": 594,
       "line_count": 42,
-      "sha256": "0202073d0088f4519ac72f8b96b8e5d49f70c6338bfcb15c478527bea4be8a85",
+      "sha256": "ec6e8b5e709bd5d559230a575ca0badf9f1143c32055c9fbb75f94f0909c4d7d",
       "status": "pending_review"
     },
     {
       "path": "AUDIT_LOG.md",
-      "size_bytes": 716,
+      "size_bytes": 741,
       "line_count": 25,
-      "sha256": "4240ba7468413f4f675cc4af3b7f67f52b0cd7b8c943bb78c9af4494eca50658",
+      "sha256": "705dc774f5fc48a3bcdf34a27719c3b4d1e045de407f9f41c845bdcd0507da90",
       "status": "pending_review"
     },
     {
       "path": "AUDIT_REPORT.md",
-      "size_bytes": 33568,
+      "size_bytes": 34171,
       "line_count": 603,
-      "sha256": "06f1f45b5095c40af93ab07f23a1c8fbc1d2777f79983db4d3dad459b282b2cf",
+      "sha256": "298e29ec66dbd4d0eb00a7d78594cd82ddbb065e709cd409c2573a164ddf9947",
       "status": "pending_review"
     },
     {
       "path": "Docker Guide.md",
-      "size_bytes": 1940,
+      "size_bytes": 2028,
       "line_count": 88,
-      "sha256": "7c4e1627fb649cfe7044e3af21d96e90bb946227cb52d3f91fb80e0290e2d29c",
+      "sha256": "481da202c5e690ba4b903e519caf569a939d01cdbc73b97f8c42e62e56dd4411",
       "status": "pending_review"
     },
     {
       "path": "Dockerfile",
-      "size_bytes": 6821,
+      "size_bytes": 7016,
       "line_count": 195,
-      "sha256": "8a2ebbcc3a981d5a9ecde83004c14a061f73817545c615ca4af6270c4749a682",
+      "sha256": "06bfed83f862adc64df5ae76d18c986e3abf599a7bf0d1e27440423957513f4a",
       "status": "pending_review"
     },
     {
       "path": "LICENSE",
-      "size_bytes": 1058,
+      "size_bytes": 1079,
       "line_count": 21,
-      "sha256": "4a7be66353db7f925758884957bb84eb8c4483c429df3b7d1752ee09ae7164dd",
+      "sha256": "92cd149954235067707c3203e69b1c30fa3501271b6c93319ef7c8d736bef5e4",
       "status": "pending_review"
     },
     {
@@ -68,9 +68,9 @@
     },
     {
       "path": "README.md",
-      "size_bytes": 3150,
+      "size_bytes": 3289,
       "line_count": 139,
-      "sha256": "cd279638e2693a9bfb14741e9efc07f1f2d0b4c1bea8989038a3fd071d21b930",
+      "sha256": "1a9a897f30b304e6cd0c8fc08b28586a62817bcf8d4e0a49975bcfbd5af54ef7",
       "status": "pending_review"
     },
     {
@@ -82,37 +82,37 @@
     },
     {
       "path": "configs/default.yaml",
-      "size_bytes": 4016,
+      "size_bytes": 4136,
       "line_count": 120,
-      "sha256": "2d4f73e23485d1dbfc0fe9017d82d146d799a18d6016ea57fbd6bca498801295",
+      "sha256": "5927fc097521301f511cda772cbba4c080ee0a19e5e8a56ce8a5615f092153b2",
       "status": "pending_review"
     },
     {
       "path": "configs/settings.py",
-      "size_bytes": 7581,
+      "size_bytes": 7802,
       "line_count": 221,
-      "sha256": "5805e4277061b483f555ba2350c23eb8e21cf42696d047e6e92cd49c8398af1a",
+      "sha256": "f4888960012ea7656fe4cf594360ef4ba417debddb5d6a196e0aeeaefee3214e",
       "status": "pending_review"
     },
     {
       "path": "docker-compose.yml",
-      "size_bytes": 1556,
+      "size_bytes": 1603,
       "line_count": 48,
-      "sha256": "95cc0732cfc61b89dcf06a0b504ee6eb2b8ff88c5b86aa536ea058048bb969fd",
+      "sha256": "501bd36c776cbb347ae059603d6d3a2f8504a17e0b8da95bf186b4a5dbaa047b",
       "status": "pending_review"
     },
     {
       "path": "docker/docker-entrypoint.sh",
-      "size_bytes": 3837,
+      "size_bytes": 3924,
       "line_count": 87,
-      "sha256": "b1c99c461fc6f9cbc9464f11cf5ce0f4750e121dc40a27280be0e7f5bc6e99ab",
+      "sha256": "6e573f24a097bb023cc9f6eeed636abe863296342052c225ba1b8676bda3dfd7",
       "status": "pending_review"
     },
     {
       "path": "install_deps.sh",
-      "size_bytes": 13088,
+      "size_bytes": 13567,
       "line_count": 479,
-      "sha256": "04191a8d8075d24eea4684f0f042eb92d08be51544be7a4b03ace88d5c03591d",
+      "sha256": "3d439cd37815ea04c600d1ab458c7ff358bfa8d9eb9dfabc99155d3d40731dd3",
       "status": "pending_review"
     },
     {
@@ -124,93 +124,93 @@
     },
     {
       "path": "modules/active_directory.py",
-      "size_bytes": 23970,
+      "size_bytes": 24605,
       "line_count": 635,
-      "sha256": "cb10294b063136d8131fb56916e27761977e155f7036d1017c86b01fdac15f6b",
+      "sha256": "572a7b6c8e600b57973a2489495c36f41cf38e9e5d5fb7b5894f81280631c0ee",
       "status": "pending_review"
     },
     {
       "path": "modules/base.py",
-      "size_bytes": 4454,
+      "size_bytes": 4586,
       "line_count": 132,
-      "sha256": "079a79cd5879b46de05ab09abb9316f2fecca6944a800c246019e472e318e1b3",
+      "sha256": "206410eae0b6dc40f9c5b760c694314b8da2dd029f1c0cab0b91fe8be9f9a8a7",
       "status": "pending_review"
     },
     {
       "path": "modules/cracking.py",
-      "size_bytes": 11024,
+      "size_bytes": 11334,
       "line_count": 310,
-      "sha256": "7f5501068b9f69cfbcd91d9ebfcfd7603e572841c8428b3208075942b9fde6c4",
+      "sha256": "28f63bb2286d0ebc0358717c59149bd4501df53fd9abe5131fa60c1c41a9e66a",
       "status": "pending_review"
     },
     {
       "path": "modules/enumeration.py",
-      "size_bytes": 26325,
+      "size_bytes": 26990,
       "line_count": 665,
-      "sha256": "3513335f1fed1d320d0e58516505f5ce35ced82fbdbce3f8fc8e8c425bfbfeec",
+      "sha256": "838c65daed1ff4129c511015585e2aebb1266727a28fec1345b9f1060c271814",
       "status": "pending_review"
     },
     {
       "path": "modules/exploitation.py",
-      "size_bytes": 10816,
+      "size_bytes": 11130,
       "line_count": 314,
-      "sha256": "7e273e61f8c6d98e3015347df8dc66e0175f609d0b25889a0f93b68594a370bf",
+      "sha256": "98e6588ba0df5e877633024d69658d977b5fd3f74100dd6645347bcbc58553aa",
       "status": "pending_review"
     },
     {
       "path": "modules/post_exploitation.py",
-      "size_bytes": 14645,
+      "size_bytes": 15059,
       "line_count": 414,
-      "sha256": "96aa98466cd17c691a0ad81abb7d5a5e3b9f7d29c0b76d4e96d322a0a26f97b3",
+      "sha256": "7de4850f804b2398d1c091376c1e73966d728faf31b3556395c28d7ae0058615",
       "status": "pending_review"
     },
     {
       "path": "modules/recon.py",
-      "size_bytes": 7247,
+      "size_bytes": 7450,
       "line_count": 203,
-      "sha256": "7225a1147b04bdf57250ab0b1797007fd6053a67eaeabdec410bac5c239a4598",
+      "sha256": "d78e61b64f4a40fe9c63c8bc0afddf24a9722966bfeb886104bd199cf0e703a6",
       "status": "pending_review"
     },
     {
       "path": "modules/scanning.py",
-      "size_bytes": 15632,
+      "size_bytes": 16041,
       "line_count": 409,
-      "sha256": "49fb41dde4f14909ef218b6592f7857494f7df7d8ec733a1600936a0f172acb7",
+      "sha256": "09982a5d0bfd4faa5ef4592b3139329673bea64b4826ff984ab627cb4b000046",
       "status": "pending_review"
     },
     {
       "path": "modules/web_app.py",
-      "size_bytes": 18742,
+      "size_bytes": 19268,
       "line_count": 526,
-      "sha256": "c200ebb13e34d8ed2fc7a39772dfe1e4f78c1364bf06f704778a697e3c18f0ac",
+      "sha256": "cfcc0e7236d8d03018d866d71be197339701b92f5bd46cb13dd26decb2295457",
       "status": "pending_review"
     },
     {
       "path": "mypy.ini",
-      "size_bytes": 264,
+      "size_bytes": 273,
       "line_count": 9,
-      "sha256": "5cf0298e9ba8ae176019201280ae286a2df1ef05f6ff6eecd1ada835adbf7386",
+      "sha256": "76df3b6694fd1bddf9a6b2df6d863144a7c90539800ea74a56fe1f9037955a6e",
       "status": "pending_review"
     },
     {
       "path": "perfodia.py",
-      "size_bytes": 10974,
+      "size_bytes": 11287,
       "line_count": 313,
-      "sha256": "749ca5c0b2f3e21170578bf17e76ae5129b133bff81311f3d1843fb4ce54b4d3",
+      "sha256": "e2c095cbb3efcacaf3663126d73b58d25a461e8c19a072721a08879716693fd0",
       "status": "pending_review"
     },
     {
       "path": "pyproject.toml",
-      "size_bytes": 1410,
+      "size_bytes": 1468,
       "line_count": 59,
-      "sha256": "76da6feb8c5f55d47eba907c2da72f195eee3a9bb3fbee825a685eb92bf7c0ab",
+      "sha256": "dec8174d8029ad46410bedf5d73c85ef317a8d0995324e81c1f14ac4d1a67ea1",
       "status": "pending_review"
     },
     {
       "path": "requirements.txt",
-      "size_bytes": 1221,
+      "size_bytes": 1254,
       "line_count": 33,
-      "sha256": "5efd2f7401773db994eade56aa9cc8f414689e5062d35ac87dc9ca5f02e5ed60",
+      "sha256": "eb1845b525ebac3439348085c114ea529c65ae790bf5b49686d389c571dbdfe2",
       "status": "pending_review"
     },
     {
@@ -222,72 +222,72 @@
     },
     {
       "path": "tests/conftest.py",
-      "size_bytes": 3131,
+      "size_bytes": 3230,
       "line_count": 99,
-      "sha256": "4a9a8329a6153bff86d34f169f8a909fd5612d385852d6efc94bfa6fa31316ef",
+      "sha256": "f7dcac637a180bd92ac59643acf9aceab45887f11dfce884933faa590e29e217",
       "status": "pending_review"
     },
     {
       "path": "tests/test_core.py",
-      "size_bytes": 6900,
+      "size_bytes": 7096,
       "line_count": 196,
-      "sha256": "434c9e307079ebf61bdb373ebad41d9980a6e0898713771aaff5939f8083e5d0",
+      "sha256": "b039b20e21ab103ccc6397c3e86b96839768266e125b52ec9eba0c7978b4d62a",
       "status": "pending_review"
     },
     {
       "path": "tests/test_credential_vault.py",
-      "size_bytes": 4322,
+      "size_bytes": 4422,
       "line_count": 100,
-      "sha256": "6e0dad16b50e3b2cc644ed94e973070cb853a788d8661fa584224ab52cae91d5",
+      "sha256": "9f500471a55c9061f27f8fb9993d18c3072340b6d34806fcb7915d57e01adbf9",
       "status": "pending_review"
     },
     {
       "path": "tests/test_sanitizer.py",
-      "size_bytes": 2774,
+      "size_bytes": 2861,
       "line_count": 87,
-      "sha256": "0715048456dc9878e01bbb18292599959f680d27c0c70b8901ac541d95f1ccf0",
+      "sha256": "19ebdf0fea834b8875eadc2709857ae6f282a39fb33dfd6de75af93ed75de92f",
       "status": "pending_review"
     },
     {
       "path": "tests/test_scope_guard.py",
-      "size_bytes": 3062,
+      "size_bytes": 3150,
       "line_count": 88,
-      "sha256": "53a603a31434a9a0923ea0bc5c5c8bc090edb15a154d90582e3c648debee93a0",
+      "sha256": "1e59334371eb85a8d9648e2aceb7ee6ff5379de5a0b7c06e0b881785ef0bf422",
       "status": "pending_review"
     },
     {
       "path": "tests/test_tui.py",
-      "size_bytes": 1520,
+      "size_bytes": 1573,
       "line_count": 53,
-      "sha256": "a6524aa6625e8efa33d0ffc9596c1f59a8efc1a9ee08bb98efb127147c959164",
+      "sha256": "fb0c847598a08ed18ced90acfa388c89c69ffe3b300194df1998369d21874595",
       "status": "pending_review"
     },
     {
       "path": "tests/test_validators.py",
-      "size_bytes": 3707,
+      "size_bytes": 3818,
       "line_count": 111,
-      "sha256": "4325a302df4a6da8844ba66fb5601ed6e57b6329aaa30b70b1cbd1f637f920ec",
+      "sha256": "8177939c01a9e1878271e96a8e75e086e076043aa214449d0c13da1d9c4edd03",
       "status": "pending_review"
     },
     {
       "path": "tests/test_vuln_scorer.py",
-      "size_bytes": 4075,
+      "size_bytes": 4183,
       "line_count": 108,
-      "sha256": "ee6154611d06e9e67787827075307694ab71cadef7a59063c33d0f95a7867ffd",
+      "sha256": "a16c6c878a214ef0287b443a75277f94885e2da3c179650bc7dc85c1b0d6ee44",
       "status": "pending_review"
     },
     {
       "path": "tools/generate_audit_manifest.py",
-      "size_bytes": 2782,
+      "size_bytes": 2881,
       "line_count": 99,
-      "sha256": "b57c379ef224959b1cd4fe65668c3c79e53ff3ad073022e64dde53a74087b94e",
+      "sha256": "6b9ffe23dad6a9ecd48c04e72716b0a444a3efc7a4fc5073b77ac9eaef13068a",
       "status": "pending_review"
     },
     {
       "path": "tools/verify_readme_testing_tools.py",
-      "size_bytes": 2261,
+      "size_bytes": 2348,
       "line_count": 87,
-      "sha256": "5731e7eb47ad407556eb52a094a78ee113dced9e75c57d4b6e3c5f6a2f97b4fa",
+      "sha256": "19b835e9eb2d49d5fd073087c8c4a543ff53614e81c4a405f8a39fdbd698d194",
       "status": "pending_review"
     },
     {
@@ -299,100 +299,100 @@
     },
     {
       "path": "utils/config_wizard.py",
-      "size_bytes": 9029,
+      "size_bytes": 9305,
       "line_count": 276,
-      "sha256": "bb6b4601fff35a3345620af9114237236bc45b56c15d91da09c15d04527caf2b",
+      "sha256": "a223db58fda50b0e193e3b6bee594597fa93c2c90c8b4951ff54569940452621",
       "status": "pending_review"
     },
     {
       "path": "utils/credential_vault.py",
-      "size_bytes": 13031,
+      "size_bytes": 13389,
       "line_count": 358,
-      "sha256": "7512211c3e62252603fc7bb9e7ef001243e11fdd7c23a6e4236a7749f438f410",
+      "sha256": "4e6a0116ec8f1554006735058c76bb0f3345cd0c413b1471f8ffc03720c87ef1",
       "status": "pending_review"
     },
     {
       "path": "utils/logger.py",
-      "size_bytes": 4645,
+      "size_bytes": 4792,
       "line_count": 147,
-      "sha256": "46b058791aadb85d87a64fdff37585deaaf8ca602e80c71d1c830798117450d7",
+      "sha256": "9a1c389780841ea957fea68052fdd6c25adf149ba4611dedfa51486b94e95bc8",
       "status": "pending_review"
     },
     {
       "path": "utils/parallel.py",
-      "size_bytes": 7133,
+      "size_bytes": 7339,
       "line_count": 206,
-      "sha256": "0b541d815d0457598dfdc0b19b4df3297f08032e1e038e7a60d4c6f5ddc67080",
+      "sha256": "14c3be0a63c8a1c7c1d8d4d5992d2ad5dce2f134ac97e079a04a1a5340651ecc",
       "status": "pending_review"
     },
     {
       "path": "utils/parsers.py",
-      "size_bytes": 10497,
+      "size_bytes": 10849,
       "line_count": 352,
-      "sha256": "0006d8805f217b10522d9e16eb39637a4a4b682019976329719ce2717324e861",
+      "sha256": "83eca16acefdd673f8feb9c5745d803328fe804aa4f082001b26542ecf6272c6",
       "status": "pending_review"
     },
     {
       "path": "utils/report_generator.py",
-      "size_bytes": 30384,
+      "size_bytes": 31080,
       "line_count": 696,
-      "sha256": "ec68c3fa8a83f22631d1631ec8f0164c392681638dd25f39e516820f01554102",
+      "sha256": "acbb82086945d153f3dbb5435be000b35f779c9bee563e643ee32fbbf556869e",
       "status": "pending_review"
     },
     {
       "path": "utils/sanitizer.py",
-      "size_bytes": 3319,
+      "size_bytes": 3432,
       "line_count": 113,
-      "sha256": "318daa23a0528b1f390f2d09dab213f6af4b41f183407e210635f9cb03a6080f",
+      "sha256": "ac22c314fced321984604d52d52dc977a504fc1d246332d85bdb453fbfa55d3f",
       "status": "pending_review"
     },
     {
       "path": "utils/scope_guard.py",
-      "size_bytes": 9712,
-      "line_count": 274,
-      "sha256": "6eb83e16862bd05d27ae56936e86b5a535faeb7b0c46934a49b4ada183e74a17",
+      "size_bytes": 9962,
+      "line_count": 272,
+      "sha256": "89ac43043ce4f49695fa01c5681c9a777e18c357ff8694fd2654c0148c0bbab7",
       "status": "pending_review"
     },
     {
       "path": "utils/screenshot.py",
-      "size_bytes": 10796,
+      "size_bytes": 11114,
       "line_count": 318,
-      "sha256": "daf08245528e3b4d946920ad8c442f4a862521f284dbb07912fb5b6048e278bb",
+      "sha256": "7a578ff9467ea582bb5683efeb0855351d539d90decf9e839adeb2fec337a2c6",
       "status": "pending_review"
     },
     {
       "path": "utils/session_state.py",
-      "size_bytes": 5394,
+      "size_bytes": 5546,
       "line_count": 152,
-      "sha256": "3e20f0efa44b80b91a12cec5584fd64b71ad1d70de831f3f197845e4a71b16e8",
+      "sha256": "60173a4fdf827f8b7a09f10d83bc8644efe943385a20c8e5ecb834acf2f004cb",
       "status": "pending_review"
     },
     {
       "path": "utils/tool_runner.py",
-      "size_bytes": 16086,
+      "size_bytes": 16531,
       "line_count": 445,
-      "sha256": "730af4ec9c895b68577fcbab04b5b091af9155f44243136db9bb4bf0db8c25e4",
+      "sha256": "1b8994c8938bd43ca18106995827383530d07b91edf579d2efda42cdd0de82fb",
       "status": "pending_review"
     },
     {
       "path": "utils/tui.py",
-      "size_bytes": 9941,
+      "size_bytes": 10214,
       "line_count": 273,
-      "sha256": "0fe8ca95a849db1baeda827e57d86b233628278743912b486e46bdf177d92cb5",
+      "sha256": "98996ae9cfe9bad8456bc02c32ea69516c32540abdf2d3e483b9f0bcf9d64038",
       "status": "pending_review"
     },
     {
       "path": "utils/validators.py",
-      "size_bytes": 12617,
+      "size_bytes": 12997,
       "line_count": 380,
-      "sha256": "3b2aef4850b093b1f5a801fd491908e6defd3b1a9856f86e7fde84cf4f5b5ce7",
+      "sha256": "4c17399d538bad8862aebdb4638b79be524608b483b6a6595fa7d4a54ce0fb54",
       "status": "pending_review"
     },
     {
       "path": "utils/vuln_scorer.py",
-      "size_bytes": 15584,
+      "size_bytes": 16055,
       "line_count": 471,
-      "sha256": "1fd34e6b1541115155078ad6d01ee66ef699a0a3d1d2d66f212f00ebf0e9da35",
+      "sha256": "b7367ecd49c3c8c81d1c720a9756069d28211dde4bd72000815e49ae021f10b5",
       "status": "pending_review"
     }
   ]
