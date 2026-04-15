@@ -121,9 +121,6 @@ class ToolRunner:
             msg = (
                 f"Tool '{tool_name}' not found in PATH. Install it or update tool_paths in config."
             )
-            msg = (
-                f"Tool '{tool_name}' not found in PATH. Install it or update tool_paths in config."
-            )
             logger.error("[PRE-FLIGHT FAIL] %s", msg)
             return ToolResult(
                 tool=tool_name,
@@ -203,7 +200,6 @@ class ToolRunner:
                 err_path.parent.mkdir(parents=True, exist_ok=True)
                 with open(err_path, "w", encoding="utf-8") as f:
                     f.write(f"# Tool: {tool_name}\n")
-                    f.write(f"# Command: {self._redact_command_for_logging(last_result.command)}\n")
                     f.write(f"# Command: {self._redact_command_for_logging(last_result.command)}\n")
                     f.write(f"# Exit code: {last_result.return_code}\n")
                     f.write(f"# Category: {last_result.error_category}\n")
@@ -307,12 +303,6 @@ class ToolRunner:
                     duration,
                     len(process.stdout),
                 )
-                logger.info(
-                    "[OK] %s completed in %.1fs (%d bytes stdout)",
-                    tool_name,
-                    duration,
-                    len(process.stdout),
-                )
             else:
                 logger.error(
                     "[FAIL] %s exited with code %d in %.1fs (category: %s)",
@@ -331,9 +321,6 @@ class ToolRunner:
                         if i < 10:
                             logger.warning("  stderr: %s", line)
                     if len(stderr_lines) > 10:
-                        logger.warning(
-                            "  ... (%d more stderr lines in all.log)", len(stderr_lines) - 10
-                        )
                         logger.warning(
                             "  ... (%d more stderr lines in all.log)", len(stderr_lines) - 10
                         )

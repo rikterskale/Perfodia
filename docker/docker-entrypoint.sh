@@ -60,8 +60,13 @@ DIRECT_TOOLS="nmap masscan nikto gobuster hydra snmpwalk whatweb searchsploit   
 
 for tool in $DIRECT_TOOLS; do
     if [ "$1" = "$tool" ]; then
-        log "Running tool directly: $*"
-        exec "$@"
+        if [ "${PERFODIA_ALLOW_DIRECT_TOOLS:-0}" = "1" ]; then
+            log "Running tool directly (PERFODIA_ALLOW_DIRECT_TOOLS=1): $*"
+            exec "$@"
+        fi
+        err "Direct tool passthrough is disabled by default for scope safety."
+        err "Set PERFODIA_ALLOW_DIRECT_TOOLS=1 to override intentionally."
+        exit 2
     fi
 done
 
