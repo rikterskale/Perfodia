@@ -31,6 +31,7 @@ class ScanningModule(BaseModule):
 
         for target in self.targets:
             logger.info(f"\n[SCAN] Target: {target}")
+            target_hosts_data = []
 
             # ── Phase 1: Host Discovery ──
             live_hosts = self._host_discovery(target)
@@ -51,10 +52,15 @@ class ScanningModule(BaseModule):
                 host_data = self._detailed_scan(host_ip, quick_ports)
                 if host_data:
                     all_hosts_data.append(host_data)
+                    target_hosts_data.append(host_data)
 
             # ── Phase 4: Vulnerability Scan ──
-            if not self.config.get("nmap", "extra_args") == "no-vuln":
-                for host_data in all_hosts_data:
+            extra_args = self.config.get("nmap", "extra_args", default=[])
+            vuln_disabled = extra_args == "no-vuln" or (
+                isinstance(extra_args, list) and "no-vuln" in extra_args
+            )
+            if not vuln_disabled:
+                for host_data in target_hosts_data:
                     open_ports = [
                         str(p["port"])
                         for p in host_data.get("ports", [])

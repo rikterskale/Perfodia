@@ -28,4 +28,6 @@ textual>=0.85.0
 # bloodhound>=1.7.0            # pip install bloodhound
 
 # ── Testing ──
-# pytest>=7.0                  # pip install pytest (for running unit tests)
+pytest>=8.0
+ruff>=0.4
+mypy>=1.10

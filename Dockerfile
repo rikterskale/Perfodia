@@ -37,8 +37,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 RUN groupadd -r pentester && \
-    useradd -r -g pentester -m -s /bin/bash pentester && \
-    echo "pentester ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+    useradd -r -g pentester -m -s /bin/bash pentester
 
 WORKDIR /opt/perfodia
 COPY --chown=pentester:pentester . /opt/perfodia/

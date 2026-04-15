@@ -675,7 +675,6 @@ blockquote {{ border-left: 3px solid #00d4ff; padding: 10px 15px; margin: 15px 0
                             chrome,
                             "--headless",
                             "--disable-gpu",
-                            "--no-sandbox",
                             f"--print-to-pdf={pdf_path}",
                             str(html_path),
                         ],
