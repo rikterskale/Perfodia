@@ -27,66 +27,93 @@ pip install -r requirements.txt
 python3 perfodia.py --check-tools
 python3 perfodia.py -t 192.168.1.100 -m recon -v
 python3 perfodia.py -t 192.168.1.100 -m full --dry-run -v
+```
 
-Installation
-1) System tools
+## Installation
+
+### 1) System tools
+
+```bash
 chmod +x install_deps.sh
 sudo bash install_deps.sh --dry-run
 sudo bash install_deps.sh --full
+```
 
-2) Python dependencies
+### 2) Python dependencies
+
+```bash
 pip install -r requirements.txt
+```
 
-Configuration
-Default config: configs/default.yaml
+## Configuration
+
+- Default config: `configs/default.yaml`
 
 Use custom config:
 
+```bash
 python3 perfodia.py -t 192.168.1.100 -m full -c configs/default.yaml
+```
+
 Generate one interactively:
 
+```bash
 python3 perfodia.py --init
-Resume / Session Rules
+```
+
+## Resume / Session Rules
+
 To resume, you must provide the original session name:
 
+```bash
 python3 perfodia.py -t 192.168.1.100 -m full --session 20260410_120000 --resume
-If checkpoint is missing for that session, the command exits with an error.
+```
 
-Modes and Module Chains
-Mode	Modules
-recon	recon
-scan	scan
-webapp	scan, webapp
-exploit	scan, enum, exploit
-ad	scan, enum, ad
-crack	crack
-post	post
-full	recon, scan, enum, webapp, exploit, ad, crack, post
+If a checkpoint is missing for that session, the command exits with an error.
 
-Notes on Nmap Overrides
---nmap-extra: append sanitized options to default scanning args.
+## Modes and Module Chains
 
---nmap-raw: replace default scan flags with sanitized raw flags.
+| Mode | Modules |
+|---|---|
+| recon | recon |
+| scan | scan |
+| webapp | scan, webapp |
+| exploit | scan, enum, exploit |
+| ad | scan, enum, ad |
+| crack | crack |
+| post | post |
+| full | recon, scan, enum, webapp, exploit, ad, crack, post |
 
---nmap-scan-type: override scan type (example: sT).
+## Notes on Nmap Overrides
 
---nmap-scripts: override script selection used in vuln-script phase.
+- `--nmap-extra`: append sanitized options to default scanning args.
+- `--nmap-raw`: replace default scan flags with sanitized raw flags.
+- `--nmap-scan-type`: override scan type (example: `sT`).
+- `--nmap-scripts`: override script selection used in vuln-script phase.
 
-Docker
-See Docker Guide.md for container execution examples.
+## Docker
 
-Project Structure
-perfodia.py
-configs/
-modules/
-utils/
-install_deps.sh
-Dockerfile
-docker-compose.yml
-tests/
-Testing
+See `Docker Guide.md` for container execution examples.
+
+## Project Structure
+
+- `perfodia.py`
+- `configs/`
+- `modules/`
+- `utils/`
+- `install_deps.sh`
+- `Dockerfile`
+- `docker-compose.yml`
+- `tests/`
+
+## Testing
+
+```bash
 pytest -q
 ruff check .
 mypy .
-License
-MIT (see LICENSE).
+```
+
+## License
+
+MIT (see `LICENSE`).
