@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "generated_by": "tools/generate_audit_manifest.py",
-  "file_count": 56,
+  "file_count": 55,
   "files": [
     {
       "path": ".gitattributes",
@@ -29,13 +29,6 @@
       "size_bytes": 741,
       "line_count": 25,
       "sha256": "705dc774f5fc48a3bcdf34a27719c3b4d1e045de407f9f41c845bdcd0507da90",
-      "status": "pending_review"
-    },
-    {
-      "path": "AUDIT_REPORT.md",
-      "size_bytes": 34171,
-      "line_count": 603,
-      "sha256": "298e29ec66dbd4d0eb00a7d78594cd82ddbb065e709cd409c2573a164ddf9947",
       "status": "pending_review"
     },
     {
