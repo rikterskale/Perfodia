@@ -12,27 +12,12 @@ docker build -t perfodia:minimal --target minimal .
 ```
 
 ## Basic Usage
-<<<<<<< ours
 
 ```bash
 # Show framework CLI help
 docker run --rm perfodia --help
 
 # Validate tool dependencies
-docker run --rm perfodia --check-tools
-
-# Recon workflow
-docker run --rm --net=host perfodia -t 192.168.1.100 -m recon -v
-
-# Full workflow (dry run)
-docker run --rm --net=host perfodia -t 192.168.1.100 -m full --dry-run -v
-=======
-
-```bash
-# Help
-docker run --rm perfodia --help
-
-# Validate dependencies
 docker run --rm perfodia --check-tools
 
 # Recon workflow
@@ -67,7 +52,6 @@ docker run --rm --net=host perfodia \
   --nmap-extra '-Pn --top-ports 2000' \
   --nmap-scripts 'safe,vuln' \
   -v
->>>>>>> theirs
 ```
 
 ## Persist Reports
@@ -75,11 +59,7 @@ docker run --rm --net=host perfodia \
 ```bash
 docker run --rm --net=host \
   -v "$(pwd)/reports:/opt/perfodia/reports" \
-<<<<<<< ours
-  perfodia -t 192.168.1.100 -m full -v
-=======
   perfodia -t 192.168.1.100 -m full --report-format all -v
->>>>>>> theirs
 ```
 
 ## Custom Configs
@@ -104,8 +84,5 @@ docker compose down
 
 - Use `--net=host` for best scanner behavior.
 - For rootless patterns, pass `--nmap-scan-type sT`.
-<<<<<<< ours
-- You can still pass compatibility flags like `--nmap-extra` and `--nmap-raw`.
-=======
 - `--resume` requires `--session <existing_session_name>`.
->>>>>>> theirs
+- You can pass compatibility flags like `--nmap-extra` and `--nmap-raw`.

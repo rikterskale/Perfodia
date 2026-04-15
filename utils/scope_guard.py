@@ -170,9 +170,7 @@ class ScopeGuard:
         ips: List[str] = []
 
         # IPv4 in common CLI patterns
-        ipv4_pattern = re.compile(
-            r"(?:^|[@/=\s])(\d{1,3}(?:\.\d{1,3}){3})(?:[:/\s]|$)"
-        )
+        ipv4_pattern = re.compile(r"(?:^|[@/=\s])(\d{1,3}(?:\.\d{1,3}){3})(?:[:/\s]|$)")
         # Bracketed IPv6 (URLs and URI-like args)
         ipv6_bracket_pattern = re.compile(r"\[([0-9a-fA-F:]+)\]")
         for arg in args:
