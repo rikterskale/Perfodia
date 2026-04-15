@@ -121,7 +121,9 @@ class ToolRunner:
             msg = (
                 f"Tool '{tool_name}' not found in PATH. Install it or update tool_paths in config."
             )
-            msg = f"Tool '{tool_name}' not found in PATH. Install it or update tool_paths in config."
+            msg = (
+                f"Tool '{tool_name}' not found in PATH. Install it or update tool_paths in config."
+            )
             logger.error("[PRE-FLIGHT FAIL] %s", msg)
             return ToolResult(
                 tool=tool_name,
@@ -202,9 +204,7 @@ class ToolRunner:
                 with open(err_path, "w", encoding="utf-8") as f:
                     f.write(f"# Tool: {tool_name}\n")
                     f.write(f"# Command: {self._redact_command_for_logging(last_result.command)}\n")
-                    f.write(
-                        f"# Command: {self._redact_command_for_logging(last_result.command)}\n"
-                    )
+                    f.write(f"# Command: {self._redact_command_for_logging(last_result.command)}\n")
                     f.write(f"# Exit code: {last_result.return_code}\n")
                     f.write(f"# Category: {last_result.error_category}\n")
                     f.write("# ---\n")
@@ -282,7 +282,9 @@ class ToolRunner:
             error_message = None
             if not success:
                 stderr_lower = (process.stderr or "").lower()
-                if process.returncode in (1, 2) and ("usage" in stderr_lower or "help" in stderr_lower):
+                if process.returncode in (1, 2) and (
+                    "usage" in stderr_lower or "help" in stderr_lower
+                ):
                     error_category = "usage"
                     error_message = (
                         f"{tool_name} rejected the arguments (exit code {process.returncode}). "
@@ -305,7 +307,12 @@ class ToolRunner:
                     duration,
                     len(process.stdout),
                 )
-                logger.info("[OK] %s completed in %.1fs (%d bytes stdout)", tool_name, duration, len(process.stdout))
+                logger.info(
+                    "[OK] %s completed in %.1fs (%d bytes stdout)",
+                    tool_name,
+                    duration,
+                    len(process.stdout),
+                )
             else:
                 logger.error(
                     "[FAIL] %s exited with code %d in %.1fs (category: %s)",
@@ -327,7 +334,9 @@ class ToolRunner:
                         logger.warning(
                             "  ... (%d more stderr lines in all.log)", len(stderr_lines) - 10
                         )
-                        logger.warning("  ... (%d more stderr lines in all.log)", len(stderr_lines) - 10)
+                        logger.warning(
+                            "  ... (%d more stderr lines in all.log)", len(stderr_lines) - 10
+                        )
 
                 self._save_stderr(tool_name, process.stderr)
 
@@ -357,7 +366,9 @@ class ToolRunner:
             partial_stdout = ""
             if getattr(exc, "stdout", None):
                 partial_stdout = (
-                    exc.stdout if isinstance(exc.stdout, str) else exc.stdout.decode(errors="replace")
+                    exc.stdout
+                    if isinstance(exc.stdout, str)
+                    else exc.stdout.decode(errors="replace")
                 )
             return ToolResult(
                 tool=tool_name,
