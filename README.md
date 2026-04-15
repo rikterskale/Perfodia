@@ -114,6 +114,26 @@ ruff check .
 mypy .
 ```
 
+## Audit Workflow Utilities
+
+- Generate or refresh machine-readable file coverage manifest:
+
+```bash
+python3 tools/generate_audit_manifest.py
+```
+
+- Validate that `AUDIT_MANIFEST.json` is current (used in CI):
+
+```bash
+python3 tools/generate_audit_manifest.py --check
+```
+
+- Validate that README testing commands are backed by `requirements.txt`:
+
+```bash
+python3 tools/verify_readme_testing_tools.py
+```
+
 ## License
 
 MIT (see `LICENSE`).

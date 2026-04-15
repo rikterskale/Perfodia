@@ -96,13 +96,7 @@ webapp:
 ad:
   enabled: true
   bloodhound_collect: true     # BloodHound data collection (needs valid creds)
-  spray_passwords:             # passwords to try during AD password spraying
-    - "Password1"
-    - "Welcome1"
-    - "Company123"
-    - "Spring2025"
-    - "Summer2025"
-    - "Changeme1"
+  spray_passwords: []          # set explicitly per lab to avoid accidental lockouts
   max_spray_users: 200         # cap users per spray round
   check_smb_signing: true      # check for SMB signing (relay attack potential)
 
